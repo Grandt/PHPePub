@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>EPub class documentation</title>
+</head>
+<body>
+<h1>EPub class documentation</h1>
+<p>This class have been designed for ease of use, and to enable ePub book creation on the fly.</p>
+<p>The ePub standard contains a lot of parameters that can be set by the user, but in this implementation we are only relying on some of them, the important ones so to speak.</p>
+<p>The mandatory fields are:</p>
+<dl>
+	<dt>Title</dt>
+	<dd><code>setTitle($title)</code>, where $title is a text string.</dd>
+	<dt>Language</dt>
+	<dd><code>setLanguage($language)</code>, where $language is a RFC3066 Language code, such as &quot;en&quot;, &quot;da&quot;, &quot;fr&quot; etc. Language is &quot;en&quot; by default.</dd>
+	<dt>Identifier</dt>
+	<dd><code>setIdentifier($identifier, $identifierType)</code>, where both arguments are text strings.<br />
+	The $identifier should be unique for the book. If you don't have anything unique you can use the <code>createUUID</code> function mentioned later in the documentation.<br />
+	The $identifierType must be one of these:
+		<dl>
+			<dt>&quot;EPub::IDENTIFIER_URI&quot;</dt>
+			<dd>When using the page URL as $identifier.</dd>
+			<dt>&quot;EPub::IDENTIFIER_ISBN&quot;</dt>
+			<dd>Usually used for published books, where the books unique ISBN number are available.</dd>
+			<dt>&quot;EPub::IDENTIFIER_UUID&quot;</dt>
+			<dd>A generated or random UUID string on the form <code>c5bc871d-a20a-fc48-ccb4-bb134ae6c564</code></dd>
+		</dl>
+	</dd>
+</dl>
+<p>Where the additional optional fields are:</p>
+<dl>
+	<dt>Description</dt>
+	<dd>A book description or synopsis</dd>
+	<dt>Author</dt>
+	<dd>Book author or creator. <code>setAuthor($author, $authorSortKey)</code> has two arguments, where the sort key can be left blank with ''.<br />
+	The $authorSortKey is basically how the name is to be sorted, usually it's &quot;Lastname, First names&quot; where the $author is the straight &quot;Firstnames Lastname&quot;</dd>
+	<dt>Publisher</dt>
+	<dd>Book publisher Information, use <code>setPublisher($publisherName, $publisherURL)</code> to set the name and URL of the publisher.</dd>
+	<dt>Date</dt>
+	<dd>The publishing date of the book, as a timestamp. If left blank the current date/time will be used.</dd>
+	<dt>Rights</dt>
+	<dd>Test string with the licence and copyrights that may apply to the book.</dd>
+	<dt>Source URL</dt>
+	<dd>The web address for the book, if any are available, but this eBook must be downloadable from somewhere. This is usually also the address used as an identifier, if that parameter is using the &quot;URI&quot; identifier type.</dd>
+</dl>
+</body>
+</html>

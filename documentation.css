@@ -1,0 +1,144 @@
+/* Copy of http://jkingweb.ca/code/documentation.css */
+body
+ {background-color:#f4f4f4;
+  font:normal 12px/17px Helvetica,Arial,sans-serif;
+  color:#2f2f2f;
+  padding:0 2em 2em 2em;
+  margin:0;}	
+a,a:visited
+ {font-weight:bold;
+  text-decoration:none;
+  color:#0072bc;}
+a:hover
+ {text-decoration:underline;}	
+a:visited
+ {color:#662d91;}
+h1,h2,h3,h4,h5,h6
+ {margin:0 0 1em 0;}	
+h1
+ {font-size:2em;
+  font-weight:bold;
+  padding:1ex;
+  border:1px solid gray;
+  border-top-width:0;
+  border-bottom-width:4px;
+  background-color:white;}
+h2
+ {font-size:1.5em;}
+h3,h4
+ {margin:0;
+  padding:0.5ex 1ex;
+  border:1px solid gray;
+  border-bottom-width:2px;
+  background-color:white;
+  line-height:1.4em;}
+h4
+ {font-size:1.1em;
+  margin: 1em -1.5ex;
+  border-left-width:0;
+  border-right-width:0;
+  border-top-width:2px;
+  line-height:1.6em;}
+p
+ {margin:0 0 1em 0;}
+kbd,var,pre,code,samp
+ {font-family:Consolas,Courier,"Courier New",monospace;}
+code
+ {color:#a65302;
+  font-weight:bold;
+  font-style:italic;}
+kbd
+ {color:#297100;}
+var
+ {color:#046d7f;}
+dl,dt,dd
+ {margin:0;}
+div[id]
+ {padding-bottom:1em;}
+
+#contents ol
+ {list-style-position:inside;
+  padding:0;
+  margin:0;}
+#contents>ol
+ {margin-bottom:1em;
+  border:1px solid gray;
+  background-color:white;
+  font-weight:bold;}
+#contents li
+ {padding:0;
+  border-top:1px solid gray;
+  margin:0;}
+#contents>ol>li
+ {padding:1ex 1ex 0 1ex;}
+#contents>ol>li li
+ {padding:1ex 1ex 0 1ex;} 
+
+#contents>ol ol li
+ {border-left:1.25em solid gray;}
+
+#contents li li
+ {margin: 0 -1ex;}
+
+#contents h3
+ {border-bottom-width:1px;}
+#contents h2+h3+ol
+ {list-style-type:lower-roman;}
+#contents h2+h3+ol+h3+ol+h3+ol
+ {list-style-type:upper-alpha;}
+
+ul
+ {list-style-position:inside;
+  margin:0 0 1em 0;
+  padding:0 0 0 0.8em;}
+ul li
+ {margin:0;
+  padding:0 0 1ex 0;}
+
+h3+ul,h3+div,h3+p,p.samp,pre,dl,table,table caption,table th,table td
+ {border:1px solid gray;
+  margin:0 0 1em 0;
+  padding:2ex 1.5ex 1ex 1.5ex;
+  background-color:white;}
+
+p.samp,pre,h3+div dl,table th
+ {background-color:#f4f4f4;}
+body>div pre
+ {background-color:white;}
+
+
+dt
+ {background-color:white;
+  font-weight:bold;}
+dl,table
+ {padding:0;}
+table
+ {font-size:1em;
+  width:100%;
+  border-collapse:collapse;
+  margin-top:1em;}
+table caption,table th
+ {padding:1ex 1ex;
+  font-size:1.1em;
+  margin:0;
+  text-align:left;
+  font-weight:bold;}
+table th
+ {font-size:1em;}
+
+
+dl dt,dl dd
+ {padding:0.5em;
+  border-top:1px solid gray;}
+dl dt
+ {line-height:1.5em;}
+dl dt:first-child
+ {border-top:0;}
+dd ul
+ {margin-top:1ex;
+  margin-bottom:0;}
+
+pre
+ {overflow:auto;}
+
+ 

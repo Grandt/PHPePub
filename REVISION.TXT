@@ -1,0 +1,74 @@
+---------------------------------------------------------------------
+Rev. 2.04 - 2011-03-13
+* Fixed: The relPath function in previous versions had a bug where paths with elements containing non alphanumeric characters were not handled correctly. Function has now been rewritten and moved to the Zip class.
+
+* Changed: function relPath is now deprecated, please use Zip::getRelativePath($relPath) instead.
+
+* Added: Version check for the used Zip class.
+---------------------------------------------------------------------
+Rev. 2.03 - 2011-03-05
+* Fixed: Cover was not showing on Stanza, the Cover image had not been referenced correctly in the book meta data.
+
+* Added: Support of ePub meta tags Subject, Relation and Coverage.
+
+* Added: Descriptions for ePub metadata tags, taken from the specification at http://dublincore.org/2010/10/11/dcelements.rdf#
+---------------------------------------------------------------------
+Rev. 2.02 - 2011-02-23
+* Fixed: Failed in PHP 5.2 due to the way arrays were queries about the existence of a key.
+
+* Addded const VERSION and REQ_ZIP_VERSION for future use to enable version check on dependencies.
+---------------------------------------------------------------------
+Rev. 2.01 - 2011-02-20
+* Fixed: Sending failed when the Output buffer had been initialized with ob_start, but was empty.
+
+* Changed: setIgnoreEmptyBuffer deprecated, function is now a default feature in Zip. (Zip.php v. 1.21)
+---------------------------------------------------------------------
+Rev. 2.00 - 2011-02-19
+EPub Class:
+* Important: Requires Zip.php version 1.2 or newer from http://www.phpclasses.org/package/6110
+
+* Fix: EPub was loading the entire generated book into memory when finalized, it will now remain in the temp file if such have been used (typically for Books over 1 MB in size)
+
+* Added: Constants for Identifier types: IDENTIFIER_UUID, IDENTIFIER_URI and IDENTIFIER_ISBN
+
+* Added: Constants for External reference handling in addChapter and AddCSSFile: EXTERNAL_REF_IGNORE, EXTERNAL_REF_ADD, EXTERNAL_REF_REMOVE_IMAGES and EXTERNAL_REF_REPLACE_IMAGES.
+
+* Added: Function setCoverImage(image path) to add a cover image to the book. Only one cover image can be added, and it will also create a XHTML entry called CoverPage.html
+
+* Added: Protected function processChapterExternalReferences to process a HTML file and add referenced images and links, such as CSS files, and rewrite links to point to these inside the book. The function will not add the rewritten HTML, but will return it to the calling function as a DOMDocument or String depending on the input value.
+
+* Added: Protected function processCSSExternalReferences to process a CSS file and add referenced images to the book, and rewrite these url's to point to these inside the book. The function does not add the rewritten CSS, but will return it as a string to the calling function.
+
+* Changed: Function addChapter to include additional parameters $externalReferences (default EPub::EXTERNAL_REF_IGNORE) and $baseDir, these will cause the function to call processChapterExternalReferences before adding the html file.
+
+* Changed: Function addCSSFile to include additional parameters $externalReferences (default EPub::EXTERNAL_REF_IGNORE) and $baseDir, these will cause the function to call processCSSExternalReferences before adding the CSS file.
+
+* Added: Function getFileList() to get an array with the files added to the book, key will be the file path and name in the archive, and the value is the corrosponding path added, almost always identical, except in files added via the addChapterExternalReferences and addCSSExternalReferences functions.
+
+* Added: Boolean return values to most functions to signal if the function succeeded. Others will return their normal value if successful, and false if it failed, such as when the book has been finalized.
+
+* Added: "Getter" functions for most parameters to which there were "setter" functions. It is done deliberately as very few values can be modified directly without breaking the generated book, in the worst case resulting in an invalid or corrupt archive.
+
+* Fix: The old UUID generation were faulty, and EPub now uses J. King's (http://jkingweb.ca/) DrUUID class for UUID generation as it is RFC4122 compliant. This WILL require an update of code which were using the old createUUID function, as the arguments have changed. See documentation for the method inside the EPub class.
+
+* Fix: If no Identifier have been set before finalize, a random UUID will be generated.
+
+* Fix: If no SourceURL have been set before finalize, the current URL is used.
+
+* Fix: If no Publisher URL have been set before finalize, the current Server address is used.
+
+* Added: Function getBookSize() to return the size of the generated book.
+
+* Changed: Function sendBook, will automatically append .epub to the filename if this is missing.
+
+* Added: Function getImage(filename), which will retrieve the image, determine it's size and mime type and return thie information in an array with the keys "width", "height", "mime" and "image". If GD is available the image will be resized to the limits set by the $maxImageWidth and $maxImageHeight variables in the EPub class if it exceeds these limits. Aspect ratio will be retained.
+
+* Added: Utility functions  getCurrentPageURL() and getCurrentServerURL()
+
+* Added setSplitSize and getSplitSize for setting the books autoSplit target size.
+
+EPubChapterSplitter Class:
+* Added: Split HTML files by search string, for instance chapters. Note, chapter search disables size checks. Returned chapter have the matched line from the HTML returned as the key of the returned array. This can be used to generate the correct chapter name entry in the book, see the updated EPub.Example1.php.
+---------------------------------------------------------------------
+Rev. 1.00
+Initial release
