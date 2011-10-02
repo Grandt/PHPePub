@@ -12,15 +12,22 @@
  * @copyright A. Grandt 2009-2011
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @link http://www.phpclasses.org/package/6110
- * @version 1.25
+ * @version 1.28
  */
 class Zip {
-	const VERSION = 1.25;
+	const VERSION = 1.28;
+
+	const ZIP_LOCAL_FILE_HEADER = "\x50\x4b\x03\x04"; // Local file header signature
+	const ZIP_CENTRAL_FILE_HEADER = "\x50\x4b\x01\x02"; // Central file header signature
+	const ZIP_END_OF_CENTRAL_DIRECTORY = "\x50\x4b\x05\x06\x00\x00\x00\x00"; //end of Central directory record
+
+	const EXT_FILE_ATTR_DIR = "\x10\x40\xed\x41"; // Unix : Dir + mod:755
+	const EXT_FILE_ATTR_FILE = "\x00\x40\xa4\x81"; // Unix : File + mod:644
+
+	const ATTR_VERSION_TO_EXTRACT = "\x0A\x00"; // Version needed to extract
+	const ATTR_MADE_BY_VERSION = "\x15\x03"; // Made By Version
 
 	private $zipMemoryThreshold = 1048576; // Autocreate tempfile if the zip data exceeds 1048576 bytes (1 MB)
-	private $endOfCentralDirectory = "\x50\x4b\x05\x06\x00\x00\x00\x00"; //end of Central directory record
-	private $localFileHeader = "\x50\x4b\x03\x04"; // Local file header signature
-	private $centralFileHeader = "\x50\x4b\x01\x02"; // Central file header signature
 
 	private $zipData = NULL;
 	private $zipFile = NULL;
@@ -28,6 +35,7 @@ class Zip {
 	private $cdRec = array(); // central directory
 	private $offset = 0;
 	private $isFinalized = FALSE;
+	private $addExtraFields = TRUE;
 
 	private $streamChunkSize = 65536;
 	private $streamFilePath = NULL;
@@ -55,6 +63,16 @@ class Zip {
 			fclose($this->zipFile);
 		}
 		$this->zipData = NULL;
+	}
+
+	/**
+	 * Extra fields on the Zip directory records are Unix time codes needed for compatibility on the default Mac zip archive tool.
+	 * These are enabled as default, as they do no harm elsewhere and only add 26 bytes per file added.
+	 *
+	 * @param bool $setExtraField TRUE (default) will enable adding of extra fields, anything else will disable it.
+	 */
+	function setExtraField($setExtraField = TRUE) {
+		$this->addExtraFields = ($setExtraField === TRUE);
 	}
 
 	/**
@@ -91,7 +109,7 @@ class Zip {
 			while(!feof($this->zipFile)) {
 				fwrite($fd, fread($this->zipFile, $this->streamChunkSize));
 			}
-				
+
 			fclose($this->zipFile);
 		} else {
 			fwrite($fd, $this->zipData);
@@ -115,7 +133,7 @@ class Zip {
 		if ($this->isFinalized) {
 			return FALSE;
 		}
-		$this->buildZipEntry($directoryPath, $fileComment, "\x00\x00", "\x00\x00", $timestamp, "\x00\x00\x00\x00", 0, 0, 16);
+		$this->buildZipEntry($directoryPath, $fileComment, "\x00\x00", "\x00\x00", $timestamp, "\x00\x00\x00\x00", 0, 0, self::EXT_FILE_ATTR_DIR);
 
 		return TRUE;
 	}
@@ -157,7 +175,7 @@ class Zip {
 			$this->zipData = NULL;
 		}
 
-		$this->buildZipEntry($filePath, $fileComment, $gpFlags, $gzType, $timestamp, $fileCRC32, $gzLength, $dataLength, 32);
+		$this->buildZipEntry($filePath, $fileComment, $gpFlags, $gzType, $timestamp, $fileCRC32, $gzLength, $dataLength, self::EXT_FILE_ATTR_FILE);
 		if (is_null($this->zipFile)) {
 			$this->zipData .= $gzData;
 		} else {
@@ -172,9 +190,9 @@ class Zip {
 	 * @author Adam Schmalhofer <Adam.Schmalhofer@gmx.de>
 	 * @author A. Grandt
 	 *
-	 * @param String $realPath Path on the file system.
-	 * @param String $zipPath  Filepath and name to be used in the archive.
-	 * @param bool $zipPath    Add content recursively, default is TRUE.
+	 * @param String $realPath      Path on the file system.
+	 * @param String $zipPath       Filepath and name to be used in the archive.
+	 * @param bool   $recursive     Add content recursively, default is TRUE.
 	 */
 	public function addDirectoryContent($realPath, $zipPath, $recursive = TRUE) {
 		$iter = new DirectoryIterator($realPath);
@@ -214,7 +232,7 @@ class Zip {
 		}
 		fclose($fh);
 
-		$this->closeStream();
+		$this->closeStream($this->addExtraField);
 
 		return TRUE;
 	}
@@ -228,6 +246,10 @@ class Zip {
 	 * @return bool $success
 	 */
 	public function openStream($filePath, $timestamp = 0, $fileComment = NULL)   {
+		if ( !function_exists('sys_get_temp_dir')) {
+			die ("ERROR: Zip " . self::VERSION . " requires PHP version 5.2.1 or above if large files are used.");
+		}
+
 		if ($this->isFinalized) {
 			return FALSE;
 		}
@@ -300,7 +322,7 @@ class Zip {
 
 		fseek($file_handle, 10);
 
-		$this->buildZipEntry($this->streamFilePath, $this->streamFileComment, $gpFlags, $gzType, $this->streamTimestamp, $fileCRC32, $gzLength, $dataLength, 32);
+		$this->buildZipEntry($this->streamFilePath, $this->streamFileComment, $gpFlags, $gzType, $this->streamTimestamp, $fileCRC32, $gzLength, $dataLength, self::EXT_FILE_ATTR_FILE);
 		while(!feof($file_handle)) {
 			fwrite($this->zipFile, fread($file_handle, $this->streamChunkSize));
 		}
@@ -328,8 +350,8 @@ class Zip {
 				$this->closeStream();
 			}
 			$cd = implode("", $this->cdRec);
-				
-			$cdRec = $cd . $this->endOfCentralDirectory
+
+			$cdRec = $cd . self::ZIP_END_OF_CENTRAL_DIRECTORY
 			. pack("v", sizeof($this->cdRec))
 			. pack("v", sizeof($this->cdRec))
 			. pack("V", strlen($cd))
@@ -339,7 +361,7 @@ class Zip {
 			} else {
 				$cdRec .= "\x00\x00";
 			}
-				
+
 			if (is_null($this->zipFile)) {
 				$this->zipData .= $cdRec;
 			} else {
@@ -349,7 +371,7 @@ class Zip {
 			$this->isFinalized = TRUE;
 			$cd = NULL;
 			$this->cdRec = NULL;
-				
+
 			return TRUE;
 		}
 		return FALSE;
@@ -398,7 +420,7 @@ class Zip {
 	 * Send the archive as a zip download
 	 *
 	 * @param String $fileName The name of the Zip archive, ie. "archive.zip".
-	 * @param String $contentType Content mime type. Optional, defailts to "application/zip".
+	 * @param String $contentType Content mime type. Optional, defaults to "application/zip".
 	 * @return bool $success
 	 */
 	function sendZip($fileName, $contentType = "application/zip") {
@@ -412,7 +434,7 @@ class Zip {
 					ini_set('zlib.output_compression', 'Off');
 				}
 
-				header('Pragma: public');
+				header("Pragma: public");
 				header("Last-Modified: " . gmdate("D, d M Y H:i:s T"));
 				header("Expires: 0");
 				header("Accept-Ranges: bytes");
@@ -478,20 +500,32 @@ class Zip {
 	 * @param string $fileCRC32
 	 * @param int $gzLength
 	 * @param int $dataLength
-	 * @param integer $extFileAttr 16 for directories, 32 for files.
+	 * @param integer $extFileAttr Use self::EXT_FILE_ATTR_FILE for files, self::EXT_FILE_ATTR_DIR for Directories.
 	 */
 	private function buildZipEntry($filePath, $fileComment, $gpFlags, $gzType, $timestamp, $fileCRC32, $gzLength, $dataLength, $extFileAttr) {
 		$filePath = str_replace("\\", "/", $filePath);
 		$fileCommentLength = (is_null($fileComment) ? 0 : strlen($fileComment));
+
+		$timestamp = (int)$timestamp;
+		$timestamp = ($timestamp == 0 ? time() : $timestamp);
+
 		$dosTime = $this->getDosTime($timestamp);
 
-		$zipEntry  = $this->localFileHeader;
-		$zipEntry .= "\x14\x00"; // Version needed to extract
+		$zipEntry  = self::ZIP_LOCAL_FILE_HEADER;
+		$zipEntry .= self::ATTR_VERSION_TO_EXTRACT;
 		$zipEntry .= $gpFlags . $gzType . $dosTime. $fileCRC32;
 		$zipEntry .= pack("VV", $gzLength, $dataLength);
 		$zipEntry .= pack("v", strlen($filePath) ); // File name length
-		$zipEntry .= "\x00\x00"; // Extra field length
-		$zipEntry .= $filePath; // FileName . Extra field
+		$zipEntry .= $this->addExtraField ? "\x10\x00" : "\x00\x00"; // Extra field length
+		$zipEntry .= $filePath; // FileName
+		// Extra fields
+		if ($this->addExtraField) {
+			$zipEntry .= "\x55\x58"; 			// 0x5855	Short	tag for this extra block type ("UX")
+			$zipEntry .= "\x0c\x00";   			// TSize	Short	total data size for this block
+			$zipEntry .= pack("V", $timestamp);	// AcTime	Long	time of last access (UTC/GMT)
+			$zipEntry .= pack("V", $timestamp);	// ModTime	Long	time of last modification (UTC/GMT)
+			$zipEntry .= "\x00\x00\x00\x00";
+		}
 
 		if (is_null($this->zipFile)) {
 			$this->zipData .= $zipEntry;
@@ -499,19 +533,27 @@ class Zip {
 			fwrite($this->zipFile, $zipEntry);
 		}
 
-		$cdEntry  = $this->centralFileHeader;
-		$cdEntry .= "\x00\x00"; // Made By Version
-		$cdEntry .= "\x14\x00"; // Version Needed to extract
+		$cdEntry  = self::ZIP_CENTRAL_FILE_HEADER;
+		$cdEntry .= self::ATTR_MADE_BY_VERSION;
+		$cdEntry .= self::ATTR_VERSION_TO_EXTRACT;
 		$cdEntry .= $gpFlags . $gzType . $dosTime. $fileCRC32;
 		$cdEntry .= pack("VV", $gzLength, $dataLength);
 		$cdEntry .= pack("v", strlen($filePath)); // Filename length
-		$cdEntry .= "\x00\x00"; // Extra field length
+		$cdEntry .= $this->addExtraField ? "\x0c\x00" : "\x00\x00"; // Extra field length
 		$cdEntry .= pack("v", $fileCommentLength); // File comment length
 		$cdEntry .= "\x00\x00"; // Disk number start
 		$cdEntry .= "\x00\x00"; // internal file attributes
-		$cdEntry .= pack("V", $extFileAttr ); // External file attributes
+		$cdEntry .= $extFileAttr; // External file attributes
 		$cdEntry .= pack("V", $this->offset ); // Relative offset of local header
-		$cdEntry .= $filePath; // FileName . Extra field
+		$cdEntry .= $filePath; // FileName
+		// Extra fields
+		if ($this->addExtraField) {
+			$cdEntry .= "\x55\x58"; 			// 0x5855	Short	tag for this extra block type ("UX")
+			$cdEntry .= "\x08\x00";   			// TSize	Short	total data size for this block
+			$cdEntry .= pack("V", $timestamp);	// AcTime	Long	time of last access (UTC/GMT)
+			$cdEntry .= pack("V", $timestamp);	// ModTime	Long	time of last modification (UTC/GMT)
+		}
+
 		if (!is_null($fileComment)) {
 			$cdEntry .= $fileComment; // Comment
 		}
@@ -544,7 +586,7 @@ class Zip {
 	public static function getRelativePath($path) {
 		$path = preg_replace("#/+\.?/+#", "/", str_replace("\\", "/", $path));
 		$dirs = explode("/", rtrim(preg_replace('#^(\./)+#', '', $path), '/'));
-				
+
 		$offset = 0;
 		$sub = 0;
 		$subOffset = 0;
@@ -556,12 +598,12 @@ class Zip {
 		} else if (preg_match("#[A-Za-z]:#", $dirs[0])) {
 			$root = strtoupper($dirs[0]) . "/";
 			$dirs = array_splice($dirs, 1);
-		} 
+		}
 
 		$newDirs = array();
 		foreach($dirs as $dir) {
 			if ($dir !== "..") {
-				$subOffset--;	
+				$subOffset--;
 				$newDirs[++$offset] = $dir;
 			} else {
 				$subOffset++;
@@ -569,14 +611,14 @@ class Zip {
 					$offset = 0;
 					if ($subOffset > $sub) {
 						$sub++;
-					} 
+					}
 				}
 			}
 		}
 
 		if (empty($root)) {
 			$root = str_repeat("../", $sub);
-		} 
+		}
 		return $root . implode("/", array_slice($newDirs, 0, $offset));
 	}
 }
