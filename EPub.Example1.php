@@ -2,11 +2,33 @@
 // Example. 
 // Create a test book for download.
 
+// ePub uses XHTML 1.1, preferably strict.
+$content_start =
+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+. "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+. "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+. "<head>"
+. "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
+. "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
+. "<title>Test Book</title>\n"
+. "</head>\n"
+. "<body>\n";
+
+$bookEnd = "</body>\n</html>\n";
+
+$tStart = gettimeofday();
+$tLast = $tStart;
+$log = $content_start . "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
+logLine("Start");
+
 $fileDir = './';
 
 include_once("EPub.php");
+logLine("include EPub");
 
 $book = new EPub();
+logLine("new EPub()");
 
 // Title and Identifier are mandatory!
 $book->setTitle("Test book");
@@ -18,10 +40,12 @@ $book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublica
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
 $book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBook.html");
+logLine("Set up parameters");
 
 $cssData = "body {\n  margin-left: .5em;\n  margin-right: .5em;\n  text-align: justify;\n}\n\np {\n  font-family: serif;\n  font-size: 10pt;\n  text-align: justify;\n  text-indent: 1em;\n  margin-top: 0px;\n  margin-bottom: 1ex;\n}\n\nh1, h2 {\n  font-family: sans-serif;\n  font-style: italic;\n  text-align: center;\n  background-color: #6b879c;\n  color: white;\n  width: 100%;\n}\n\nh1 {\n    margin-bottom: 2px;\n}\n\nh2 {\n    margin-top: -2px;\n    margin-bottom: 2px;\n}\n";
 
 $book->addCSSFile("styles.css", "css1", $cssData);
+logLine("Add css");
 
 // This test requires you have an image, change "images/_cover_.jpg" to match your location.
 //$book->setCoverImage("Cover.jpg", file_get_contents("images/_cover_.jpg"), "image/jpeg");
@@ -31,22 +55,10 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 //  When using this method, the given image path must be the absolute path from the servers Document root.
 $book->setCoverImage("/test/images/_cover_.jpg");
 // setCoverImage can only be called once per book, but can be called at any point in the book creation.
-
-// ePub uses XHTML 1.1, preferably strict.
-$content_start =
-	"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-	. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
-	. "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-	. "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
-	. "<head>"
-	. "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
-	. "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
-	. "<title>Test Book</title>\n"
-	. "</head>\n"
-	. "<body>\n";
+logLine("Set Cover Image");
 
 $cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n"
-	. "</body>\n</html>\n";
+	. $bookEnd;
 $book->addChapter("Notices", "Cover.html", $cover);
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
@@ -56,7 +68,7 @@ $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
 	. "<p>Pellentesque vulputate sollicitudin justo, at faucibus nisl convallis in. Nulla facilisi. Curabitur nec mauris eu justo ultricies ultricies gravida eu ipsum. Pellentesque at nunc velit, vitae congue nisl. Nam varius imperdiet leo eu accumsan. Nullam elementum fermentum diam euismod porttitor. Etiam sed pellentesque ante. Donec in est elementum mi tempor consectetur. Fusce orci lorem, mollis at tincidunt eget, fringilla sed nunc. Ut consectetur condimentum condimentum. Phasellus sed felis non massa gravida euismod ut in tellus. Curabitur suscipit pharetra sapien vitae dignissim. Morbi id arcu nec ante viverra lobortis vitae nec quam. Mauris id gravida odio. Nunc non sem nisi. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque hendrerit volutpat nisl id elementum. Vivamus lobortis iaculis nisi, sit amet tristique risus porttitor vel. Suspendisse potenti.</p>\n"
 	. "<p>Quisque aliquet sapien leo, vitae eleifend dolor. Fusce quis tincidunt nunc. Nam nec purus nulla, ac eleifend lorem. Curabitur eu quam et nibh egestas mattis. Maecenas eget felis augue. Integer scelerisque commodo urna, a pulvinar tortor euismod et. Praesent in nunc sapien. Ut iaculis auctor neque, sit amet rutrum est faucibus vitae. Sed a sagittis quam. Quisque interdum luctus fringilla. Vestibulum vitae nunc in felis luctus ultricies at id magna. Nam volutpat sapien ac lorem interdum pellentesque. Suspendisse faucibus, leo vitae laoreet interdum, mi mi pulvinar neque, sit amet tristique sapien nulla nec dolor. Etiam non ligula augue.</p>\n"
 	. "<p>Vivamus purus elit, ornare eget accumsan ut, luctus et orci. Sed vestibulum turpis ut quam vehicula id hendrerit velit suscipit. Pellentesque pulvinar, libero vitae sagittis scelerisque, felis ante faucibus risus, ut viverra velit mi at tortor. Aliquam lacinia condimentum felis, eu elementum ligula laoreet vitae. Sed placerat tempus turpis a fringilla. Etiam porta accumsan feugiat. Phasellus et cursus magna. Suspendisse vitae odio sit amet urna vulputate consectetur. Vestibulum massa magna, sagittis at dictum vitae, sagittis scelerisque erat. Donec viverra tincidunt lacus. Maecenas fermentum erat et mauris tincidunt sed eleifend quam tempus. In at augue mi, in tincidunt arcu. Duis dapibus aliquet mi, ac ullamcorper est semper quis. Sed nec nulla nec odio malesuada viverra id sed nulla. Donec lobortis euismod aliquam. Praesent sit amet dolor quis lacus auctor lobortis. In hac habitasse platea dictumst. Sed at nisi sed nisi ullamcorper pellentesque. Vivamus eget enim sem, non laoreet leo. Sed vel odio lacus.</p>\n"
-	. "</body>\n</html>\n";
+	. $bookEnd;
 
 $chapter2 = $content_start . "<h1>Chapter 2</h1>\n"
 	. "<h2>Vivamus bibendum massa</h2>\n"
@@ -65,7 +77,7 @@ $chapter2 = $content_start . "<h1>Chapter 2</h1>\n"
 	. "<p>Praesent gravida, sapien aliquet interdum elementum, magna mauris hendrerit eros, blandit posuere lectus neque sed massa. Cras ultricies rhoncus mi, vitae posuere ligula scelerisque sit amet. Cras porttitor congue odio, sit amet tristique magna euismod id. Cras enim dolor, scelerisque eget egestas vel, consectetur vel purus. Aenean et convallis felis. Mauris in arcu sollicitudin ipsum lobortis fringilla. Suspendisse felis mauris, convallis ac blandit interdum, imperdiet eget massa. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque velit quis augue commodo tristique. Maecenas dictum dui congue enim tristique vel mattis neque luctus. Fusce neque dui, laoreet suscipit varius sed, mattis sit amet diam. Nullam elementum, ante non cursus imperdiet, eros dui placerat elit, sit amet elementum erat risus eget nunc.</p>\n"
 	. "<p>Nam tellus nibh, vehicula a laoreet non, fermentum vel leo. Proin id augue tellus. Donec placerat pharetra interdum. Aliquam vestibulum viverra bibendum. Nullam auctor congue tortor. Sed sagittis, massa ac cursus malesuada, ipsum velit aliquam lectus, quis tincidunt tellus risus id justo. Suspendisse sodales adipiscing eros, ut pulvinar eros suscipit in. Fusce vel libero id urna blandit pharetra. Cras aliquam suscipit ultrices. Vivamus luctus tristique vestibulum. Nam placerat dolor ipsum. Nulla vitae tristique sapien. Nulla laoreet ante ut elit dictum ultricies. Fusce mi tortor, commodo sit amet tincidunt semper, pellentesque nec ante. Vestibulum nec dui at massa adipiscing pulvinar. Integer ultrices tristique odio, iaculis bibendum metus fringilla id. Ut ac elit ac enim convallis dignissim pharetra id purus. Nunc pulvinar blandit nulla, in ornare erat condimentum id. Sed sit amet placerat est. Curabitur pretium tellus in velit aliquet eu dictum arcu consectetur.</p>\n"
 	. "<p>In hac habitasse platea dictumst. Integer lectus augue, varius nec rutrum non, fringilla eu neque. Curabitur a gravida velit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque vestibulum orci ac ligula interdum dapibus. Maecenas sollicitudin aliquet libero in sodales. In tempor orci vitae nisi imperdiet at varius sem dignissim. Aenean tortor libero, pellentesque eget hendrerit id, ullamcorper in justo. Sed euismod egestas est vitae convallis. Nunc tempus lacinia purus condimentum mattis. Sed id elementum est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In nec tempus eros. </p>\n"
-	. "</body>\n</html>\n";
+	. $bookEnd;
 
 $chapter3 = array();
 $chapter3[] = $content_start . "<h1>Chapter 3</h1>\n"
@@ -75,14 +87,14 @@ $chapter3[] = $content_start . "<h1>Chapter 3</h1>\n"
 	. "<p>Praesent gravida, sapien aliquet interdum elementum, magna mauris hendrerit eros, blandit posuere lectus neque sed massa. Cras ultricies rhoncus mi, vitae posuere ligula scelerisque sit amet. Cras porttitor congue odio, sit amet tristique magna euismod id. Cras enim dolor, scelerisque eget egestas vel, consectetur vel purus. Aenean et convallis felis. Mauris in arcu sollicitudin ipsum lobortis fringilla. Suspendisse felis mauris, convallis ac blandit interdum, imperdiet eget massa. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque velit quis augue commodo tristique. Maecenas dictum dui congue enim tristique vel mattis neque luctus. Fusce neque dui, laoreet suscipit varius sed, mattis sit amet diam. Nullam elementum, ante non cursus imperdiet, eros dui placerat elit, sit amet elementum erat risus eget nunc.</p>\n"
 	. "<p>Nam tellus nibh, vehicula a laoreet non, fermentum vel leo. Proin id augue tellus. Donec placerat pharetra interdum. Aliquam vestibulum viverra bibendum. Nullam auctor congue tortor. Sed sagittis, massa ac cursus malesuada, ipsum velit aliquam lectus, quis tincidunt tellus risus id justo. Suspendisse sodales adipiscing eros, ut pulvinar eros suscipit in. Fusce vel libero id urna blandit pharetra. Cras aliquam suscipit ultrices. Vivamus luctus tristique vestibulum. Nam placerat dolor ipsum. Nulla vitae tristique sapien. Nulla laoreet ante ut elit dictum ultricies. Fusce mi tortor, commodo sit amet tincidunt semper, pellentesque nec ante. Vestibulum nec dui at massa adipiscing pulvinar. Integer ultrices tristique odio, iaculis bibendum metus fringilla id. Ut ac elit ac enim convallis dignissim pharetra id purus. Nunc pulvinar blandit nulla, in ornare erat condimentum id. Sed sit amet placerat est. Curabitur pretium tellus in velit aliquet eu dictum arcu consectetur.</p>\n"
 	. "<p>In hac habitasse platea dictumst. Integer lectus augue, varius nec rutrum non, fringilla eu neque. Curabitur a gravida velit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque vestibulum orci ac ligula interdum dapibus. Maecenas sollicitudin aliquet libero in sodales. In tempor orci vitae nisi imperdiet at varius sem dignissim. Aenean tortor libero, pellentesque eget hendrerit id, ullamcorper in justo. Sed euismod egestas est vitae convallis. Nunc tempus lacinia purus condimentum mattis. Sed id elementum est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In nec tempus eros. </p>\n"
-	. "</body>\n</html>\n";
+	. $bookEnd;
 $chapter3[] = $content_start . "<h2>Vivamus bibendum massa 3</h2>\n"
 	. "<p>Vivamus bibendum massa ac magna congue gravida. Curabitur nulla ante, accumsan sit amet luctus a, fermentum ut diam. Maecenas porttitor faucibus mattis. Ut auctor aliquet ligula nec posuere. Nullam arcu turpis, dapibus sit amet tempor nec, cursus at augue. Aliquam sed sem velit, id sagittis mauris. Donec sed ipsum nisi, id scelerisque felis. Cras lacus est, fermentum in ultricies eu, congue in elit. Nulla tincidunt posuere eros, eget suscipit tellus porta vel. Aliquam ut sollicitudin libero. Suspendisse potenti. Sed cursus dignissim nulla in elementum. Aliquam id quam justo, sit amet laoreet ligula. Etiam pellentesque tellus a nisi commodo eu sodales ante commodo. Vestibulum ultricies sapien arcu. Proin nunc mauris, ultrices id imperdiet ac, malesuada ac nunc. Nunc a mi quis nunc ultricies rhoncus. Mauris pellentesque eros eu augue congue ac tincidunt est gravida.</p>\n"
 	. "<p>Integer lobortis facilisis magna, non tristique sem facilisis ut. Sed id nisi diam. Nulla viverra lectus ut purus tempus sagittis. Quisque dictum enim tempus ipsum mollis blandit. Cras in mi non nulla imperdiet fringilla at blandit urna. Donec vel dui quis sem congue ullamcorper nec a massa. Vivamus in dui nunc. Donec sit amet augue odio, at imperdiet lacus. Mauris sit amet magna justo. Maecenas ultrices orci ultrices sapien ornare eget consequat nisl tristique. Integer non mi ac eros vehicula pharetra. Curabitur risus augue, sollicitudin vitae pharetra interdum, sollicitudin sit amet magna. Nunc sit amet est lacus, vel sodales elit. Duis dolor lorem, convallis eu dignissim quis, vulputate at nibh.</p>\n"
 	. "<p>Praesent gravida, sapien aliquet interdum elementum, magna mauris hendrerit eros, blandit posuere lectus neque sed massa. Cras ultricies rhoncus mi, vitae posuere ligula scelerisque sit amet. Cras porttitor congue odio, sit amet tristique magna euismod id. Cras enim dolor, scelerisque eget egestas vel, consectetur vel purus. Aenean et convallis felis. Mauris in arcu sollicitudin ipsum lobortis fringilla. Suspendisse felis mauris, convallis ac blandit interdum, imperdiet eget massa. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque velit quis augue commodo tristique. Maecenas dictum dui congue enim tristique vel mattis neque luctus. Fusce neque dui, laoreet suscipit varius sed, mattis sit amet diam. Nullam elementum, ante non cursus imperdiet, eros dui placerat elit, sit amet elementum erat risus eget nunc.</p>\n"
 	. "<p>Nam tellus nibh, vehicula a laoreet non, fermentum vel leo. Proin id augue tellus. Donec placerat pharetra interdum. Aliquam vestibulum viverra bibendum. Nullam auctor congue tortor. Sed sagittis, massa ac cursus malesuada, ipsum velit aliquam lectus, quis tincidunt tellus risus id justo. Suspendisse sodales adipiscing eros, ut pulvinar eros suscipit in. Fusce vel libero id urna blandit pharetra. Cras aliquam suscipit ultrices. Vivamus luctus tristique vestibulum. Nam placerat dolor ipsum. Nulla vitae tristique sapien. Nulla laoreet ante ut elit dictum ultricies. Fusce mi tortor, commodo sit amet tincidunt semper, pellentesque nec ante. Vestibulum nec dui at massa adipiscing pulvinar. Integer ultrices tristique odio, iaculis bibendum metus fringilla id. Ut ac elit ac enim convallis dignissim pharetra id purus. Nunc pulvinar blandit nulla, in ornare erat condimentum id. Sed sit amet placerat est. Curabitur pretium tellus in velit aliquet eu dictum arcu consectetur.</p>\n"
 	. "<p>In hac habitasse platea dictumst. Integer lectus augue, varius nec rutrum non, fringilla eu neque. Curabitur a gravida velit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque vestibulum orci ac ligula interdum dapibus. Maecenas sollicitudin aliquet libero in sodales. In tempor orci vitae nisi imperdiet at varius sem dignissim. Aenean tortor libero, pellentesque eget hendrerit id, ullamcorper in justo. Sed euismod egestas est vitae convallis. Nunc tempus lacinia purus condimentum mattis. Sed id elementum est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In nec tempus eros. </p>\n"
-	. "</body>\n</html>\n";
+	. $bookEnd;
 
 $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
 	. "<h2>Vivamus bibendum massa 4</h2>\n"
@@ -106,21 +118,29 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
 	. "<p>Morbi pretium lectus laoreet sapien tincidunt ac volutpat erat ullamcorper. Vivamus dolor neque, blandit non ultrices vitae, mollis venenatis nisi. Fusce at mollis ante. Sed id libero id purus eleifend rutrum. Fusce eget lacus eget libero euismod elementum. Phasellus ac eros non mi luctus pulvinar vestibulum vitae nibh. Proin elementum ultricies mauris, non hendrerit massa egestas quis. Maecenas consectetur consequat quam, vitae tempor leo aliquam sed. Proin iaculis fringilla ante id laoreet. In facilisis vestibulum mollis. Etiam ut arcu mi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at fermentum nisl. Proin odio justo, condimentum euismod mollis et, malesuada ac tortor. Aliquam ac elit euismod nibh pulvinar sodales id vitae nibh. Curabitur ut libero metus, eu bibendum turpis.</p>\n"
 	. "<p>Nam faucibus nibh non nulla aliquet id aliquet tortor tincidunt. Fusce at nisi ac mauris pulvinar vehicula at sed velit. Pellentesque vitae eros nec justo semper egestas ut id nisl. Quisque et est lectus. Cras eget nibh et odio pretium venenatis non nec tellus. Aliquam placerat odio non diam facilisis at sollicitudin turpis tempus. Etiam vitae magna dui, nec dignissim odio. Donec dui tellus, adipiscing vel dictum in, vehicula ut diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse est elit, porta non lobortis rutrum, placerat non urna. Integer nisi tellus, imperdiet ac dapibus at, interdum ut enim. Mauris fringilla tempus risus at dapibus. Quisque enim nunc, posuere vel dapibus vel, posuere vel sapien. Suspendisse potenti. Nullam pulvinar nibh nisi, nec porttitor nisi. Donec iaculis euismod elit at porttitor. Mauris quis nunc ut risus semper auctor. Pellentesque pulvinar cursus augue mattis luctus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>\n"
 	. "<p>Pellentesque pharetra tincidunt velit, ac laoreet ipsum dictum quis. Cras hendrerit neque eu tellus pellentesque condimentum. Suspendisse metus mi, dignissim eu faucibus vel, molestie quis tortor. Suspendisse vel orci non orci gravida ultrices eu in dui. Vivamus vitae dolor vitae mauris congue auctor. Nulla iaculis, est tempor sagittis condimentum, libero erat fermentum libero, id dapibus tortor sem sit amet sapien. Pellentesque id ipsum eu elit pharetra tristique non ac nibh. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, lorem id elementum feugiat, orci arcu tincidunt diam, quis placerat sem lectus convallis nulla. Proin eget est quis libero molestie faucibus. Cras et est vitae lacus lacinia auctor. Mauris ligula justo, ullamcorper molestie fermentum vel, tincidunt at nunc. Sed ullamcorper fringilla lectus in pharetra. Sed libero erat, lobortis nec tempor ac, volutpat id orci. Phasellus orci elit, blandit a sollicitudin at, dignissim in mi. Ut facilisis gravida cursus. Duis risus lacus, pretium vitae egestas varius, interdum non ipsum.</p>\n" 	
-	. "</body>\n</html>\n";
-	
+	. $bookEnd;
+logLine("Build Chapters");
+
 $book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1);
+logLine("Add Chapter 1");
 $book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $chapter2);
+logLine("Add Chapter 2");
 $book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
+logLine("Add Chapter 3");
 
 // Autosplit a chapter:
 $book->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
 $book->addChapter("Chapter 4: Vivamus bibendum massa split", "Chapter004.html", $chapter4, true);
+logLine("Add Chapter 5");
 
 // More advanced use of the splitter:
 // Still using Chapter 4, but as you can see, "Chapter 4" also contains a header for Chapter 5.
 include_once 'EPubChapterSplitter.php';
+logLine("include EPubChapterSplitter.php");
+
 $splitter = new EPubChapterSplitter();
 $splitter->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
+logLine("new EPubChapterSplitter()");
 
 /* Using the # as regexp delimiter here, it makes writing the regexp easier.
  *  in this case we could have just searched for "Chapter ", or if we were using regexp '#^<h1>Chapter #i',
@@ -130,6 +150,7 @@ $splitter->setSplitSize(15000); // For this test, we split at approx 15k. Defaul
  * Essentially, the search strnig is looking for lines starting with...
  */
 $html2 = $splitter->splitChapter($chapter4, true, "Chapter ");/* '#^<.+?>Chapter \d*#i'); */  
+logLine("Split chapter 5");
 
 $idx = 0;
 while (list($k, $v) = each($html2)) {
@@ -150,6 +171,7 @@ while (list($k, $v) = each($html2)) {
 	
 	$book->addChapter($cName, "Chapter005_" . $idx . ".html", $v, true);
 }
+logLine("Add Chapter 5");
 
 // Notice that Chapter 1 have an image reference in paragraph 2?
 // We can tell EPub to automatically load embedded images and other references:
@@ -162,7 +184,11 @@ while (list($k, $v) = each($html2)) {
 //  6: Base Dir, This is important, as this have to point to the root of the imported HTML, as seen from it's Document root.
 //     if you are importing an HTML designed to live in "http://server/story/book.html", $baseDir must be "story"
 //     It is used to resolve any links in the HTML.
-$book->addChapter("Chapter 6: Image test", "Chapter006.html", $chapter1, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+
+// BEWARE!
+// Using EPub::EXTERNAL_REF_ADD means EPub will try to download the imagees from the internet if they are external. This WILL slow down book generation a lot.
+// $book->addChapter("Chapter 6: Image test", "Chapter006.html", $chapter1, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+//logLine("add chapter 6");
 
 $book->finalize(); // Finalize the book, and build the archive.
 
@@ -184,4 +210,14 @@ $zipData = $book->sendBook("Example1Book");
 
 // After this point your script should call exit. If anything is written to the output, 
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
+
+function logLine($line) {
+	global $log, $tStart, $tLast;
+	$tTemp = gettimeofday();
+	$tS = $tStart[sec] + (((int)($tStart[usec]/100))/10000);
+	$tL = $tLast[sec] + (((int)($tLast[usec]/100))/10000);
+	$tT = $tTemp[sec] + (((int)($tTemp[usec]/100))/10000);
+	$log .= sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $line;
+	$tLast = $tTemp;
+}
 ?>
