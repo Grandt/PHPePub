@@ -9,13 +9,13 @@
  * License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  *
  * @author A. Grandt
- * @copyright A. Grandt 2009-2011
+ * @copyright A. Grandt 2009-2012
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @link http://www.phpclasses.org/package/6110
- * @version 1.28
+ * @version 1.29
  */
 class Zip {
-	const VERSION = 1.28;
+	const VERSION = 1.29;
 
 	const ZIP_LOCAL_FILE_HEADER = "\x50\x4b\x03\x04"; // Local file header signature
 	const ZIP_CENTRAL_FILE_HEADER = "\x50\x4b\x01\x02"; // Central file header signature
@@ -44,7 +44,7 @@ class Zip {
 	private $streamFile = NULL;
 	private $streamData = NULL;
 	private $streamFileLength = 0;
-
+	
 	/**
 	 * Constructor.
 	 *
@@ -190,22 +190,40 @@ class Zip {
 	 * @author Adam Schmalhofer <Adam.Schmalhofer@gmx.de>
 	 * @author A. Grandt
 	 *
-	 * @param String $realPath      Path on the file system.
-	 * @param String $zipPath       Filepath and name to be used in the archive.
-	 * @param bool   $recursive     Add content recursively, default is TRUE.
+	 * @param String $realPath       Path on the file system.
+	 * @param String $zipPath        Filepath and name to be used in the archive.
+	 * @param bool   $recursive      Add content recursively, default is TRUE.
+	 * @param bool   $followSymlinks Follow and add symbolic links, if they are accessible, default is TRUE.
+	 * @param array  $addedFiles     Reference to the added files, this is used to prevent duplicates, efault is an empty array.
+	 *                               If you start the function by parsing an array, the array will be populated with the realPath
+	 *                               and zipPath kay/value pairs added to the archive by the function.
 	 */
-	public function addDirectoryContent($realPath, $zipPath, $recursive = TRUE) {
-		$iter = new DirectoryIterator($realPath);
-		foreach ($iter as $file) {
-			if ($file->isDot()) {
-				continue;
+	public function addDirectoryContent($realPath, $zipPath, $recursive = TRUE, $followSymlinks = TRUE, &$addedFiles = array()) {
+		if (file_exists($realPath) && !isset($addedFiles[realpath($realPath)])) {
+			if (is_dir($realPath)) {
+				$this->addDirectory($zipPath);
 			}
-			$newRealPath = $file->getPathname();
-			$newZipPath = self::pathJoin($zipPath, $file->getFilename());
-			if ($file->isFile()) {
-				$this->addLargeFile($newRealPath, $newZipPath);
-			} else if ($recursive === TRUE) {
-				$this->addDirectoryContent($newRealPath, $newZipPath, $recursive);
+
+			$addedFiles[realpath($realPath)] = $zipPath;
+
+			$iter = new DirectoryIterator($realPath);
+			foreach ($iter as $file) {
+				if ($file->isDot()) {
+					continue;
+				}
+				$newRealPath = $file->getPathname();
+				$newZipPath = self::pathJoin($zipPath, $file->getFilename());
+
+				if(file_exists($newRealPath) && ($folowSymliks === TRUE || !is_link($newRealPath))) {
+					if ($file->isFile()) {
+						$addedFiles[realpath($newRealPath)] = $newZipPath;
+						$this->addLargeFile($newRealPath, $newZipPath);
+					} else if ($recursive === TRUE) {
+						$this->addDirectoryContent($newRealPath, $newZipPath, $recursive);
+					} else {
+						$this->addDirectory($zipPath);
+					}
+				}
 			}
 		}
 	}
@@ -232,7 +250,7 @@ class Zip {
 		}
 		fclose($fh);
 
-		$this->closeStream($this->addExtraField);
+		$this->closeStream($this->addExtraFields);
 
 		return TRUE;
 	}
@@ -516,10 +534,10 @@ class Zip {
 		$zipEntry .= $gpFlags . $gzType . $dosTime. $fileCRC32;
 		$zipEntry .= pack("VV", $gzLength, $dataLength);
 		$zipEntry .= pack("v", strlen($filePath) ); // File name length
-		$zipEntry .= $this->addExtraField ? "\x10\x00" : "\x00\x00"; // Extra field length
+		$zipEntry .= $this->addExtraFields ? "\x10\x00" : "\x00\x00"; // Extra field length
 		$zipEntry .= $filePath; // FileName
 		// Extra fields
-		if ($this->addExtraField) {
+		if ($this->addExtraFields) {
 			$zipEntry .= "\x55\x58"; 			// 0x5855	Short	tag for this extra block type ("UX")
 			$zipEntry .= "\x0c\x00";   			// TSize	Short	total data size for this block
 			$zipEntry .= pack("V", $timestamp);	// AcTime	Long	time of last access (UTC/GMT)
@@ -539,7 +557,7 @@ class Zip {
 		$cdEntry .= $gpFlags . $gzType . $dosTime. $fileCRC32;
 		$cdEntry .= pack("VV", $gzLength, $dataLength);
 		$cdEntry .= pack("v", strlen($filePath)); // Filename length
-		$cdEntry .= $this->addExtraField ? "\x0c\x00" : "\x00\x00"; // Extra field length
+		$cdEntry .= $this->addExtraFields ? "\x0c\x00" : "\x00\x00"; // Extra field length
 		$cdEntry .= pack("v", $fileCommentLength); // File comment length
 		$cdEntry .= "\x00\x00"; // Disk number start
 		$cdEntry .= "\x00\x00"; // internal file attributes
@@ -547,7 +565,7 @@ class Zip {
 		$cdEntry .= pack("V", $this->offset ); // Relative offset of local header
 		$cdEntry .= $filePath; // FileName
 		// Extra fields
-		if ($this->addExtraField) {
+		if ($this->addExtraFields) {
 			$cdEntry .= "\x55\x58"; 			// 0x5855	Short	tag for this extra block type ("UX")
 			$cdEntry .= "\x08\x00";   			// TSize	Short	total data size for this block
 			$cdEntry .= pack("V", $timestamp);	// AcTime	Long	time of last access (UTC/GMT)
