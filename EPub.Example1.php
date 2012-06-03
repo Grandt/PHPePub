@@ -205,6 +205,11 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 }
 */
 
+// Save book as a file relative to your script (for local ePub generation)
+// Notice that the extions .epub will be added by the script.
+// The second parameter is a directory name which is '.' by default. Don't use trailing slash!
+$book->saveBook('epub-filename', '.')
+
 // Send the book to the client. ".epub" will be appended if missing.
 $zipData = $book->sendBook("Example1Book");
 

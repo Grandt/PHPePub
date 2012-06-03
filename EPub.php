@@ -1216,6 +1216,52 @@ class EPub {
 		return $this->zip->getZipData();
 	}
 
+    /**
+     * Remove not allowed characters from string to get a nearly safe filename
+     *
+     * @param $fileName
+     * @return mixed|string
+     */
+    private function sanitizeFileName($fileName) {
+        $forbidden_character = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}");
+        $fileName = str_replace($forbidden_character, '', $fileName);
+        $fileName = preg_replace('/[\s-]+/', '-', $fileName);
+        $fileName = trim($fileName, '.-_');
+        return $fileName;
+    }
+
+    /**
+     * Save the ePub file to local disk.
+     *
+     * @param $fileName
+     * @param $baseDir If empty baseDir is absolute to server path, if omitted it's relative to script path
+     * @return bool
+     */
+    function saveBook($fileName, $baseDir = '.') {
+
+        // Make fileName safe
+        $fileName = $this->sanitizeFileName($fileName);
+
+        // Finalize book, if it's not done already
+        if(!$this->isFinalized) {
+            $this->finalize();
+        }
+
+        // Try to open file access
+        $fh = fopen($baseDir.'/'.$fileName . '.epub', "w");
+
+        if($fh) {
+            fputs($fh, $this->getBook());
+            fclose($fh);
+
+            // if file is written return TRUE
+            return TRUE;
+        }
+
+        // return FALSE by default
+        return FALSE;
+    }
+
 	/**
 	 * Return the finalized book.
 	 *
