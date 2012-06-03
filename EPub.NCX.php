@@ -126,9 +126,11 @@ class Ncx {
 		. "\t\t<meta name=\"dtb:totalPageCount\" content=\"0\" />\n"
 		. "\t\t<meta name=\"dtb:maxPageNumber\" content=\"0\" />\n";
 
-		foreach ($this->meta as $metaEntry) {
-			list($name, $content) = each($metaEntry);
-			$ncx .= "\t\t<meta name=\"" . $name . "\" content=\"" . $content . "\" />\n";
+		if (sizeof($this->meta)) {
+			foreach ($this->meta as $metaEntry) {
+				list($name, $content) = each($metaEntry);
+				$ncx .= "\t\t<meta name=\"" . $name . "\" content=\"" . $content . "\" />\n";
+			}
 		}
 
 		$ncx .= "\t</head>\n\n\t<docTitle>\n\t\t<text>"

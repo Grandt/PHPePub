@@ -71,6 +71,9 @@ class EPubChapterSplitter {
 		$htmlPos = stripos($chapter, "<html");
 		$htmlEndPos = stripos($chapter, ">", $htmlPos);
 		$newXML = substr($chapter, 0, $htmlEndPos+1) . "\n</html>";
+		if (strpos(trim($newXML), "<?xml ") === FALSE) {
+			$newXML = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" . $newXML;
+		}
 		$headerLength = strlen($newXML);
 
 		$files = array();
