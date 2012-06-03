@@ -25,7 +25,7 @@ $tLast = $tStart;
 $log = $content_start . "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
 logLine("Start");
 
-$fileDir = './';
+$fileDir = './PHPePub';
 
 include_once("EPub.php");
 logLine("include EPub");
@@ -62,8 +62,7 @@ $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "im
 // setCoverImage can only be called once per book, but can be called at any point in the book creation.
 logLine("Set Cover Image");
 
-$cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n"
-	. $bookEnd;
+$cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n" . $bookEnd;
 $book->addChapter("Notices", "Cover.html", $cover);
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
