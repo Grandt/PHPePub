@@ -109,14 +109,16 @@ class EPub {
 	 * Class destructor
 	 *
 	 * @return void
+     * @TODO make sure elements in the destructor match the current class elements
 	 */
 	function __destruct() {
 		$this->zip = NULL;
 		$this->title = "";
 		$this->author = "";
-		$this->publisher = "";
-		$this->publishDate = 0;
-		$this->bookId = "";
+		$this->publisherName = "";
+		$this->publisherURL = "";
+		$this->date = 0;
+		$this->identifier = "";
 		$this->opf_manifest = "";
 		$this->opf_spine = "";
 		$this->ncx_navmap = "";
