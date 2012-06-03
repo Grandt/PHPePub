@@ -51,12 +51,14 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 logLine("Add css");
 
 // This test requires you have an image, change "images/_cover_.jpg" to match your location.
-//$book->setCoverImage("Cover.jpg", file_get_contents("images/_cover_.jpg"), "image/jpeg");
+$book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
 
 // A better way is to let EPub handle the image itself, as it may need resizing. Most Ebooks are only about 600x800
 //  pixels, adding megapix images is a waste of place and spends bandwidth. setCoverImage can resize the image.
 //  When using this method, the given image path must be the absolute path from the servers Document root.
-$book->setCoverImage("/test/images/_cover_.jpg");
+
+/* $book->setCoverImage("/absolute/path/to/demo/cover-image.jpg"); */
+
 // setCoverImage can only be called once per book, but can be called at any point in the book creation.
 logLine("Set Cover Image");
 
