@@ -8,16 +8,17 @@
  * 
  * Thanks to: Adam Schmalhofer and Kirstyn Fox for invaluable input and for "nudging" me in the right direction :)
  *
- * @author A. Grandt
- * @copyright A. Grandt 2009-2011
+ * @author A. Grandt <php@grandt.com>
+ * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.04
- * @link http://www.phpclasses.org/package/6115
- * @uses Zip.php version 1.23; http://www.phpclasses.org/browse/package/6110.html
+ * @version 2.05
+ * @link http://www.phpclasses.org/package/6115 
+ * @link https://github.com/Grandt/PHPePub
+ * @uses Zip.php version 1.33; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.04;
-	const REQ_ZIP_VERSION = 1.23;
+	const VERSION = 2.05;
+	const REQ_ZIP_VERSION = 1.33;
 
 	const IDENTIFIER_UUID = 'UUID';
 	const IDENTIFIER_URI = 'URI';
@@ -82,18 +83,20 @@ class EPub {
 	 * @return void
 	 */
 	function __construct() {
-		include_once("Zip.php");
+		include_once "Zip.php";
  
 		if (!defined("Zip::VERSION") || Zip::VERSION < self::REQ_ZIP_VERSION) {
 			die("<p>EPub requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher.<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
 		}
-		include_once("EPubChapterSplitter.php");
+		include_once "EPubChapterSplitter.php";
 		
 		$this->docRoot = $_SERVER["DOCUMENT_ROOT"] . "/";
 
 		$this->zip = new Zip();
+		$this->zip->setExtraField(FALSE);
 		$this->zip->addFile("application/epub+zip", "mimetype");
-		$this->zip->addDirectory("META-INF/");
+		$this->zip->setExtraField(TRUE);
+		$this->zip->addDirectory("META-INF//");
 
 		$this->content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n\t<rootfiles>\n\t\t<rootfile full-path=\"book.opf\" media-type=\"application/oebps-package+xml\" />\n\t</rootfiles>\n</container>\n";
 
@@ -269,7 +272,7 @@ class EPub {
 	 *
 	 * $externalReferences determins how the function will handle external references.
 	 *
-	 * @param mixed  $doc (referenced)
+	 * @param mixed  &$doc (referenced)
 	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
 	 * @param String $baseDir Default is "", meaning it is pointing to the document root.
 	 * @param String $htmlDir The path to the parent HTML file's directory from the root of the archive.
@@ -326,7 +329,7 @@ class EPub {
 	 *
 	 * $externalReferences determins how the function will handle external references.
 	 *
-	 * @param String $cssFile (referenced)
+	 * @param String &$cssFile (referenced)
 	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
 	 * @param String $baseDir Default is "", meaning it is pointing to the document root.
 	 * @param String $cssDir The of the CSS file's directory from the root of the archive.
@@ -367,7 +370,7 @@ class EPub {
 	/**
 	 * Process style tags in a DOMDocument. Styles will be passed as CSS files and reinserted into the document.
 	 *
-	 * @param DOMDocument $xmlDoc (referenced)
+	 * @param DOMDocument &$xmlDoc (referenced)
 	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
 	 * @param String $baseDir  Default is "", meaning it is pointing to the document root.
 	 * @param String $htmlDir  The path to the parent HTML file's directory from the root of the archive.
@@ -398,7 +401,7 @@ class EPub {
 	 * Process link tags in a DOMDocument. Linked files will be loaded into the archive, and the link src will be rewritten to point to that location.
 	 * Link types text/css will be passed as CSS files.
 	 *
-	 * @param DOMDocument $xmlDoc (referenced)
+	 * @param DOMDocument &$xmlDoc (referenced)
 	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
 	 * @param String $baseDir  Default is "", meaning it is pointing to the document root.
 	 * @param String $htmlDir  The path to the parent HTML file's directory from the root of the archive.
@@ -461,11 +464,11 @@ class EPub {
 	 * Process img tags in a DOMDocument.
 	 * $externalReferences will determine what will happen to these images, and the img src will be rewritten accordingly.
 	 *
-	 * @param DOMDocument $xmlDoc (referenced)
-	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
-	 * @param String $baseDir  Default is "", meaning it is pointing to the document root.
-	 * @param String $htmlDir  The path to the parent HTML file's directory from the root of the archive.
-	 * @param String $backPath The path to get back to the root of the archive from $htmlDir.
+	 * @param DOMDocument &$xmlDoc             (referenced)
+	 * @param int          $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
+	 * @param String       $baseDir            Default is "", meaning it is pointing to the document root.
+	 * @param String       $htmlDir            The path to the parent HTML file's directory from the root of the archive.
+	 * @param String       $backPath           The path to get back to the root of the archive from $htmlDir.
 	 *
 	 * @return Bool  FALSE if uncuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
 	 */
@@ -512,13 +515,13 @@ class EPub {
 	/**
 	 * Resolve an image src and determine it's target location and add it to the book.
 	 *
-	 * @param String $source Image Source link.
-	 * @param String $internalPath (referenced) Return value, will be set to the target path and name in the book.
-	 * @param String $internalSrc (referenced) Return value, will be set to the target name in the book.
-	 * @param String $isSourceExternal (referenced) Return value, will be set to TRUE if the image originated from a full URL.
-	 * @param String $baseDir  Default is "", meaning it is pointing to the document root.
-	 * @param String $htmlDir  The path to the parent HTML file's directory from the root of the archive.
-	 * @param String $backPath The path to get back to the root of the archive from $htmlDir.
+	 * @param String  $source Image Source link.
+	 * @param String &$internalPath (referenced) Return value, will be set to the target path and name in the book.
+	 * @param String &$internalSrc (referenced) Return value, will be set to the target name in the book.
+	 * @param String &$isSourceExternal (referenced) Return value, will be set to TRUE if the image originated from a full URL.
+	 * @param String  $baseDir  Default is "", meaning it is pointing to the document root.
+	 * @param String  $htmlDir  The path to the parent HTML file's directory from the root of the archive.
+	 * @param String  $backPath The path to get back to the root of the archive from $htmlDir.
 	 */
 	protected function resolveImage($source, &$internalPath, &$internalSrc, &$isSourceExternal, $baseDir = "", $htmlDir = "", $backPath = "") {
 		if ($this->isFinalized) {
@@ -1065,7 +1068,7 @@ class EPub {
 	}
 
 	/**
-	 * @Deprecated
+	 * @Deprecated No longer used
 	 */
 	function setIgnoreEmptyBuffer($ignoreEmptyBuffer = TRUE) {
 		return TRUE;
@@ -1100,11 +1103,11 @@ class EPub {
 			$this->date = time();
 		}
 
-		if(empty($this->sourceURL)) {
+		if (empty($this->sourceURL)) {
 			$this->sourceURL = $this->getCurrentPageURL();
 		}
 
-		if(empty($this->publisherURL)) {
+		if (empty($this->publisherURL)) {
 			$this->sourceURL = $this->getCurrentServerURL();
 		}
 
@@ -1141,11 +1144,11 @@ class EPub {
 			$this->opf .= "\t\t<dc:rights>" . $this->rights . "</dc:rights>\n";
 		}
 
-		if(!empty($this->subject)) {
+		if (!empty($this->subject)) {
 			$this->opf .=  "\t\t<dc:subject>" . $this->subject . "</dc:subject>\n";
 		}
 		
-		if(!empty($this->coverage)) {
+		if (!empty($this->coverage)) {
 			$this->opf .=  "\t\t<dc:coverage>" . $this->coverage . "</dc:coverage>\n";
 		}
 		
@@ -1153,7 +1156,7 @@ class EPub {
 			$this->opf .=  "\t\t<dc:source>" . $this->sourceURL . "</dc:source>\n";
 		}
 
-		if(!empty($this->relation)) {
+		if (!empty($this->relation)) {
 			$this->opf .=  "\t\t<dc:relation>" . $this->relation . "</dc:relation>\n";
 		}
 		
@@ -1209,7 +1212,7 @@ class EPub {
 	 * @return String with the book in binary form.
 	 */
 	function getBook() {
-		if(!$this->isFinalized) {
+		if (!$this->isFinalized) {
 			$this->finalize();
 		}
 
@@ -1222,7 +1225,7 @@ class EPub {
 	 * @return String
 	 */
 	function getBookSize() {
-		if(!$this->isFinalized) {
+		if (!$this->isFinalized) {
 			$this->finalize();
 		}
 
@@ -1240,7 +1243,7 @@ class EPub {
 	 * @return bool $success
 	 */
 	function sendBook($fileName) {
-		if(!$this->isFinalized) {
+		if (!$this->isFinalized) {
 			$this->finalize();
 		}
 
@@ -1258,12 +1261,12 @@ class EPub {
 	 *
 	 * Added for convinience
 	 *
-	 * @param      $version UUID version to retrieve, See lib.uuid.manual.html for details.
-	 * @return     string   The formatted uuid
+	 * @param  int    $version UUID version to retrieve, See lib.uuid.manual.html for details.
+	 * @return string $url     The formatted uuid
 	 */
 	function createUUID($version = 4, $url = NULL) {
-		include_once("lib.uuid.php");
-		return UUID::mint($version,$url,UUID::nsURL);
+		include_once "lib.uuid.php";
+		return UUID::mint($version, $url, UUID::nsURL);
 	}
 
 	/**
@@ -1341,7 +1344,7 @@ class EPub {
 				$image_p = imagecreatetruecolor($width*$ratio, $height*$ratio);
 				imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
 				ob_start();
-				imagejpeg($image_p,NULL,80);
+				imagejpeg($image_p, NULL, 80);
 				$image = ob_get_contents();
 				ob_end_clean();
 				imagedestroy($image_o);
@@ -1401,7 +1404,7 @@ class EPub {
 	 * Set default chapter target size.
 	 * Default is 250000 bytes, and minimum is 10240 bytes.
 	 *
-	 * @param $size
+	 * @param $size segment size in bytes
 	 * @return void
 	 */
 	function setSplitSize($size) {

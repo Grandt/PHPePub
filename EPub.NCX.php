@@ -2,12 +2,10 @@
 /**
  * ePub NCX file structure
  *
- * @author Grandt
- * @copyright Grandt 2011
+ * @author A. Grandt <php@grandt.com>
+ * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @version 1.00
- * @link
- * @uses
  */
 class Ncx {
 	const VERSION = 1.00;
@@ -146,13 +144,6 @@ class Ncx {
 
 /**
  * ePub NavMap class
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
  */
 class NavMap {
 	const VERSION = 1.00;
@@ -225,13 +216,6 @@ class NavMap {
 
 /**
  * ePub NavPoint class
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
  */
 class NavPoint {
 	const VERSION = 1.00;

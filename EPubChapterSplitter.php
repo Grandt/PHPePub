@@ -4,9 +4,12 @@
  * What this splitter does is using DOM to try and retain any formatting in the file, including rebuilding the DOM tree for subsequent parts.
  * Split size is considered max target size. The actual size is the result of an even split across the resulting files.
  *
- * License: GNU LGPL.
+ * @author A. Grandt <php@grandt.com>
+ * @copyright 2009-2012 A. Grandt
+ * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @link http://www.phpclasses.org/package/6115 
+ * @link https://github.com/Grandt/PHPePub
  * @version 2.02
- * @author Grandt
  */
 class EPubChapterSplitter {
 	const VERSION = 2.02;
@@ -17,7 +20,7 @@ class EPubChapterSplitter {
 	 * Set default chapter target size.
 	 * Default is 250000 bytes, and minimum is 10240 bytes.
 	 *
-	 * @param $size
+	 * @param $size segment size in bytes
 	 * @return void
 	 */
 	function setSplitSize($size) {
