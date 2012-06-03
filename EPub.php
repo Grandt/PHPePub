@@ -425,7 +425,7 @@ class EPub {
 				$urlinfo = parse_url($source);
 
 				if (strpos($urlinfo['path'], $baseDir."/") !== FALSE) {
-					$internalSrc = substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($basedir) + 1);
+					$internalSrc = substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($baseDir) + 1);
 				}
 
 				@$sourceData = file_get_contents($source);
@@ -530,7 +530,7 @@ class EPub {
 			$urlinfo = parse_url($source);
 
 			if (strpos($urlinfo['path'], $baseDir."/") !== FALSE) {
-				$internalSrc = substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($basedir) + 1);
+				$internalSrc = substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($baseDir) + 1);
 			}
 			$internalPath = $urlinfo["scheme"] . "/" . $urlinfo["host"] . "/" . pathinfo($urlinfo["path"], PATHINFO_DIRNAME);
 			$isSourceExternal = TRUE;
