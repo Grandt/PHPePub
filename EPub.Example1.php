@@ -17,6 +17,9 @@ $content_start =
 
 $bookEnd = "</body>\n</html>\n";
 
+// setting timezone for time functions used for logging to work properly
+date_default_timezone_set('Europe/Berlin');
+
 $tStart = gettimeofday();
 $tLast = $tStart;
 $log = $content_start . "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
@@ -48,12 +51,14 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 logLine("Add css");
 
 // This test requires you have an image, change "images/_cover_.jpg" to match your location.
-//$book->setCoverImage("Cover.jpg", file_get_contents("images/_cover_.jpg"), "image/jpeg");
+$book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
 
 // A better way is to let EPub handle the image itself, as it may need resizing. Most Ebooks are only about 600x800
 //  pixels, adding megapix images is a waste of place and spends bandwidth. setCoverImage can resize the image.
 //  When using this method, the given image path must be the absolute path from the servers Document root.
-$book->setCoverImage("/test/images/_cover_.jpg");
+
+/* $book->setCoverImage("/absolute/path/to/demo/cover-image.jpg"); */
+
 // setCoverImage can only be called once per book, but can be called at any point in the book creation.
 logLine("Set Cover Image");
 
@@ -211,6 +216,11 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 	fclose($f);
 }
 */
+
+// Save book as a file relative to your script (for local ePub generation)
+// Notice that the extions .epub will be added by the script.
+// The second parameter is a directory name which is '.' by default. Don't use trailing slash!
+$book->saveBook('epub-filename', '.');
 
 // Send the book to the client. ".epub" will be appended if missing.
 $zipData = $book->sendBook("Example1Book");
