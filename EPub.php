@@ -112,14 +112,16 @@ class EPub {
 	 * Class destructor
 	 *
 	 * @return void
+     * @TODO make sure elements in the destructor match the current class elements
 	 */
 	function __destruct() {
 		$this->zip = NULL;
 		$this->title = "";
 		$this->author = "";
-		$this->publisher = "";
-		$this->publishDate = 0;
-		$this->bookId = "";
+		$this->publisherName = "";
+		$this->publisherURL = "";
+		$this->date = 0;
+		$this->identifier = "";
 		$this->opf_manifest = "";
 		$this->opf_spine = "";
 		$this->ncx_navmap = "";
@@ -257,7 +259,7 @@ class EPub {
 
 	/**
 	 * Process external references from a HTML to the book. The chapter itself is not stored.
-	 * the HTML is scanned for &lt;link..., &lt;style..., and &lt;img tags.
+	 * the HTML is scanned for <link>, <style> and <img> tags.
 	 * Embedded CSS styles and links will also be processed.
 	 * Script tags are not processed, as scripting should be avoided in e-books.
 	 *
@@ -270,7 +272,7 @@ class EPub {
 	 * Basedir is the root dir the HTML is supposed to "live" in, used to resolve
 	 *  relative references such as <code>&lt;img src="../images/image.png"/&gt;</code>
 	 *
-	 * $externalReferences determins how the function will handle external references.
+	 * $externalReferences determines how the function will handle external references.
 	 *
 	 * @param mixed  &$doc (referenced)
 	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
@@ -327,14 +329,14 @@ class EPub {
 	/**
 	 * Process images referenced from an CSS file to the book.
 	 *
-	 * $externalReferences determins how the function will handle external references.
+	 * $externalReferences determines how the function will handle external references.
 	 *
 	 * @param String &$cssFile (referenced)
 	 * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
 	 * @param String $baseDir Default is "", meaning it is pointing to the document root.
 	 * @param String $cssDir The of the CSS file's directory from the root of the archive.
 	 *
-	 * @return Bool  FALSE if uncuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
+	 * @return Bool  FALSE if unsuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
 	 */
 	protected function processCSSExternalReferences(&$cssFile, $externalReferences = EPub::EXTERNAL_REF_ADD, $baseDir = "", $cssDir = "") {
 		if ($this->isFinalized || $externalReferences === EPub::EXTERNAL_REF_IGNORE) {
@@ -571,7 +573,7 @@ class EPub {
 			return FALSE;
 		}
 
-		if ($imageData == NULL) { // assume $fileName is the valig file path.
+		if ($imageData == NULL) { // assume $fileName is the valid file path.
 			$image = $this->getImage($this->docRoot . $fileName);
 			$imageData = $image['image'];
 			$mimetype = $image['mime'];
@@ -1218,6 +1220,52 @@ class EPub {
 
 		return $this->zip->getZipData();
 	}
+
+    /**
+     * Remove not allowed characters from string to get a nearly safe filename
+     *
+     * @param $fileName
+     * @return mixed|string
+     */
+    private function sanitizeFileName($fileName) {
+        $forbidden_character = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}");
+        $fileName = str_replace($forbidden_character, '', $fileName);
+        $fileName = preg_replace('/[\s-]+/', '-', $fileName);
+        $fileName = trim($fileName, '.-_');
+        return $fileName;
+    }
+
+    /**
+     * Save the ePub file to local disk.
+     *
+     * @param $fileName
+     * @param $baseDir If empty baseDir is absolute to server path, if omitted it's relative to script path
+     * @return bool
+     */
+    function saveBook($fileName, $baseDir = '.') {
+
+        // Make fileName safe
+        $fileName = $this->sanitizeFileName($fileName);
+
+        // Finalize book, if it's not done already
+        if(!$this->isFinalized) {
+            $this->finalize();
+        }
+
+        // Try to open file access
+        $fh = fopen($baseDir.'/'.$fileName . '.epub', "w");
+
+        if($fh) {
+            fputs($fh, $this->getBook());
+            fclose($fh);
+
+            // if file is written return TRUE
+            return TRUE;
+        }
+
+        // return FALSE by default
+        return FALSE;
+    }
 
 	/**
 	 * Return the finalized book.
