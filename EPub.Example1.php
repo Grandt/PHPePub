@@ -17,6 +17,9 @@ $content_start =
 
 $bookEnd = "</body>\n</html>\n";
 
+// setting timezone for time functions used for logging to work properly
+date_default_timezone_set('Europe/Berlin');
+
 $tStart = gettimeofday();
 $tLast = $tStart;
 $log = $content_start . "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
@@ -208,7 +211,7 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 // Save book as a file relative to your script (for local ePub generation)
 // Notice that the extions .epub will be added by the script.
 // The second parameter is a directory name which is '.' by default. Don't use trailing slash!
-$book->saveBook('epub-filename', '.')
+$book->saveBook('epub-filename', '.');
 
 // Send the book to the client. ".epub" will be appended if missing.
 $zipData = $book->sendBook("Example1Book");
