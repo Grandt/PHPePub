@@ -13,10 +13,10 @@
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @link http://www.phpclasses.org/package/6110
  * @link https://github.com/Grandt/PHPZip
- * @version 1.33
+ * @version 1.35
  */
 class Zip {
-	const VERSION = 1.33;
+	const VERSION = 1.35;
 
 	const ZIP_LOCAL_FILE_HEADER = "\x50\x4b\x03\x04"; // Local file header signature
 	const ZIP_CENTRAL_FILE_HEADER = "\x50\x4b\x01\x02"; // Central file header signature
@@ -138,7 +138,7 @@ class Zip {
 		$directoryPath = rtrim($directoryPath, "/");
 
 		if (strlen($directoryPath) > 0) {
-			$this->buildZipEntry($directoryPath, $fileComment, "\x00\x00", "\x00\x00", $timestamp, "\x00\x00\x00\x00", 0, 0, self::EXT_FILE_ATTR_DIR);
+			$this->buildZipEntry($directoryPath.'/', $fileComment, "\x00\x00", "\x00\x00", $timestamp, "\x00\x00\x00\x00", 0, 0, self::EXT_FILE_ATTR_DIR);
 			return TRUE;
 		}
 		return FALSE;
@@ -206,7 +206,7 @@ class Zip {
 	 *                               and zipPath kay/value pairs added to the archive by the function.
 	 */
 	public function addDirectoryContent($realPath, $zipPath, $recursive = TRUE, $followSymlinks = TRUE, &$addedFiles = array()) {
-		if (is_file($realPath) && !isset($addedFiles[realpath($realPath)])) {
+		if (file_exists($realPath) && !isset($addedFiles[realpath($realPath)])) {
 			if (is_dir($realPath)) {
 				$this->addDirectory($zipPath);
 			}
@@ -221,7 +221,7 @@ class Zip {
 				$newRealPath = $file->getPathname();
 				$newZipPath = self::pathJoin($zipPath, $file->getFilename());
 
-				if (is_file($newRealPath) && ($followSymlinks === TRUE || !is_link($newRealPath))) {
+				if (file_exists($newRealPath) && ($followSymlinks === TRUE || !is_link($newRealPath))) {
 					if ($file->isFile()) {
 						$addedFiles[realpath($newRealPath)] = $newZipPath;
 						$this->addLargeFile($newRealPath, $newZipPath);
@@ -477,6 +477,8 @@ class Zip {
 			$this->finalize();
 		}
 
+		$headerFile = null;
+		$headerLine = null;
 		if (!headers_sent($headerFile, $headerLine) or die("<p><strong>Error:</strong> Unable to send file $fileName. HTML Headers have already been sent from <strong>$headerFile</strong> in line <strong>$headerLine</strong></p>")) {
 			if ((ob_get_contents() === FALSE || ob_get_contents() == '') or die("\n<p><strong>Error:</strong> Unable to send file <strong>$fileName.epub</strong>. Output buffer contains the following text (typically warnings or errors):<br>" . ob_get_contents() . "</p>")) {
 				if (ini_get('zlib.output_compression')) {

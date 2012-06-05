@@ -96,7 +96,7 @@ class EPub {
 		$this->zip->setExtraField(FALSE);
 		$this->zip->addFile("application/epub+zip", "mimetype");
 		$this->zip->setExtraField(TRUE);
-		$this->zip->addDirectory("META-INF//");
+		$this->zip->addDirectory("META-INF");
 
 		$this->content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n\t<rootfiles>\n\t\t<rootfile full-path=\"book.opf\" media-type=\"application/oebps-package+xml\" />\n\t</rootfiles>\n</container>\n";
 
@@ -344,6 +344,7 @@ class EPub {
 		}
 
 		$backPath = preg_replace('#[^/]+/#i', "../", $cssDir);
+		$imgs = null;
 		preg_match_all('#url\s*\([\'\"\s]*(.+?)[\'\"\s]*\)#im', $cssFile, $imgs, PREG_SET_ORDER);
 
 		$itemCount = count($imgs);
