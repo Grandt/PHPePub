@@ -11,14 +11,14 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.05
+ * @version 2.06
  * @link http://www.phpclasses.org/package/6115 
  * @link https://github.com/Grandt/PHPePub
- * @uses Zip.php version 1.33; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
+ * @uses Zip.php version 1.35; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.05;
-	const REQ_ZIP_VERSION = 1.33;
+	const VERSION = 2.06;
+	const REQ_ZIP_VERSION = 1.35;
 
 	const IDENTIFIER_UUID = 'UUID';
 	const IDENTIFIER_URI = 'URI';
@@ -36,7 +36,7 @@ class EPub {
 	public $maxImageWidth = 768;
 	public $maxImageHeight = 1024;
 
-	private $splitDefaultSize = 250000;
+	public $splitDefaultSize = 250000;
 
 	private $zip;
 
@@ -232,6 +232,10 @@ class EPub {
 			$this->opf_spine .= "\t\t<itemref idref=\"chapter" . $this->chapterCount . "\" />\n";
 			$this->ncx_navmap .= "\n\t\t<navPoint id=\"chapter" . $this->chapterCount . "\" playOrder=\"" . $this->chapterCount . "\">\n\t\t\t<navLabel><text>" . $chapterName . "</text></navLabel>\n\t\t\t<content src=\"" . $fileName . "\" />\n\t\t</navPoint>\n";
 		} else if (is_array($chapter)) {
+			$fileNameParts = pathinfo($fileName);
+			$extension = $fileNameParts['extension'];
+			$name = $fileNameParts['filename'];
+			
 			$partCount = 0;
 			$this->chapterCount++;
 
@@ -243,16 +247,17 @@ class EPub {
 					$this->processChapterExternalReferences($c, $externalReferences, $baseDir);
 				}
 				$partCount++;
-				$this->zip->addFile($c, $fileName . "-" . $partCount);
-				$this->fileList[$fileName . "-" . $partCount] = $fileName . "-" . $partCount;
+				$partName = $partName = $name . "-" . $partCount . "." . $extension;;
+				$this->zip->addFile($c, $partName);
+				$this->fileList[$partName] = $partName;
 
-				$this->opf_manifest .= "\t\t<item id=\"chapter" . $this->chapterCount . "-" . $partCount . "\" href=\"" . $fileName  . "-" . $partCount . "\" media-type=\"application/xhtml+xml\" />\n";
+				$this->opf_manifest .= "\t\t<item id=\"chapter" . $this->chapterCount . "-" . $partCount . "\" href=\"" . $partName . "\" media-type=\"application/xhtml+xml\" />\n";
 
 				$this->opf_spine .= "\t\t<itemref idref=\"chapter" . $this->chapterCount . "-" . $partCount . "\" />\n";
 				$oneChapter = each($chapter);
 			}
 
-			$this->ncx_navmap .= "\n\t\t<navPoint id=\"chapter" . $this->chapterCount . "-1\" playOrder=\"" . $this->chapterCount . "\">\n\t\t\t<navLabel><text>" . $chapterName . "</text></navLabel>\n\t\t\t<content src=\"" . $fileName . "-1\" />\n\t\t</navPoint>\n";
+			$this->ncx_navmap .= "\n\t\t<navPoint id=\"chapter" . $this->chapterCount . "-1\" playOrder=\"" . $this->chapterCount . "\">\n\t\t\t<navLabel><text>" . $chapterName . "</text></navLabel>\n\t\t\t<content src=\"" . $name . "-1." . $extension . "\" />\n\t\t</navPoint>\n";
 		}
 		return TRUE;
 	}

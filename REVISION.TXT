@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 2.06 - 2011-06-06
+* Changed: Adding chapters using an array of chapter parts now adds the part counter to the filename before the extension.
+---------------------------------------------------------------------
 Rev. 2.05 - 2011-06-03
 * Updated: Zip to version 1.33, fixing a problem with empty sub directories
 

@@ -126,14 +126,15 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
 	. $bookEnd;
 logLine("Build Chapters");
 
-$book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1);
 logLine("Add Chapter 1");
-$book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $chapter2);
+$book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1);
 logLine("Add Chapter 2");
-$book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
+$book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $chapter2);
 logLine("Add Chapter 3");
+$book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
 
 // Autosplit a chapter:
+logLine("Add Chapter 4");
 $book->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
 $book->addChapter("Chapter 4: Vivamus bibendum massa split", "Chapter004.html", $chapter4, true);
 logLine("Add Chapter 5");
