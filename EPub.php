@@ -11,13 +11,13 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.06
+ * @version 2.07
  * @link http://www.phpclasses.org/package/6115 
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.35; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.06;
+	const VERSION = 2.07;
 	const REQ_ZIP_VERSION = 1.35;
 
 	const IDENTIFIER_UUID = 'UUID';
@@ -1205,8 +1205,16 @@ class EPub {
 
 		$this->ncx .= "\t<navMap>\n" . $this->ncx_navmap . "\t</navMap>\n</ncx>\n";
 
-		$this->zip->addFile($this->opf, "book.opf");
-		$this->zip->addFile($this->ncx, "book.ncx");
+		if (mb_detect_encoding($this->opf, 'UTF-8', true) === "UTF-8") {
+			$this->zip->addFile($this->opf, "book.opf");
+		} else {
+			$this->zip->addFile(mb_convert_encoding($this->opf, "UTF-8"), "book.opf");
+		}
+		if (mb_detect_encoding($this->ncx, 'UTF-8', true) === "UTF-8") {
+			$this->zip->addFile($this->ncx, "book.ncx");
+		} else {
+			$this->zip->addFile(mb_convert_encoding($this->ncx, "UTF-8"), "book.ncx");
+		}
 		$this->opf = "";
 		$this->ncx = "";
 
