@@ -1,4 +1,17 @@
 ---------------------------------------------------------------------
+Rev. 2.07 - 2012-08-12
+* Fixed: Github issue #5: I can't encode chinese
+---------------------------------------------------------------------
+Rev. 2.06 - 2011-06-06
+* Changed: Adding chapters using an array of chapter parts now adds the part counter to the filename before the extension.
+---------------------------------------------------------------------
+Rev. 2.05 - 2011-06-03
+* Updated: Zip to version 1.33, fixing a problem with empty sub directories
+
+* Fixed: Problem where EPUBChecker would report a problem with the mimetype file having extra field data.
+
+* Fixed: typo in a few variables, thanks to riconeitzel.
+---------------------------------------------------------------------
 Rev. 2.04 - 2011-03-13
 * Fixed: The relPath function in previous versions had a bug where paths with elements containing non alphanumeric characters were not handled correctly. Function has now been rewritten and moved to the Zip class.
 

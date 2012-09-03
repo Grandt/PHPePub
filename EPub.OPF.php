@@ -1,13 +1,11 @@
 <?php
 /**
- * Enter description here ...
+ * ePub OPF file structure
  *
- * @author Grandt
- * @copyright Grandt 2011
+ * @author A. Grandt <php@grandt.com>
+ * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @version 1.00
- * @link
- * @uses
  */
 class Opf {
 	const VERSION = 1.00;
@@ -210,14 +208,7 @@ class Opf {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF Metadata structures
  */
 class Metadata {
 	const VERSION = 1.00;
@@ -294,14 +285,7 @@ class Metadata {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF Dublin Core (dc:) Metadata structures
  */
 class DublinCore {
 	const VERSION = 1.00;
@@ -422,14 +406,7 @@ class DublinCore {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF Manifest structure
  */
 class Manifest {
 	const VERSION = 1.00;
@@ -481,14 +458,7 @@ class Manifest {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF Item structure
  */
 class Item {
 	const VERSION = 1.00;
@@ -617,14 +587,7 @@ class Item {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF Spine structure
  */
 class Spine {
 	const VERSION = 1.00;
@@ -688,14 +651,7 @@ class Spine {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF ItemRef structure
  */
 class Itemref {
 	const VERSION = 1.00;
@@ -758,14 +714,7 @@ class Itemref {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * ePub OPF Guide structure
  */
 class Guide {
 	const VERSION = 1.00;
@@ -830,14 +779,7 @@ class Guide {
 }
 
 /**
- * Enter description here ...
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
+ * Reference constants
  */
 class Reference {
 	const VERSION = 1.00;
@@ -961,13 +903,6 @@ class Reference {
 /**
  * Common Marc codes.
  * Ref: http://www.loc.gov/marc/relators/
- *
- * @author Grandt
- * @copyright Grandt 2011
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
- * @link
- * @uses
  */
 class MarcCode {
 	const VERSION = 1.00;
