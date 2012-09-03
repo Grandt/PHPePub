@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 2.08 - 2012-09-03
+* Fixed: PHPClasses Issue "Undefined index": Missing a check on the presence of a server variable.
+---------------------------------------------------------------------
 Rev. 2.07 - 2012-08-12
 * Fixed: Github issue #5: I can't encode chinese
 ---------------------------------------------------------------------
