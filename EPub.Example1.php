@@ -32,6 +32,11 @@ logLine("include EPub");
 
 $book = new EPub();
 logLine("new EPub()");
+logLine("EPub version: " . EPub::VERSION);
+logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
+logLine("Zip version: " . Zip::VERSION);
+logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
+logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("Test book");

@@ -11,13 +11,13 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.07
+ * @version 2.08
  * @link http://www.phpclasses.org/package/6115 
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.35; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.07;
+	const VERSION = 2.08;
 	const REQ_ZIP_VERSION = 1.35;
 
 	const IDENTIFIER_UUID = 'UUID';
@@ -1339,7 +1339,7 @@ class EPub {
 	 */
 	function getCurrentPageURL() {
 		$pageURL = 'http';
-		if ($_SERVER["HTTPS"] == "on") {
+		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
 			$pageURL .= "s";
 		}
 		$pageURL .= "://" . $_SERVER["SERVER_NAME"];
@@ -1358,7 +1358,7 @@ class EPub {
 	 */
 	function getCurrentServerURL() {
 		$serverURL = 'http';
-		if ($_SERVER["HTTPS"] == "on") {
+		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
 			$serverURL .= "s";
 		}
 		$serverURL .= "://" . $_SERVER["SERVER_NAME"];
