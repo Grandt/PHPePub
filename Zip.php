@@ -9,14 +9,14 @@
  * License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2012 A. Grandt
+ * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @link http://www.phpclasses.org/package/6110
  * @link https://github.com/Grandt/PHPZip
- * @version 1.35
+ * @version 1.37
  */
 class Zip {
-	const VERSION = 1.35;
+	const VERSION = 1.37;
 
 	const ZIP_LOCAL_FILE_HEADER = "\x50\x4b\x03\x04"; // Local file header signature
 	const ZIP_CENTRAL_FILE_HEADER = "\x50\x4b\x01\x02"; // Central file header signature
@@ -377,16 +377,17 @@ class Zip {
 		fseek($file_handle, 34);
 		$pos = 34;
 
-		while (!feof($file_handle)) {
-			$data = fread($file_handle, $this->streamChunkSize);
-			$datalen = strlen($data);
-			if ($datalen+$pos > $eof) {
+		while (!feof($file_handle) && $pos < $eof) {
+			$datalen = $this->streamChunkSize;
+			if ($pos + $this->streamChunkSize > $eof) {
 				$datalen = $eof-$pos;
-				$data = substr($data, 0, $datalen);
 			}
+			$data = fread($file_handle, $datalen);
 			$pos += $datalen;
 
 			$this->zipwrite($data);
+			
+			flush();
 		}
 
 		fclose($file_handle);
@@ -567,26 +568,32 @@ class Zip {
 
 		$ux = "\x75\x78\x0B\x00\x01\x04\xE8\x03\x00\x00\x04\x00\x00\x00\x00";
 
+		$isFileUTF8 = mb_check_encoding($filePath, "UTF-8") && !mb_check_encoding($filePath, "ASCII");
+		$isCommentUTF8 = !empty($fileComment) && mb_check_encoding($fileComment, "UTF-8") && !mb_check_encoding($fileComment, "ASCII");
+		if ($isFileUTF8 || $isCommentUTF8) {
+			$gpFlagsV = unpack("v", $gpFlags);
+			$gpFlags = pack("v", $gpFlagsV[0] | (1 << 11));
+		}
+		
 		$header = $gpFlags . $gzType . $dosTime. $fileCRC32
 		. pack("VVv", $gzLength, $dataLength, strlen($filePath)); // File name length
 
 		$zipEntry  = self::ZIP_LOCAL_FILE_HEADER;
 		$zipEntry .= self::ATTR_VERSION_TO_EXTRACT;
 		$zipEntry .= $header;
-		$zipEntry .= $this->addExtraField ? "\x1C\x00" : "\x00\x00"; // Extra field length
+		$zipEntry .= pack("v", ($this->addExtraField ? 28 : 0)); // Extra field length
 		$zipEntry .= $filePath; // FileName
 		// Extra fields
 		if ($this->addExtraField) {
 			$zipEntry .= "\x55\x54\x09\x00\x03" . $tsPack . $tsPack . $ux;
 		}
-
 		$this->zipwrite($zipEntry);
 
 		$cdEntry  = self::ZIP_CENTRAL_FILE_HEADER;
 		$cdEntry .= self::ATTR_MADE_BY_VERSION;
 		$cdEntry .= ($dataLength === 0 ? "\x0A\x00" : self::ATTR_VERSION_TO_EXTRACT);
 		$cdEntry .= $header;
-		$cdEntry .= $this->addExtraField ? "\x18\x00" : "\x00\x00"; // Extra field length
+		$cdEntry .= pack("v", ($this->addExtraField ? 24 : 0)); // Extra field length
 		$cdEntry .= pack("v", $fileCommentLength); // File comment length
 		$cdEntry .= "\x00\x00"; // Disk number start
 		$cdEntry .= "\x00\x00"; // internal file attributes
@@ -597,7 +604,6 @@ class Zip {
 		if ($this->addExtraField) {
 			$cdEntry .= "\x55\x54\x05\x00\x03" . $tsPack . $ux;
 		}
-
 		if (!empty($fileComment)) {
 			$cdEntry .= $fileComment; // Comment
 		}

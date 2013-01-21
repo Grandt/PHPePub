@@ -42,4 +42,5 @@ Icon?
 Thumbs.db
 
 .DS_Store
-/nbproject/private/
+nbproject/private/
+nbproject
