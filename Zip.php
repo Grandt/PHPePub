@@ -568,11 +568,19 @@ class Zip {
 
 		$ux = "\x75\x78\x0B\x00\x01\x04\xE8\x03\x00\x00\x04\x00\x00\x00\x00";
 
+		if (!isset($gpFlags) || strlen($gpFlags) != 2) {
+			$gpFlags = "\x00\x00";
+		}
+
 		$isFileUTF8 = mb_check_encoding($filePath, "UTF-8") && !mb_check_encoding($filePath, "ASCII");
 		$isCommentUTF8 = !empty($fileComment) && mb_check_encoding($fileComment, "UTF-8") && !mb_check_encoding($fileComment, "ASCII");
 		if ($isFileUTF8 || $isCommentUTF8) {
-			$gpFlagsV = unpack("v", $gpFlags);
-			$gpFlags = pack("v", $gpFlagsV[0] | (1 << 11));
+			$flag = 0;
+			$gpFlagsV = unpack("vflags", $gpFlags);
+			if (isset($gpFlagsV['flags'])) {
+				$flag = $gpFlagsV['flags'];
+			}
+			$gpFlags = pack("v", $flag | (1 << 11));
 		}
 		
 		$header = $gpFlags . $gzType . $dosTime. $fileCRC32
