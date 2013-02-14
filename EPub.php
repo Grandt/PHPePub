@@ -77,6 +77,9 @@ class EPub {
 	private $EPubMark = TRUE;
 	private $generator = "";
 
+    private $contentHeader = "";
+    private $contentFooter = "";
+
 	/**
 	 * Class constructor.
 	 *
@@ -106,6 +109,20 @@ class EPub {
 		$this->chapterCount = 0;
 
 		$this->isGdInstalled = extension_loaded('gd') && function_exists('gd_info');
+
+        // introduced variable {{BOOKTITLE}} for str_replace the BookTitle in all head sections
+        $this->contentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+            . "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+            . "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+            . "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+            . "<head>"
+            . "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
+            . "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
+            . "<title>{{BOOKTITLE}}</title>\n"
+            . "</head>\n"
+            . "<body>\n";
+
+        $this->contentFooter = "</body>\n</html>\n";
 	}
 
 	/**
@@ -210,7 +227,8 @@ class EPub {
 		$htmlDir = pathinfo($fileName);
 		$htmlDir = preg_replace('#^[/\.]+#i', "", $htmlDir["dirname"] . "/");
 
-		$chapter = $chapterData;
+        // Add Header and Footer to Chapter HTML Data
+		$chapter = $this->wrapChapter($chapterData);
 		if ($autoSplit && is_string($chapterData) && mb_strlen($chapterData) > $this->splitDefaultSize) {
 			$splitter = new EPubChapterSplitter();
 
@@ -261,6 +279,16 @@ class EPub {
 		}
 		return TRUE;
 	}
+
+    /**
+     * Wrap ChapterContent with Head and Footer
+     *
+     * @param $content
+     * @return string $content
+     */
+    private function wrapChapter($content) {
+        return $this->contentHeader . "\n" . $content . "\n" . $this->contentFooter;
+    }
 
 	/**
 	 * Process external references from a HTML to the book. The chapter itself is not stored.
@@ -629,6 +657,10 @@ class EPub {
 			return FALSE;
 		}
 		$this->title = $title;
+
+        // Set Booktitle as Title Tag in all xHTML Documents
+        $this->contentHeader = str_replace("{{BOOKTITLE}}", $title, $this->contentHeader);
+
 		return TRUE;
 	}
 
