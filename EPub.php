@@ -448,7 +448,7 @@ class EPub {
 					$internalSrc = substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($baseDir) + 1);
 				}
 
-				@$sourceData = file_get_contents($source);
+				@$sourceData = getFileContents($source);
 			} else if (strpos($source, "/") === 0) {
 				@$sourceData = file_get_contents($this->docRoot . $source);
 			} else {
@@ -1390,27 +1390,12 @@ class EPub {
 	 * $return array
 	 */
 	function getImage($source) {
-		$image = FALSE;
 		$width = -1;
 		$height = -1;
 		$mime = "application/octet-stream";
 		$type = null;
 		
-		if ($this->isCurlInstalled) {
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $source);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$res = curl_exec($ch);
-			$info = curl_getinfo($ch);
-			curl_close($ch);
-
-			if ($info['http_code'] == 200 && $res != false) {
-				$image = $res;
-			}
-		}
-		if ($image === FALSE && $this->isFileGetContentsExtInstalled) {
-			@$image = file_get_contents($source);
-		}
+		$image = $this->getFileContents($source);
 
 		if ($image !== FALSE && strlen($image) > 0) {
 			$imageFile = imagecreatefromstring($image);
@@ -1464,6 +1449,36 @@ class EPub {
 		return $rv;
 	}
 
+	/**
+	 * Get file contents, using curl if available, else file_get_contents
+	 * 
+	 * @param type $source
+	 * @return boolean 
+	 */
+	function getFileContents($source) {
+		$isExternal = preg_match('#^(http|ftp)s?://#i', $source) == 1;
+		
+		if ($isExternal && $this->isCurlInstalled) {
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $source);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$res = curl_exec($ch);
+			$info = curl_getinfo($ch);
+			curl_close($ch);
+
+			if ($info['http_code'] == 200 && $res != false) {
+				return $res;
+			}
+		}
+
+		if ($this->isFileGetContentsInstalled && (!$isExternal || $this->isFileGetContentsExtInstalled)) {
+			@$data = file_get_contents($source);
+			return $data;
+		}
+
+		return FALSE;
+	}
+	
 	/**
 	* get mime type from image data
 	* 
