@@ -11,14 +11,14 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.08
+ * @version 2.09
  * @link http://www.phpclasses.org/package/6115 
  * @link https://github.com/Grandt/PHPePub
- * @uses Zip.php version 1.35; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
+ * @uses Zip.php version 1.37; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.08;
-	const REQ_ZIP_VERSION = 1.35;
+	const VERSION = 2.09;
+	const REQ_ZIP_VERSION = 1.37;
 
 	const IDENTIFIER_UUID = 'UUID';
 	const IDENTIFIER_URI = 'URI';
@@ -71,7 +71,12 @@ class EPub {
 	private $dateformatShort = 'Y-m-d'; // short date format to placate ePubChecker.
 	private $headerDateFormat = "D, d M Y H:i:s T";
 
+	protected $isCurlInstalled;
 	protected $isGdInstalled;
+	protected $isExifInstalled;
+	protected $isFileGetContentsInstalled;
+	protected $isFileGetContentsExtInstalled;
+	
 	private $docRoot = NULL;
 	
 	private $EPubMark = TRUE;
@@ -105,7 +110,11 @@ class EPub {
 		$this->opf_manifest = "\t\t<item id=\"ncx\" href=\"book.ncx\" media-type=\"application/x-dtbncx+xml\" />\n";
 		$this->chapterCount = 0;
 
+		$this->isCurlInstalled = extension_loaded('curl') && function_exists('curl_version');
 		$this->isGdInstalled = extension_loaded('gd') && function_exists('gd_info');
+		$this->isExifInstalled = extension_loaded('exif') && function_exists('exif_imagetype');
+		$this->isFileGetContentsInstalled = function_exists('file_get_contents');
+		$this->isFileGetContentsExtInstalled = $isFileGetContentsInstalled && ini_get('allow_url_fopen');
 	}
 
 	/**
@@ -497,8 +506,8 @@ class EPub {
 			} else {
 				$source = $img->attributes->getNamedItem("src")->nodeValue;
 
-				$pathData = pathinfo($source);
-				$internalSrc = $pathData['basename'];
+				$parsedSource = parse_url($source);
+				$internalSrc = $this->sanitizeFileName(urldecode(pathinfo($parsedSource['path'], PATHINFO_BASENAME)));
 				$internalPath = "";
 				$isSourceExternal = FALSE;
 
@@ -541,7 +550,7 @@ class EPub {
 			$urlinfo = parse_url($source);
 
 			if (strpos($urlinfo['path'], $baseDir."/") !== FALSE) {
-				$internalSrc = substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($baseDir) + 1);
+				$internalSrc = $this->sanitizeFileName(urldecode(substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($baseDir) + 1)));
 			}
 			$internalPath = $urlinfo["scheme"] . "/" . $urlinfo["host"] . "/" . pathinfo($urlinfo["path"], PATHINFO_DIRNAME);
 			$isSourceExternal = TRUE;
@@ -1242,7 +1251,7 @@ class EPub {
      * @return mixed|string
      */
     private function sanitizeFileName($fileName) {
-        $forbidden_character = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}");
+        $forbidden_character = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%");
         $fileName = str_replace($forbidden_character, '', $fileName);
         $fileName = preg_replace('/[\s-]+/', '-', $fileName);
         $fileName = trim($fileName, '.-_');
@@ -1381,17 +1390,49 @@ class EPub {
 	 * $return array
 	 */
 	function getImage($source) {
-		list($width, $height, $type, $attr) = getimagesize($source);
-		$mime = image_type_to_mime_type($type);
+		$image = FALSE;
+		$width = -1;
+		$height = -1;
+		$mime = "application/octet-stream";
+		$type = null;
+		
+		if ($this->isCurlInstalled) {
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $source);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$res = curl_exec($ch);
+			$info = curl_getinfo($ch);
+			curl_close($ch);
 
-		if ($width == 0 || $height == 0) {
+			if ($info['http_code'] == 200 && $res != false) {
+				$image = $res;
+			}
+		}
+		if ($image === FALSE && $this->isFileGetContentsExtInstalled) {
+			@$image = file_get_contents($source);
+		}
+
+		if ($image !== FALSE && strlen($image) > 0) {
+			$imageFile = imagecreatefromstring($image);
+			if ($imageFile !== false) {
+				$width = ImageSX($imageFile);
+				$height = ImageSY($imageFile);
+			}	
+			if ($this->isExifInstalled) {
+				$type = exif_imagetype($source);
+				$mime = image_type_to_mime_type($type);
+			}
+			if ($type === FALSE) {
+				$mime = $this->image_file_type_from_binary($image);
+			}
+		} else {
 			return FALSE;
 		}
 
-		@$image = file_get_contents($source);
-		if ($image === FALSE) {
+		if ($width <= 0 || $height <= 0) {
 			return FALSE;
 		}
+
 		$ratio = 1;
 
 		if ($this->isGdInstalled) {
@@ -1421,6 +1462,32 @@ class EPub {
 		$rv['image'] = $image;
 
 		return $rv;
+	}
+
+	/**
+	* get mime type from image data
+	* 
+	* By fireweasel found on http://stackoverflow.com/questions/2207095/get-image-mimetype-from-resource-in-php-gd
+	* @staticvar array $type
+	* @param type $binary
+	* @return string 
+	*/
+	function image_file_type_from_binary($binary) {
+		$hits = 0;
+		if (!preg_match(
+				'/\A(?:(\xff\xd8\xff)|(GIF8[79]a)|(\x89PNG\x0d\x0a)|(BM)|(\x49\x49(?:\x2a\x00|\x00\x4a))|(FORM.{4}ILBM))/',
+				$binary, $hits)) {
+			return 'application/octet-stream';
+		}
+		static $type = array (
+			1 => 'image/jpeg',
+			2 => 'image/gif',
+			3 => 'image/png',
+			4 => 'image/x-windows-bmp',
+			5 => 'image/tiff',
+			6 => 'image/x-ilbm',
+		);
+		return $type[count($hits) - 1];
 	}
 
 	/**

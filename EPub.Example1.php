@@ -132,7 +132,7 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
 logLine("Build Chapters");
 
 logLine("Add Chapter 1");
-$book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1);
+$book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1, true, EPub::EXTERNAL_REF_ADD);
 logLine("Add Chapter 2");
 $book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $chapter2);
 logLine("Add Chapter 3");
@@ -239,7 +239,11 @@ function logLine($line) {
 	$tS = $tStart['sec'] + (((int)($tStart['usec']/100))/10000);
 	$tL = $tLast['sec'] + (((int)($tLast['usec']/100))/10000);
 	$tT = $tTemp['sec'] + (((int)($tTemp['usec']/100))/10000);
-	$log .= sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $line;
+	$logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $line;
+	$log .= $logline;
 	$tLast = $tTemp;
+
+	// For debugging
+	// echo $logline;
 }
 ?>

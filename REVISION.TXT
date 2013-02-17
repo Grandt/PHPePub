@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------
+Rev. 2.09 - 2013-02-17
+* Fixed: Github issue #9 Corrupt ePub file generated when image url's contains extra parameters
+* Fixed: Unable to load external images on some PHP installations due to restrictions on file_get_contents (PHP_INI: "allow_url_fopen" = false)
+* Fixed: determining image mime type not working when external files could not be opened (see above restriction)
+---------------------------------------------------------------------
 Rev. 2.08 - 2012-09-03
 * Fixed: PHPClasses Issue "Undefined index": Missing a check on the presence of a server variable.
 ---------------------------------------------------------------------
