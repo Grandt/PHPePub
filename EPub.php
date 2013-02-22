@@ -11,13 +11,13 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2012 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.09
+ * @version 2.10
  * @link http://www.phpclasses.org/package/6115 
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.37; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.09;
+	const VERSION = 2.10;
 	const REQ_ZIP_VERSION = 1.37;
 
 	const IDENTIFIER_UUID = 'UUID';
@@ -114,7 +114,7 @@ class EPub {
 		$this->isGdInstalled = extension_loaded('gd') && function_exists('gd_info');
 		$this->isExifInstalled = extension_loaded('exif') && function_exists('exif_imagetype');
 		$this->isFileGetContentsInstalled = function_exists('file_get_contents');
-		$this->isFileGetContentsExtInstalled = $isFileGetContentsInstalled && ini_get('allow_url_fopen');
+		$this->isFileGetContentsExtInstalled = $this->isFileGetContentsInstalled && ini_get('allow_url_fopen');
 	}
 
 	/**

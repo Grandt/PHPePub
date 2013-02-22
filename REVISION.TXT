@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 2.10 - 2013-02-23
+* Fixed: Undefined variable: isFileGetContentsInstalled
+---------------------------------------------------------------------
 Rev. 2.09 - 2013-02-17
 * Fixed: Github issue #9 Corrupt ePub file generated when image url's contains extra parameters
 * Fixed: Unable to load external images on some PHP installations due to restrictions on file_get_contents (PHP_INI: "allow_url_fopen" = false)
