@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 2.11 - 2013-02-24
+* Fixed: image mimetype detection failed if EXIF was not installed on the PHP server.
+---------------------------------------------------------------------
 Rev. 2.10 - 2013-02-23
 * Fixed: Undefined variable: isFileGetContentsInstalled
 ---------------------------------------------------------------------

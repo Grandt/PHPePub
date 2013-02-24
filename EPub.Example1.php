@@ -1,7 +1,7 @@
 <?php
+error_reporting(E_ALL | E_STRICT);
 // Example. 
 // Create a test book for download.
-error_reporting(E_ALL | E_STRICT);
 // ePub uses XHTML 1.1, preferably strict.
 $content_start =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -22,7 +22,7 @@ date_default_timezone_set('Europe/Berlin');
 
 $tStart = gettimeofday();
 $tLast = $tStart;
-$log = $content_start . "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
+$log = "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
 logLine("Start");
 
 $fileDir = './PHPePub';
@@ -204,8 +204,12 @@ logLine("Add Chapter 5");
 $book->addChapter("Chapter 7: Local Image test", "Chapter007.html", $chapter2, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 logLine("add chapter 7");
 
-$log .= "\n</pre>" . $bookEnd;
-$book->addChapter("Log", "Log.html", $log);
+$book->addChapter("Log", "Log.html", $content_start . $log . "\n</pre>" . $bookEnd);
+
+if ($book->isLogging) { // Only used in case we need to debug EPub.php.
+	$epuplog = $book->getLog();
+	$book->addChapter("ePubLog", "ePubLog.html", $content_start . $epuplog . "\n</pre>" . $bookEnd);
+}
 
 $book->finalize(); // Finalize the book, and build the archive.
 

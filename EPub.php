@@ -9,15 +9,15 @@
  * Thanks to: Adam Schmalhofer and Kirstyn Fox for invaluable input and for "nudging" me in the right direction :)
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2012 A. Grandt
+ * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 2.10
+ * @version 2.11
  * @link http://www.phpclasses.org/package/6115 
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.37; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip 
  */
 class EPub {
-	const VERSION = 2.10;
+	const VERSION = 2.11;
 	const REQ_ZIP_VERSION = 1.37;
 
 	const IDENTIFIER_UUID = 'UUID';
@@ -82,6 +82,12 @@ class EPub {
 	private $EPubMark = TRUE;
 	private $generator = "";
 
+	private $log = "";
+	private $tStart;
+	private $tLast;
+	
+	public $isLogging = FALSE;
+
 	/**
 	 * Class constructor.
 	 *
@@ -89,7 +95,18 @@ class EPub {
 	 */
 	function __construct() {
 		include_once "Zip.php";
- 
+
+		/* Prepare Logging. Just in case it's used. later */
+		if ($this->isLogging) {
+			$this->tStart = gettimeofday();
+			$this->tLast = $this->tStart;
+			$this->log = "<h1>Log:</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $this->tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
+			$this->logLine("Start");
+			$this->logLine("EPub version..........: " . self::VERSION);
+			$this->logLine("EPub req. Zip version.: " . self::REQ_ZIP_VERSION);
+			$this->logLine("Zip version...........: " . Zip::VERSION);
+		}
+
 		if (!defined("Zip::VERSION") || Zip::VERSION < self::REQ_ZIP_VERSION) {
 			die("<p>EPub requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher.<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
 		}
@@ -115,6 +132,14 @@ class EPub {
 		$this->isExifInstalled = extension_loaded('exif') && function_exists('exif_imagetype');
 		$this->isFileGetContentsInstalled = function_exists('file_get_contents');
 		$this->isFileGetContentsExtInstalled = $this->isFileGetContentsInstalled && ini_get('allow_url_fopen');
+
+		if ($this->isLogging) {
+			$this->logLine("isCurlInstalled...............: " . ($this->isCurlInstalled ? "Yes" : "No"));
+			$this->logLine("isGdInstalled.................: " . ($this->isGdInstalled ? "Yes" : "No"));
+			$this->logLine("isExifInstalled...............: " . ($this->isExifInstalled ? "Yes" : "No"));
+			$this->logLine("isFileGetContentsInstalled....: " . ($this->isFileGetContentsInstalled ? "Yes" : "No"));
+			$this->logLine("isFileGetContentsExtInstalled.: " . ($this->isFileGetContentsExtInstalled ? "Yes" : "No"));
+		}
 	}
 
 	/**
@@ -1393,7 +1418,7 @@ class EPub {
 		$width = -1;
 		$height = -1;
 		$mime = "application/octet-stream";
-		$type = null;
+		$type = FALSE;
 		
 		$image = $this->getFileContents($source);
 
@@ -1407,8 +1432,11 @@ class EPub {
 				$type = exif_imagetype($source);
 				$mime = image_type_to_mime_type($type);
 			}
-			if ($type === FALSE) {
+			if ($mime === "application/octet-stream") {
 				$mime = $this->image_file_type_from_binary($image);
+			}
+			if ($mime === "application/octet-stream") {
+				$mime = $this->getMimeTypeFromUrl($source);
 			}
 		} else {
 			return FALSE;
@@ -1457,7 +1485,7 @@ class EPub {
 	 */
 	function getFileContents($source) {
 		$isExternal = preg_match('#^(http|ftp)s?://#i', $source) == 1;
-		
+
 		if ($isExternal && $this->isCurlInstalled) {
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $source);
@@ -1475,7 +1503,6 @@ class EPub {
 			@$data = file_get_contents($source);
 			return $data;
 		}
-
 		return FALSE;
 	}
 	
@@ -1503,6 +1530,44 @@ class EPub {
 			6 => 'image/x-ilbm',
 		);
 		return $type[count($hits) - 1];
+	}
+
+	function getMimeTypeFromUrl($source) {
+		$ext = FALSE;
+
+		$srev = strrev($source);
+		$pos = strpos($srev, "?");
+		if ($pos !== FALSE) {
+			$srev = substr($srev, $pos+1);
+		}
+
+		$pos = strpos($srev, ".");
+		if ($pos !== FALSE) {
+			$ext = strtolower(strrev(substr($srev, 0, $pos)));
+		}
+
+		if ($ext !== FALSE) {
+			switch ($ext) {
+				case "jpg":
+				case "jpe":
+				case "jpeg":
+					return 'image/jpeg';
+				case "gif":
+					return 'image/gif';
+				case "png":
+					return 'image/png';
+				case "bmp":
+					return 'image/x-windows-bmp';
+				case "tif":
+				case "tiff":
+				case "cpt":
+					return 'image/tiff';
+				case "lbm":
+				case "ilbm":
+					return 'image/x-ilbm';
+			}
+		}
+		return "application/octet-stream";
 	}
 
 	/**
@@ -1565,6 +1630,22 @@ class EPub {
 	 */
 	function getSplitSize() {
 		return $this->splitDefaultSize;
+	}
+	
+	function logLine($line) {
+		if ($this->isLogging) {
+			$tTemp = gettimeofday();
+			$tS = $this->tStart['sec'] + (((int)($this->tStart['usec']/100))/10000);
+			$tL = $this->tLast['sec'] + (((int)($this->tLast['usec']/100))/10000);
+			$tT = $tTemp['sec'] + (((int)($tTemp['usec']/100))/10000);
+
+			$this->log .= sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $line;
+			$this->tLast = $tTemp;
+		}
+	}
+	
+	function getLog() {
+		return $this->log;
 	}
 }
 ?>
