@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 2.12 - 2013-03-10
+* Fixed: Decoding of html entities if added to the book metadata. Requires added file EPub.HtmlEntities.php
+---------------------------------------------------------------------
 Rev. 2.11 - 2013-02-24
 * Fixed: image mimetype detection failed if EXIF was not installed on the PHP server.
 ---------------------------------------------------------------------

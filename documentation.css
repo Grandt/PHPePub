@@ -4,17 +4,17 @@ body
   font:normal 12px/17px Helvetica,Arial,sans-serif;
   color:#2f2f2f;
   padding:0 2em 2em 2em;
-  margin:0;}	
+  margin:0;}    
 a,a:visited
  {font-weight:bold;
   text-decoration:none;
   color:#0072bc;}
 a:hover
- {text-decoration:underline;}	
+ {text-decoration:underline;}    
 a:visited
  {color:#662d91;}
 h1,h2,h3,h4,h5,h6
- {margin:0 0 1em 0;}	
+ {margin:0 0 1em 0;}    
 h1
  {font-size:2em;
   font-weight:bold;
@@ -72,7 +72,7 @@ div[id]
 #contents>ol>li
  {padding:1ex 1ex 0 1ex;}
 #contents>ol>li li
- {padding:1ex 1ex 0 1ex;} 
+ {padding:1ex 1ex 0 1ex;}
 
 #contents>ol ol li
  {border-left:1.25em solid gray;}
@@ -106,7 +106,6 @@ p.samp,pre,h3+div dl,table th
 body>div pre
  {background-color:white;}
 
-
 dt
  {background-color:white;
   font-weight:bold;}
@@ -126,7 +125,6 @@ table caption,table th
 table th
  {font-size:1em;}
 
-
 dl dt,dl dd
  {padding:0.5em;
   border-top:1px solid gray;}
@@ -141,4 +139,3 @@ dd ul
 pre
  {overflow:auto;}
 
- 
