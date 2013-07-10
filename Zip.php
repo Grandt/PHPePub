@@ -10,7 +10,7 @@
  *
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6110
  * @link https://github.com/Grandt/PHPZip
  * @version 1.38

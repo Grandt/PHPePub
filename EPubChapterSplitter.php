@@ -6,7 +6,7 @@
  *
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2012 A. Grandt
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
  * @version 2.02
