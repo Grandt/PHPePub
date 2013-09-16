@@ -80,7 +80,7 @@ class Logger {
             $this->tLast = $tTemp;
 			
 		    if ($this->isDebugging) {
-				echo "<pre>" . $logline . "</pre>\n";
+				echo "<pre>" . $logline . "\n</pre>\n";
 			}
         }
     }
