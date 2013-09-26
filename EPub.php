@@ -11,14 +11,14 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL 2.1
- * @version 2.12
+ * @version 2.13
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.38; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION = 2.12;
-    const REQ_ZIP_VERSION = 1.38;
+    const VERSION = 2.13;
+    const REQ_ZIP_VERSION = 1.40;
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI = 'URI';
@@ -1280,7 +1280,7 @@ class EPub {
      * @param $fileName
      * @return mixed|string
      */
-    private function sanitizeFileName($fileName) {
+    function sanitizeFileName($fileName) {
         $forbidden_character = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%");
         $fileName = str_replace($forbidden_character, '', $fileName);
         $fileName = preg_replace('/[\s-]+/', '-', $fileName);
@@ -1293,7 +1293,7 @@ class EPub {
      *
      * @param $fileName
      * @param $baseDir If empty baseDir is absolute to server path, if omitted it's relative to script path
-     * @return bool
+     * @return The sent file name if successfull, FALSE if it failed.
      */
     function saveBook($fileName, $baseDir = '.') {
 
@@ -1305,15 +1305,19 @@ class EPub {
             $this->finalize();
         }
 
+		if (stripos(strrev($fileName), "bupe.") !== 0) {
+            $fileName .= ".epub";
+        }
+
         // Try to open file access
-        $fh = fopen($baseDir.'/'.$fileName . '.epub', "w");
+        $fh = fopen($baseDir.'/'.$fileName, "w");
 
         if($fh) {
             fputs($fh, $this->getBook());
             fclose($fh);
 
             // if file is written return TRUE
-            return TRUE;
+            return $fileName;
         }
 
         // return FALSE by default
@@ -1341,7 +1345,7 @@ class EPub {
      *  buffer is not empty.
      *
      * @param String $fileName The name of the book without the .epub at the end.
-     * @return bool $success
+     * @return The sent file name if successfull, FALSE if it failed.
      */
     function sendBook($fileName) {
         if (!$this->isFinalized) {
@@ -1352,7 +1356,10 @@ class EPub {
             $fileName .= ".epub";
         }
 
-        return $this->zip->sendZip($fileName, "application/epub+zip");
+		if (TRUE === $this->zip->sendZip($fileName, "application/epub+zip")) {
+			return $fileName;
+		}
+        return FALSE;
     }
 
     /**

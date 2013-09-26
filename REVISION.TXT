@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------
+Rev. 2.13 - 2013-09-26
+* Fixed: sendBook and saveBook returned boolean TRUE/FALSE depending on if the sending was successful. The sanitized/used filename was never exposed. The methods now return the filename used for sending, or FALSE if it failed.
+* Change: sanitizeFileName is now a public function.
+---------------------------------------------------------------------
 Rev. 2.12 - 2013-03-10
 * Fixed: Decoding of html entities if added to the book metadata. Requires added file EPub.HtmlEntities.php
 ---------------------------------------------------------------------
