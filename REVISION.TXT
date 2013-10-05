@@ -9,6 +9,10 @@ Rev. 2.53 - 2013-10-05
 *  ->setCurrentLevel(int) to set the current level indentation (1 or less returns to the root, same as ->rootLevel()).
 * ->buildTOC now reflects this level indentation if present.
 * ePub250 is otherwise compatible to the previous version, and no modifications are needed if you don't need this feature.
+* Added: Support for custom meta data via the function ->addCustomMetadata($name, $content);
+*  It is the responsibility of the builder to ensure no invalid values are inserted.
+*  Example use is for for instance Calibre, see EPub.Example250.php for use.
+* Added: Support or user handled DublinCore meta data via the function ->addDublinCoreMetadata(DublinCore::constants, $content);
 ---------------------------------------------------------------------
 Rev. 2.14/2.52 - 2013-10-05
 * Change: Using EPub::EXTERNAL_REF_REPLACE_IMAGES as externalReferences parameter when adding chapters containing image links, will now cause EPub to use the alt attribute of the image, if it exists.

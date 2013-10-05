@@ -8,7 +8,7 @@
  * @version 1.00
  */
 class Opf {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     /* Core Media types.
      * These types are the only guaranteed mime types any ePub reader must understand.
@@ -211,7 +211,7 @@ class Opf {
  * ePub OPF Metadata structures
  */
 class Metadata {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $dc = array();
     private $meta = array();
@@ -288,7 +288,7 @@ class Metadata {
  * ePub OPF Dublin Core (dc:) Metadata structures
  */
 class DublinCore {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     const CONTRIBUTOR = "contributor";
     const COVERAGE = "coverage";
@@ -409,7 +409,7 @@ class DublinCore {
  * ePub OPF Manifest structure
  */
 class Manifest {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $items = array();
 
@@ -461,7 +461,7 @@ class Manifest {
  * ePub OPF Item structure
  */
 class Item {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $id = NULL;
     private $href = NULL;
@@ -590,7 +590,7 @@ class Item {
  * ePub OPF Spine structure
  */
 class Spine {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $itemrefs = array();
     private $toc = NULL;
@@ -654,7 +654,7 @@ class Spine {
  * ePub OPF ItemRef structure
  */
 class Itemref {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $idref = NULL;
     private $linear = TRUE;
@@ -717,7 +717,7 @@ class Itemref {
  * ePub OPF Guide structure
  */
 class Guide {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $references = array();
 
@@ -782,7 +782,7 @@ class Guide {
  * Reference constants
  */
 class Reference {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     /* REFERENCE types are derived from the "Chicago Manual of Style"
      */
@@ -905,7 +905,7 @@ class Reference {
  * Ref: http://www.loc.gov/marc/relators/
  */
 class MarcCode {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     /**
      * Adapter

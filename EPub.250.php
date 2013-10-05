@@ -51,18 +51,13 @@ class EPub {
     private $publisherURL = "";
     private $date = 0;
     private $rights = "";
-    private $subject = "";
     private $coverage = "";
     private $relation = "";
     private $sourceURL = "";
 
     private $chapterCount = 0;
-    private $opf_manifest = "";
-    private $opf_spine = "";
-    private $opf_guide = "";
     private $opf = NULL;
     private $ncx = NULL;
-    private $navDepth = 1;
     private $isFinalized = FALSE;
     private $isCoverImageSet = FALSE;
 
@@ -162,7 +157,6 @@ class EPub {
         $this->opf = NULL;
         $this->ncx = NULL;
         $this->chapterCount = 0;
-        $this->subject = "";
         $this->coverage = "";
         $this->relation = "";
         $this->generator = "";
@@ -479,6 +473,34 @@ class EPub {
             return TRUE;
         }
         return FALSE;
+    }
+
+	/**
+     * Add custom metadata to the book. 
+	 * 
+	 * It is up to the builder to make sure there are no collisions. Metadata are just key value pairs.
+     *
+     * @param unknown_type $name
+     * @param unknown_type $content
+     */
+	function addCustomMetadata($name, $content) {
+		$this->opf->addMeta($name, $content);
+	}
+
+		/**
+	 * Add DublinCore metadata to the book
+	 * 
+	 * Use the DublinCore constants included in EPub, ie DublinCore::DATE
+	 * 
+	 * @param type $dublinCore name
+	 * @param type $value
+	 */
+    function addDublinCoreMetadata($dublinCore, $value) {
+        if ($this->isFinalized) {
+            return;
+        }
+		
+		$this->opf->addDCMeta($dublinCore, $this->decodeHtmlEntities($value));
     }
 
     /**
@@ -1205,7 +1227,7 @@ class EPub {
     }
 
     /**
-     * Set book Subject.
+     * Add book Subject.
      *
      * The topic of the resource.
      *
@@ -1220,20 +1242,10 @@ class EPub {
         if ($this->isFinalized) {
             return;
         }
-        $this->subject = $subject;
+		$this->opf->addDCMeta(DublinCore::SUBJECT, $this->decodeHtmlEntities($subject));
     }
 
-    /**
-     * Get the book subject.
-     *
-     * @return String The Subject.
-     * @Deprecated
-     */
-    function getSubject() {
-        return $this->subject;
-    }
-
-    /**
+	/**
      * Book source URL, optional.
      *
      * A related resource from which the described resource is derived.
@@ -1284,6 +1296,8 @@ class EPub {
      *
      * Used for the dc:coverage metadata parameter in the OPF file
      *
+	 * Same as ->addDublinCoreMetadata(DublinCore::COVERAGE, $coverage);
+	 * 
      * @param string $coverage
      * @access public
      * @return bool $success
@@ -1507,10 +1521,6 @@ class EPub {
 
         if (!empty($this->rights)) {
             $this->opf->addDCMeta(DublinCore::RIGHTS, $this->decodeHtmlEntities($this->rights));
-        }
-
-        if (!empty($this->subject)) {
-            $this->opf->addDCMeta(DublinCore::SUBJECT, $this->decodeHtmlEntities($this->subject));
         }
 
         if (!empty($this->coverage)) {

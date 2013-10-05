@@ -8,7 +8,7 @@
  * @version 1.00
  */
 class Ncx {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     const MIMETYPE = "application/x-dtbncx+xml";
 
@@ -219,7 +219,7 @@ class Ncx {
  * ePub NavMap class
  */
 class NavMap {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $navPoints = array();
     private $navLevels = 0;
@@ -302,7 +302,7 @@ class NavMap {
  * ePub NavPoint class
  */
 class NavPoint {
-    const VERSION = 1.00;
+    const _VERSION = 1.00;
 
     private $label = NULL;
     private $contentSrc = NULL;
