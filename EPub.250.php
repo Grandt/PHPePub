@@ -11,13 +11,13 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL 2.1
- * @version 2.52
+ * @version 2.53
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.40; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION = 2.52;
+    const VERSION = 2.53;
     const REQ_ZIP_VERSION = 1.40;
 
     const IDENTIFIER_UUID = 'UUID';
@@ -343,8 +343,8 @@ class EPub {
             $this->opf->addItemRef("chapter" . $this->chapterCount);
 
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
-            $this->ncx->getNavMap()->addNavPoint($navPoint);
-            $this->chapterList[$chapterName] = $fileName;
+            $this->ncx->addNavPoint($navPoint);
+            $this->chapterList[$chapterName] = $navPoint;
         } else if (is_array($chapter)) {
             $fileNameParts = pathinfo($fileName);
             $extension = $fileNameParts['extension'];
@@ -372,13 +372,61 @@ class EPub {
             }
 			$partName = $name . "_1." . $extension;
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $partName, $partName);
-            $this->ncx->getNavMap()->addNavPoint($navPoint);
+            $this->ncx->addNavPoint($navPoint);
 
-            $this->chapterList[$chapterName] = $partName;
+            $this->chapterList[$chapterName] = $navPoint;
         }
         return TRUE;
     }
 
+	/**
+	 * Add one chapter level.
+	 * 
+	 * Subsequent chapters will be added to this level. 
+	 */
+	function subLevel() {
+		$this->ncx->subLevel();
+	}
+
+	/**
+	 * Step back one chapter level.
+	 * 
+	 * Subsequent chapters will be added to this chapters parent level. 
+	 */
+	function backLevel() {
+		$this->ncx->backLevel();
+	}
+
+	/**
+	 * Step back to the root level.
+	 * 
+	 * Subsequent chapters will be added to the rooot NavMap. 
+	 */
+	function rootLevel() {
+		$this->ncx->rootLevel();
+	}
+	
+	/**
+	 * Step back to the given level.
+	 * Useful for returning to a previous level from deep within the structure. 
+	 * Values below 2 will have the same effect as rootLevel()
+	 * 
+	 * @param int $newLevel
+	 */
+	function setCurrentLevel($newLevel) {
+		$this->ncx->setCurrentLevel($newLevel);
+	}
+	
+	/**
+	 * Get current level count.
+	 * The indentation of the current structure point.
+	 * 
+	 * @return current level count;
+	 */
+	function getCurrentLevel() {
+		return $this->ncx->getCurrentLevel();
+	}
+	
     /**
      * Wrap ChapterContent with Head and Footer
      *
@@ -1386,8 +1434,10 @@ class EPub {
 
         while (list($item, $descriptive) = each($this->referencesOrder)) {
             if ($item === "text") {
-                while (list($chapterName, $fileName) = each($this->chapterList)) {
-                    $tocData .= "\t<p><a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
+                while (list($chapterName, $navPoint) = each($this->chapterList)) {
+					$fileName = $navPoint->getContentSrc();
+					$level = $navPoint->getLevel() -2;
+					$tocData .= "\t<p>" . str_repeat("&nbsp; &nbsp; &nbsp;", $level) . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
                 }
             } else if ($references === TRUE) {
                 if (array_key_exists($item, $this->referencesList)) {
@@ -1487,7 +1537,9 @@ class EPub {
         }
 
         reset($this->chapterList);
-        list($firstChapterName, $firstChapterFileName) = each($this->chapterList);
+        list($firstChapterName, $firstChapterNavPoint) = each($this->chapterList);
+		$firstChapterFileName = $firstChapterNavPoint->getContentSrc();
+
         $this->opf->addReference(Reference::TEXT, $this->decodeHtmlEntities($firstChapterName), $firstChapterFileName);
 
         $this->ncx->setUid($this->identifier);

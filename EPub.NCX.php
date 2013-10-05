@@ -18,13 +18,17 @@ class Ncx {
     private $docTitle = NULL;
     private $docAuthor = NULL;
 
-    /**
+	private $currentLevel = NULL;
+	private $lastLevel = NULL;
+
+	/**
      * Class constructor.
      *
      * @return void
      */
     function __construct($uid = NULL, $docTitle = NULL, $docAuthor = NULL) {
         $this->navMap = new NavMap();
+		$this->currentLevel = $this->navMap;
         $this->setUid($uid);
         $this->setDocTitle($docTitle);
         $this->setDocAuthor($docAuthor);
@@ -80,6 +84,73 @@ class Ncx {
             $this->navMap = $navMap;
         }
     }
+
+	/**
+	 * Add one chapter level.
+	 * 
+	 * Subsequent chapters will be added to this level. 
+	 */
+	function subLevel() {
+		if ($this->lastLevel !== NULL) {
+			$this->currentLevel = $this->lastLevel;
+		}
+	}
+
+	/**
+	 * Step back one chapter level.
+	 * 
+	 * Subsequent chapters will be added to this chapters parent level. 
+	 */
+	function backLevel() {
+		$this->lastLevel = $this->currentLevel;
+		$this->currentLevel = $this->currentLevel->getParent();
+	}
+
+	/**
+	 * Step back to the root level.
+	 * 
+	 * Subsequent chapters will be added to the rooot NavMap. 
+	 */
+	function rootLevel() {
+		$this->lastLevel = $this->currentLevel;
+		$this->currentLevel = $this->navMap;
+	}
+
+	/**
+	 * Step back to the given level.
+	 * Useful for returning to a previous level from deep within the structure. 
+	 * Values below 2 will have the same effect as rootLevel()
+	 * 
+	 * @param int $newLevel
+	 */
+	function setCurrentLevel($newLevel) {
+		if ($newLevel <= 1) {
+			$this->rootLevel();
+		} else {
+			while ($this->currentLevel->getLevel() > $newLevel) {
+				$this->backLevel();
+			}
+		}
+	}
+
+	/**
+	 * Get current level count.
+	 * The indentation of the current structure point.
+	 * 
+	 * @return current level count;
+	 */
+	function getCurrentLevel() {
+		return $this->currentLevel->getLevel();
+	}
+
+	/**
+     * Add child NavPoints to current level.
+     *
+     * @param NavPoint $navPoint
+     */
+	function addNavPoint($navPoint) {
+		$this->lastLevel = $this->currentLevel->addNavPoint($navPoint);
+	}
 
     /**
      *
@@ -177,8 +248,11 @@ class NavMap {
      */
     function addNavPoint($navPoint) {
         if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
+			$navPoint->setParent($this);
             $this->navPoints[] = $navPoint;
+			return $navPoint;
         }
+		return $this;
     }
 
     /**
@@ -190,6 +264,14 @@ class NavMap {
     function getNavLevels() {
         return $this->navLevels+1;
     }
+
+	function getLevel() {
+		return 1;
+	}
+
+	function getParent() {
+		return $this;
+	}
 
     /**
      * Finalize the navMap, the final max depth for the "dtb:depth" meta attribute can be retrieved with getNavLevels after finalization
@@ -226,6 +308,7 @@ class NavPoint {
     private $contentSrc = NULL;
     private $id = NULL;
     private $navPoints = array();
+	private $parent = NULL;
 
     /**
      * Class constructor.
@@ -263,6 +346,15 @@ class NavPoint {
         $this->label = is_string($label) ? trim($label) : NULL;
     }
 
+	/**
+     * Get the Text label for the NavPoint.
+	 * 
+	 * @return string Label
+	 */
+	function getLabel() {
+		return $this->label;
+	}
+	
     /**
      * Set the src reference for the NavPoint.
      *
@@ -274,6 +366,44 @@ class NavPoint {
         $this->contentSrc = is_string($contentSrc) ? trim($contentSrc) : NULL;
     }
 
+	/**
+	 * Get the src reference for the NavPoint.
+	 *
+	 * @return string content src url.
+	 */
+	function getContentSrc() {
+		return $this->contentSrc;
+	}
+    /**
+     * Set the parent for this NavPoint.
+     *
+     * @param NavPoint or NavMap $parent
+     */
+    function setParent($parent) {
+		if ($parent != NULL && is_object($parent) && 
+				(get_class($parent) === "NavPoint" || get_class($parent) === "NavMap") ) {
+			$this->parent = $parent;
+		}
+    }
+
+	/**
+	 * Get the parent to this NavPoint.
+	 * 
+	 * @return NavPoint, or NavMap if the parent is the root.
+	 */
+	function getParent() {
+		return $this->parent;
+	}
+	
+	/**
+	 * Get the current level. 1 = document root.
+	 * 
+	 * @return int level
+	 */
+	function getLevel() {
+		return $this->parent === NULL ? 1 : $this->parent->getLevel()+1;
+	}
+	
     /**
      * Set the id for the NavPoint.
      *
@@ -292,8 +422,11 @@ class NavPoint {
      */
     function addNavPoint($navPoint) {
         if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
+			$navPoint->setParent($this);
             $this->navPoints[] = $navPoint;
+			return $navPoint;
         }
+		return $this;
     }
 
     /**

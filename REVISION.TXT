@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------
+Rev. 2.53 - 2013-10-05
+* Added: Support for Chapter levels. 
+* Added functions:
+*  ->subLevel() to indent one level under the current, additional chapters are added under that.
+*  ->backLevel() to step one level back to the parent of the current level.
+*  ->rootLevel() to step back to the root of the navMap.
+*  ->getCurrentLevel() to get the current level indentation (root = 1).
+*  ->setCurrentLevel(int) to set the current level indentation (1 or less returns to the root, same as ->rootLevel()).
+* ->buildTOC now reflects this level indentation if present.
+* ePub250 is otherwise compatible to the previous version, and no modifications are needed if you don't need this feature.
+---------------------------------------------------------------------
 Rev. 2.14/2.52 - 2013-10-05
 * Change: Using EPub::EXTERNAL_REF_REPLACE_IMAGES as externalReferences parameter when adding chapters containing image links, will now cause EPub to use the alt attribute of the image, if it exists.
 ---------------------------------------------------------------------

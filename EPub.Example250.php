@@ -230,38 +230,45 @@ $log->logLine("Add Chapter 6");
 $book->addChapter("Chapter 6: Local Image test", "Chapter006.html", $content_start . "<h1>Chapter 6</h1>\n" . $chapter2, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
-$index = new Ncx();
-$navPoint = new NavPoint("Chapter 1.0", "chapter_1_0.html", "chapter_1_0");
-$index->getNavMap()->addNavPoint($navPoint);
+// Chapter 7 tests level indentation
+$chapter7Body = "<p>Vivamus bibendum massa ac magna congue gravida. Curabitur nulla ante, accumsan sit amet luctus a, fermentum ut diam. Maecenas porttitor faucibus mattis. Ut auctor aliquet ligula nec posuere. Nullam arcu turpis, dapibus sit amet tempor nec, cursus at augue. Aliquam sed sem velit, id sagittis mauris. Donec sed ipsum nisi, id scelerisque felis. Cras lacus est, fermentum in ultricies eu, congue in elit. Nulla tincidunt posuere eros, eget suscipit tellus porta vel. Aliquam ut sollicitudin libero. Suspendisse potenti. Sed cursus dignissim nulla in elementum. Aliquam id quam justo, sit amet laoreet ligula. Etiam pellentesque tellus a nisi commodo eu sodales ante commodo. Vestibulum ultricies sapien arcu. Proin nunc mauris, ultrices id imperdiet ac, malesuada ac nunc. Nunc a mi quis nunc ultricies rhoncus. Mauris pellentesque eros eu augue congue ac tincidunt est gravida.</p>\n" . $bookEnd;
 
-$np11 = new NavPoint("Chapter 1.1", "chapter_1_1.html", "chapter_1_1");
-$np111 = new NavPoint("Chapter 1.1.1", "chapter_1_1_1.html", "chapter_1_1_1");
-$np12 = new NavPoint("Chapter 1.2", "chapter_1_2.html", "chapter_1_2");
-
-$navPoint->addNavPoint($np11);
-$navPoint->addNavPoint($np12);
-$np11->addNavPoint($np111);
+$log->logLine("Add Chapter 7.0.0.0");
+$book->addChapter("Chapter 7", "Chapter00700.html", $content_start . "<h2>Chapter 7.0.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
-$navPoint = new NavPoint("Chapter 2.0", "chapter_2_0.html", "chapter_2_0");
-$index->getNavMap()->addNavPoint($navPoint);
-
-$np21 = new NavPoint("Chapter 2.1", "chapter_2_1.html", "chapter_2_1");
-$navPoint->addNavPoint($np21);
-
-$n = $index->finalize();
-
-$n = str_replace("<", "&lt;", $n);
-$n = str_replace(">", "&gt;", $n);
+$log->logLine("Add Chapter 7.1.0.0");
+$book->subLevel();
+$book->addChapter("Chapter 7.1", "Chapter00710.html", $content_start . "<h2>Chapter 7.1.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
-$chapterNcx = $content_start . 
-		"\n<pre>" . $n . "</pre>\n"
-		. $bookEnd;
+$log->logLine("Add Chapter 7.1.1.0");
+$book->subLevel();
+$book->addChapter("Chapter 7.1.1", "Chapter00711.html", $content_start . "<h2>Chapter 7.1.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+
+$log->logLine("Add Chapter 7.1.1.1");
+$book->subLevel();
+$book->addChapter("Chapter 7.1.1.1", "Chapter007111.html", $content_start . "<h2>Chapter 7.1.1.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
-$log->logLine("Add Chapter NCX");
-$book->addChapter("Chapter NCX", "ChapterNCX.html", $chapterNcx);
+$log->logLine("Add Chapter 7.2.0.0");
+// We went deep with Chapter 7.1.1.1, and sometimes the generating class knows exactly where it is anyway, 
+//  so instead of relying on multiple ->backLevel() calls, you can set the target level directly.
+// This only works for going back in the hieracy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
+$book->setCurrentLevel(2); 
+$book->addChapter("Chapter 7.2", "Chapter00720.html", $content_start . "<h2>Chapter 7.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+
+
+$log->logLine("Add Chapter 7.3.0.0");
+$book->addChapter("Chapter 7.3", "Chapter00730.html", $content_start . "<h2>Chapter 7.3.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+
+
+$log->logLine("Add Chapter 7.3.1.0");
+$book->subLevel();
+$book->addChapter("Chapter 7.3.1", "Chapter00731.html", $content_start . "<h2>Chapter 7.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+
+// If you have nested chapters, you can call ->rootLevel() to return your hierachy to the root of the navMap.
+$book->rootLevel();
 
 
 $log->logLine("Add TOC");
@@ -299,4 +306,7 @@ $zipData = $book->sendBook("ExampleBook_250");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
+
+
+
 ?>
