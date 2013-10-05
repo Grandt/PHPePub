@@ -1,0 +1,22 @@
+{
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "grandt/phpepub",
+                "version": "dev-master",
+                "source": {
+                    "url": "https://github.com/Grandt/PHPePub",
+                    "type": "git",
+                    "reference": "master"
+                },
+                "autoload": {
+                    "classmap": ["EPub250.php", "EPub.HtmlEntities.php", "EPub.NCX.php", "EPub.OPF.php", "EPubChapterSplitter.php", "lib.uuid.php", "Logger.php", "Zip.php"]
+                }
+            }
+        }
+    ],
+    "require": {
+        "grandt/phpepub": "@dev"
+    }
+}
