@@ -37,12 +37,13 @@ $fileDir = './PHPePub';
 // setting timezone for time functions used for logging to work properly
 date_default_timezone_set('Europe/Berlin');
 
-$chapter = $content_start . "<p><img src=\"demo/512x700_1.jpg\" alt=\"none\" /></p>\n"
+$chapter = $content_start . "<p><img src=\"demo/512x700_1.jpg\" /></p>\n"
 		. "<p><img src=\"demo/512x700_2.jpg\" alt=\"none\" /></p>\n"
-		. "<p><img src=\"demo/512x700_3.jpg\" alt=\"none\" /></p>\n"
+		. "<p><img src=\"demo/512x700_3.jpg\" alt=\"Demo 2\" /></p>\n"
 . $bookEnd;
 $book->addChapter("Prologue", "Texts/Prologue.html", $content_start . "<h2>Prologue</h2>\n" . $bookEnd);
 $book->addChapter("Chapter 1", "Texts/Chapter1.html", $chapter, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 2", "Texts/Chapter2.html", $chapter, false, EPub::EXTERNAL_REF_REPLACE_IMAGES, $fileDir);
 
 
 $book->finalize();

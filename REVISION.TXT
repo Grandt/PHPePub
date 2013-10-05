@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 2.14/2.52 - 2013-10-05
+* Change: Using EPub::EXTERNAL_REF_REPLACE_IMAGES as externalReferences parameter when adding chapters containing image links, will now cause EPub to use the alt attribute of the image, if it exists.
+---------------------------------------------------------------------
 Rev. 2.13 - 2013-09-26
 * Fixed: sendBook and saveBook returned boolean TRUE/FALSE depending on if the sending was successful. The sanitized/used filename was never exposed. The methods now return the filename used for sending, or FALSE if it failed.
 * Change: sanitizeFileName is now a public function.

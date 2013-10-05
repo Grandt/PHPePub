@@ -11,13 +11,13 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL 2.1
- * @version 2.13
+ * @version 2.14
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
- * @uses Zip.php version 1.38; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
+ * @uses Zip.php version 1.40; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION = 2.13;
+    const VERSION = 2.14;
     const REQ_ZIP_VERSION = 1.40;
 
     const IDENTIFIER_UUID = 'UUID';
@@ -532,7 +532,12 @@ class EPub {
             if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
                 $postProcDomElememts[] = $img;
             } else if ($externalReferences === EPub::EXTERNAL_REF_REPLACE_IMAGES) {
-                $postProcDomElememts[] = array($img, $this->createDomFragment($xmlDoc, "<em>[image]</em>"));
+                $altNode = $img->attributes->getNamedItem("alt");
+				$alt = "image";
+				if ($altNode !== NULL && strlen($altNode->nodeValue) > 0) {
+					$alt = $altNode->nodeValue;
+				}
+                $postProcDomElememts[] = array($img, $this->createDomFragment($xmlDoc, "<em>[" . $alt . "]</em>"));
             } else {
                 $source = $img->attributes->getNamedItem("src")->nodeValue;
 

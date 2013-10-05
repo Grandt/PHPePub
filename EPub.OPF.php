@@ -3,7 +3,7 @@
  * ePub OPF file structure
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2012 A. Grandt
+ * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @version 1.00
  */

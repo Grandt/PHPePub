@@ -229,6 +229,41 @@ while (list($k, $v) = each($html2)) {
 $log->logLine("Add Chapter 6");
 $book->addChapter("Chapter 6: Local Image test", "Chapter006.html", $content_start . "<h1>Chapter 6</h1>\n" . $chapter2, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
+
+$index = new Ncx();
+$navPoint = new NavPoint("Chapter 1.0", "chapter_1_0.html", "chapter_1_0");
+$index->getNavMap()->addNavPoint($navPoint);
+
+$np11 = new NavPoint("Chapter 1.1", "chapter_1_1.html", "chapter_1_1");
+$np111 = new NavPoint("Chapter 1.1.1", "chapter_1_1_1.html", "chapter_1_1_1");
+$np12 = new NavPoint("Chapter 1.2", "chapter_1_2.html", "chapter_1_2");
+
+$navPoint->addNavPoint($np11);
+$navPoint->addNavPoint($np12);
+$np11->addNavPoint($np111);
+
+
+$navPoint = new NavPoint("Chapter 2.0", "chapter_2_0.html", "chapter_2_0");
+$index->getNavMap()->addNavPoint($navPoint);
+
+$np21 = new NavPoint("Chapter 2.1", "chapter_2_1.html", "chapter_2_1");
+$navPoint->addNavPoint($np21);
+
+$n = $index->finalize();
+
+$n = str_replace("<", "&lt;", $n);
+$n = str_replace(">", "&gt;", $n);
+
+
+$chapterNcx = $content_start . 
+		"\n<pre>" . $n . "</pre>\n"
+		. $bookEnd;
+
+
+$log->logLine("Add Chapter NCX");
+$book->addChapter("Chapter NCX", "ChapterNCX.html", $chapterNcx);
+
+
 $log->logLine("Add TOC");
 $book->buildTOC();
 
