@@ -1,3 +1,8 @@
+Retireing EPub 2.14
+The new main build is 2.5+.
+Changes for users. 
+* Add EPub.NCX.php and EPub.OPF.php to your EPub directory.
+* If you used references between multi part files (as Chapter 3 in Example 1) the parts are now numbered using an underscore "_", used to be hyphen "-"
 ---------------------------------------------------------------------
 Rev. 2.53 - 2013-10-05
 * Added: Support for Chapter levels. 
@@ -11,7 +16,7 @@ Rev. 2.53 - 2013-10-05
 * ePub250 is otherwise compatible to the previous version, and no modifications are needed if you don't need this feature.
 * Added: Support for custom meta data via the function ->addCustomMetadata($name, $content);
 *  It is the responsibility of the builder to ensure no invalid values are inserted.
-*  Example use is for for instance Calibre, see EPub.Example250.php for use.
+*  Example use is for for instance Calibre, see EPub.Example2.php for use.
 * Added: Support or user handled DublinCore meta data via the function ->addDublinCoreMetadata(DublinCore::constants, $content);
 ---------------------------------------------------------------------
 Rev. 2.14/2.52 - 2013-10-05

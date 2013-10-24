@@ -1,10 +1,12 @@
 <?php
-
 error_reporting(E_ALL | E_STRICT);
+ini_set('error_reporting', E_ALL | E_STRICT);
+ini_set('display_errors', 1);
+
 // Example.
 // Create a test book for download.
 // ePub uses XHTML 1.1, preferably strict.
-include_once("EPub.250.php");
+include_once("EPub.php");
 $book = new EPub();
 
 $book->setTitle("Test book");
@@ -37,9 +39,9 @@ $fileDir = './PHPePub';
 // setting timezone for time functions used for logging to work properly
 date_default_timezone_set('Europe/Berlin');
 
-$chapter = $content_start . "<p><img src=\"demo/512x700_1.jpg\" /></p>\n"
-		. "<p><img src=\"demo/512x700_2.jpg\" alt=\"none\" /></p>\n"
-		. "<p><img src=\"demo/512x700_3.jpg\" alt=\"Demo 2\" /></p>\n"
+$chapter = $content_start . "<p><img src='demo/512x700_1.jpg' alt='Image' /></p>\n"
+		. "<p><img src='demo/512x700_2.jpg' alt='none' /></p>\n"
+		. "<p><img src='demo/512x700_3.jpg' alt='Demo 2' /></p>\n"
 . $bookEnd;
 $book->addChapter("Prologue", "Texts/Prologue.html", $content_start . "<h2>Prologue</h2>\n" . $bookEnd);
 $book->addChapter("Chapter 1", "Texts/Chapter1.html", $chapter, false, EPub::EXTERNAL_REF_ADD, $fileDir);
@@ -48,7 +50,7 @@ $book->addChapter("Chapter 2", "Texts/Chapter2.html", $chapter, false, EPub::EXT
 
 $book->finalize();
 // Send the book to the client. ".epub" will be appended if missing.
-$zipData = $book->sendBook("Example2Book250");
+$zipData = $book->sendBook("ExampleBookImg");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.

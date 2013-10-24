@@ -11,7 +11,7 @@
                     "reference": "master"
                 },
                 "autoload": {
-                    "classmap": ["EPub250.php", "EPub.HtmlEntities.php", "EPub.NCX.php", "EPub.OPF.php", "EPubChapterSplitter.php", "lib.uuid.php", "Logger.php", "Zip.php"]
+                    "classmap": ["EPub.php", "EPub.HtmlEntities.php", "EPub.NCX.php", "EPub.OPF.php", "EPubChapterSplitter.php", "lib.uuid.php", "Logger.php", "Zip.php"]
                 }
             }
         }

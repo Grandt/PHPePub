@@ -1,0 +1,1 @@
+Version 2.14 is being retired, and is retained her only as a contingency in case something major should frop up in the new version.
