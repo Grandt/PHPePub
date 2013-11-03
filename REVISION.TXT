@@ -1,8 +1,10 @@
-Retireing EPub 2.14
-The new main build is 2.5+.
-Changes for users. 
-* Add EPub.NCX.php and EPub.OPF.php to your EPub directory.
-* If you used references between multi part files (as Chapter 3 in Example 1) the parts are now numbered using an underscore "_", used to be hyphen "-"
+Rev. 3.00 - 2013-11-03
+---------------------------------------------------------------------
+* Added: ePub 3 support. The ePub 3 still contains the NCX for backwards combatability to ePub 2 readers, though there is no gurantee that it'll work on all readers.
+*  The EPub class constructor now takes arguments for epub version, EPub::BOOK_VERSION_EPUB2 or EPub::BOOK_VERSION_EPUB3
+*  The other new parameters on the EPub constructor are for default language and writing direction, used on the generated ePub 3 TOC.
+* Added: Ability to reference sub chapter id's
+*  ->addChapter($chapterName, $chapterLink); where the link must contain the #id.
 ---------------------------------------------------------------------
 Rev. 2.53 - 2013-10-05
 * Added: Support for Chapter levels. 

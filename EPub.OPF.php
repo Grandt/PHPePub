@@ -5,10 +5,10 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
+ * @version 3.00
  */
 class Opf {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     /* Core Media types.
      * These types are the only guaranteed mime types any ePub reader must understand.
@@ -26,8 +26,10 @@ class Opf {
     const TYPE_OEB1_CSS = "text/x-oeb1-css"; // Deprecated
     const TYPE_NCX = "application/x-dtbncx+xml";
 
-    private $ident = "BookId";
-
+    private $bookVersion = EPub::BOOK_VERSION_EPUB2;
+	private $ident = "BookId";
+    
+    public $date = NULL;
     public $metadata = NULL;
     public $manifest = NULL;
     public $spine = NULL;
@@ -38,8 +40,9 @@ class Opf {
      *
      * @return void
      */
-    function __construct($ident = "BookId") {
+    function __construct($ident = "BookId", $bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $this->setIdent($ident);
+        $this->setVersion($bookVersion);
         $this->metadata = new Metadata();
         $this->manifest = new Manifest();
         $this->spine = new Spine();
@@ -61,6 +64,20 @@ class Opf {
      *
      * @param unknown_type $ident
      */
+    function setVersion($bookVersion) {
+        $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
+    }
+
+	function isEPubVersion2() {
+		return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
+	}
+	
+    /**
+     *
+     * Enter description here ...
+     *
+     * @param unknown_type $ident
+     */
     function setIdent($ident = "BookId") {
         $this->ident = is_string($ident) ? trim($ident) : "BookId";
     }
@@ -72,9 +89,11 @@ class Opf {
      * @return string
      */
     function finalize() {
-        $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"2.0\">\n";
-        $opf .= $this->metadata->finalize();
-        $opf .= $this->manifest->finalize();
+        $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+				. "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
+	
+		$opf .= $this->metadata->finalize($this->bookVersion, $this->date);
+        $opf .= $this->manifest->finalize($this->bookVersion);
         $opf .= $this->spine->finalize();
 
         if ($this->guide->length() > 0) {
@@ -113,8 +132,8 @@ class Opf {
      * @param unknown_type $href
      * @param unknown_type $mediaType
      */
-    function addItem($id, $href, $mediaType) {
-        $this->manifest->addItem(new Item($id, $href, $mediaType));
+    function addItem($id, $href, $mediaType, $properties = NULL) {
+        $this->manifest->addItem(new Item($id, $href, $mediaType, $properties));
     }
 
     /**
@@ -211,7 +230,7 @@ class Opf {
  * ePub OPF Metadata structures
  */
 class Metadata {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $dc = array();
     private $meta = array();
@@ -268,13 +287,22 @@ class Metadata {
      *
      * @return string
      */
-    function finalize() {
-        $metadata = "\t<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = NULL) {
+        $metadata = "\t<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
+		if ($bookVersion === EPub::BOOK_VERSION_EPUB2) {
+			$metadata .= "\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+		} else {
+			$metadata .= "\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+			if (!isset($date)) {
+				$date = time();
+			}
+			$metadata .= "\t\t<meta property=\"dcterms:modified\">" . gmdate("Y-m-d\TH:i:s\Z", $date) . "</meta>\n";
+		}
 
         foreach ($this->dc as $dc) {
-            $metadata .= $dc->finalize();
+            $metadata .= $dc->finalize($bookVersion);
         }
-
+			
         foreach ($this->meta as $data) {
             list($name, $content) = each($data);
             $metadata .= "\t\t<meta name=\"" . $name . "\" content=\"" . $content . "\" />\n";
@@ -288,7 +316,7 @@ class Metadata {
  * ePub OPF Dublin Core (dc:) Metadata structures
  */
 class DublinCore {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     const CONTRIBUTOR = "contributor";
     const COVERAGE = "coverage";
@@ -386,7 +414,7 @@ class DublinCore {
      *
      * @return string
      */
-    function finalize() {
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $dc = "\t\t<dc:" . $this->dcName;
 
         if (sizeof($this->attr) > 0) {
@@ -395,7 +423,7 @@ class DublinCore {
             }
         }
 
-        if (sizeof($this->opfAttr) > 0) {
+        if ($bookVersion === EPub::BOOK_VERSION_EPUB2 && sizeof($this->opfAttr) > 0) {
             while (list($name, $content) = each($this->opfAttr)) {
                 $dc .= " opf:" . $name . "=\"" . $content . "\"";
             }
@@ -409,7 +437,7 @@ class DublinCore {
  * ePub OPF Manifest structure
  */
 class Manifest {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $items = array();
 
@@ -448,10 +476,10 @@ class Manifest {
      *
      * @return string
      */
-    function finalize() {
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $manifest = "\n\t<manifest>\n";
         foreach ($this->items as $item) {
-            $manifest .= $item->finalize();
+            $manifest .= $item->finalize($bookVersion);
         }
         return $manifest . "\t</manifest>\n";
     }
@@ -461,11 +489,12 @@ class Manifest {
  * ePub OPF Item structure
  */
 class Item {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $id = NULL;
     private $href = NULL;
     private $mediaType = NULL;
+	private $properties = NULL;
     private $requiredNamespace = NULL;
     private $requiredModules = NULL;
     private $fallback = NULL;
@@ -476,10 +505,11 @@ class Item {
      *
      * @return void
      */
-    function __construct($id, $href, $mediaType) {
+    function __construct($id, $href, $mediaType, $properties = NULL) {
         $this->setId($id);
         $this->setHref($href);
         $this->setMediaType($mediaType);
+        $this->setProperties($properties);
     }
 
     /**
@@ -520,6 +550,16 @@ class Item {
      */
     function setMediaType($mediaType) {
         $this->mediaType = is_string($mediaType) ? trim($mediaType) : NULL;
+    }
+
+    /**
+     *
+     * Enter description here ...
+     *
+     * @param unknown_type $properties
+     */
+    function setProperties($properties) {
+        $this->properties = is_string($properties) ? trim($properties) : NULL;
     }
 
     /**
@@ -568,8 +608,11 @@ class Item {
      *
      * @return string
      */
-    function finalize() {
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $item = "\t\t<item id=\"" . $this->id . "\" href=\"" . $this->href . "\" media-type=\"" . $this->mediaType . "\" ";
+		if ($bookVersion === EPub::BOOK_VERSION_EPUB3 && isset($this->properties)) {
+            $item .= "properties=\"" . $this->properties . "\" ";
+        }
         if (isset($this->requiredNamespace)) {
             $item .= "\n\t\t\trequired-namespace=\"" . $this->requiredNamespace . "\" ";
             if (isset($this->requiredModules)) {
@@ -654,7 +697,7 @@ class Spine {
  * ePub OPF ItemRef structure
  */
 class Itemref {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $idref = NULL;
     private $linear = TRUE;
@@ -717,7 +760,7 @@ class Itemref {
  * ePub OPF Guide structure
  */
 class Guide {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $references = array();
 
@@ -835,6 +878,26 @@ class Reference {
     /** First page of the book, ie. first page of the first chapter */
     const TEXT = "text";
 
+	// ******************
+	// ePub3 constants
+	// ******************
+
+	// Document partitions
+	/** The publications cover(s), jacket information, etc. */
+	const COVER = "cover";
+
+	/** Preliminary material to the content body, such as tables of contents, dedications, etc. */
+	const FRONTMATTER = "frontmatter";
+
+	/** The main (body) content of a document. */
+	const BODYMATTER = "bodymatter";
+
+	/** Ancillary material occurring after the document body, such as indices, appendices, etc. */
+	const BACKMATTER = "backmatter";
+
+
+	
+	
     private $type = NULL;
     private $title = NULL;
     private $href = NULL;
@@ -905,7 +968,7 @@ class Reference {
  * Ref: http://www.loc.gov/marc/relators/
  */
 class MarcCode {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     /**
      * Adapter

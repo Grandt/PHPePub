@@ -1,5 +1,7 @@
 PHPePub allows a php script to generate ePub Electronic books on the fly, and send them to the user as downloads.
 
+PHPePub support most of the ePub 2.01 specification, and enough of the new ePub3 specification to make valid ePub 3 books as well.
+
 The projects is also hosted on PHPClasses.org at the addresses:
 http://www.phpclasses.org/package/6115
 
@@ -14,13 +16,9 @@ See the examples for example usage. The php files have "some" doumentation in th
 
 TODO:
 * A LOT, there is a new version (tentatively version 2.15) being written remodelling a lot of the class structure. The goal being to encompas the majority of the features in teh ePub 2.0 specification, except the Daisy type files.
-* Add support for Multiple NavPoint levels, ie. allowing for multiple books or articlesin in a single ePub file.
 * Add better handling of Reference structures.
-* Add full coverage of all Dublin Core meta tags supported by the ePub 2.01 specification.
-* Add full coverage of all Marc Codes recommended by the ePub 2.01 specification.
 * Improve handling of media types and linked files.
 * A/V content is allowed, but definitely not recommended, and MUST have a fallback chain ending in a valid file. If no such chain is provided, the content should not be added.
 * Documentation, no one reads it, but everyone complains if it is missing.
 * Better examples to fully cover the capabilities of the EPub classes.
 * more TODO's.
-* ePub 3.0.

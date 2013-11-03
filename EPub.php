@@ -11,13 +11,13 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL 2.1
- * @version 2.53
+ * @version 3.00
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.40; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION = 2.53;
+    const VERSION = 3.00;
     const REQ_ZIP_VERSION = 1.40;
 
     const IDENTIFIER_UUID = 'UUID';
@@ -32,11 +32,23 @@ class EPub {
     const EXTERNAL_REF_REMOVE_IMAGES = 2;
     /** Process the file for external references and add them to the book, but replace images, and img tags with [image] */
     const EXTERNAL_REF_REPLACE_IMAGES = 3;
+	
+    const DIRECTION_LEFT_TO_RIGHT = "ltr";
+    const DIRECTION_RIGHT_TO_LEFT = "rtl";
+	
+	const BOOK_VERSION_EPUB2 = "2.0";
+    const BOOK_VERSION_EPUB3 = "3.0";
 
-    public $maxImageWidth = 768;
+    private $bookVersion = EPub::BOOK_VERSION_EPUB2;
+
+	public $maxImageWidth = 768;
     public $maxImageHeight = 1024;
 
     public $splitDefaultSize = 250000;
+	/** Gifs can crash some early ADE based readers, and are disabled by default. 
+	 * getImage will convert these if it can, unless this is set to TRUE.
+	 */
+    public $isGifImagesEnabled = FALSE;
 
     private $zip;
 
@@ -62,11 +74,6 @@ class EPub {
     private $isCoverImageSet = FALSE;
 
     private $fileList = array();
-
-    // TOC reference information.
-    private $chapterList = array();
-    private $referencesList = array();
-    private $referencesName = array();
 
     /**
      * Used for building the TOC.
@@ -116,14 +123,16 @@ class EPub {
      *
      * @return void
      */
-    function __construct() {
+    function __construct($bookVersion = EPub::BOOK_VERSION_EPUB2, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
         include_once("Zip.php");
-        include_once("Logger.php");
+		include_once("Logger.php");
+		
+		$this->bookVersion = $bookVersion;
         $this->log = new Logger("EPub", $this->isLogging);
 
         /* Prepare Logging. Just in case it's used. later */
         if ($this->isLogging) {
-            $this->log->logLine("EPub version..........: " . self::VERSION);
+            $this->log->logLine("EPub class version....: " . self::VERSION);
             $this->log->logLine("EPub req. Zip version.: " . self::REQ_ZIP_VERSION);
             $this->log->logLine("Zip version...........: " . Zip::VERSION);
             $this->log->dumpInstalledModules();
@@ -138,7 +147,7 @@ class EPub {
         include_once("EPub.NCX.php");
         include_once("EPub.OPF.php");
 
-        $this->initialize();
+        $this->initialize($languageCode, $writingDirection);
     }
 
     /**
@@ -168,7 +177,7 @@ class EPub {
      * Enter description here ...
      *
      */
-    private function initialize() {
+    private function initialize($languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
         $this->referencesOrder = array(
         "cover" => "Cover Page",
         Reference::TITLE_PAGE => "Title Page",
@@ -204,10 +213,22 @@ class EPub {
 
         $this->content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n\t<rootfiles>\n\t\t<rootfile full-path=\"" . $this->bookRoot . "book.opf\" media-type=\"application/oebps-package+xml\" />\n\t</rootfiles>\n</container>\n";
 
+		if (!$this->isEPubVersion2()) {
+			$this->htmlContentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			. "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
+			. "<head>"
+			. "<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n"
+			. "<title></title>\n"
+			. "</head>\n"
+			. "<body>\n";
+		}
+		
         $this->zip->addFile($this->content, "META-INF/container.xml", 0, NULL, FALSE);
         $this->content = NULL;
-        $this->ncx = new Ncx();
+        $this->ncx = new Ncx(NULL, NULL, NULL, $languageCode, $writingDirection);
         $this->opf = new Opf();
+		$this->ncx->setVersion($this->bookVersion);
+		$this->opf->setVersion($this->bookVersion);
         $this->opf->addItem("ncx", "book.ncx", Ncx::MIMETYPE);
         $this->chapterCount = 0;
     }
@@ -302,9 +323,9 @@ class EPub {
      * @param Bool   $autoSplit Should the chapter be split if it exceeds the default split size? Default=FALSE, only used if $chapterData is a String.
      * @param int    $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? See documentation for <code>processChapterExternalReferences</code> for explanation. Default is EPub::EXTERNAL_REF_IGNORE.
      * @param String $baseDir Default is "", meaning it is pointing to the document root. NOT used if $externalReferences is set to EPub::EXTERNAL_REF_IGNORE.
-     * @return bool $success
+     * @return mixed $success FALSE if the addition failed, else the new NavPoint.
      */
-    function addChapter($chapterName, $fileName, $chapterData, $autoSplit = FALSE, $externalReferences = EPub::EXTERNAL_REF_IGNORE, $baseDir = "") {
+    function addChapter($chapterName, $fileName, $chapterData = NULL, $autoSplit = FALSE, $externalReferences = EPub::EXTERNAL_REF_IGNORE, $baseDir = "") {
         if ($this->isFinalized) {
             return FALSE;
         }
@@ -338,7 +359,7 @@ class EPub {
 
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
             $this->ncx->addNavPoint($navPoint);
-            $this->chapterList[$chapterName] = $navPoint;
+            $this->ncx->chapterList[$chapterName] = $navPoint;
         } else if (is_array($chapter)) {
             $fileNameParts = pathinfo($fileName);
             $extension = $fileNameParts['extension'];
@@ -358,8 +379,8 @@ class EPub {
                     $this->processChapterExternalReferences($v, $externalReferences, $baseDir);
                 }
                 $partCount++;
-				$partName = $name . "_" . $partCount . "." . $extension;
-                $this->addFile($partName, $partName, $v, "application/xhtml+xml");
+				$partName = $name . "_" . $partCount;
+                $this->addFile($partName . "." . $extension, $partName, $v, "application/xhtml+xml");
                 $this->opf->addItemRef($partName);
 
                 $oneChapter = each($chapter);
@@ -368,9 +389,16 @@ class EPub {
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $partName, $partName);
             $this->ncx->addNavPoint($navPoint);
 
-            $this->chapterList[$chapterName] = $navPoint;
-        }
-        return TRUE;
+            $this->ncx->chapterList[$chapterName] = $navPoint;
+        } else if (!isset($chapterData) && strpos($fileName, "#") > 0) {
+            $this->chapterCount++;
+            //$this->opf->addItemRef("chapter" . $this->chapterCount);
+
+            $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
+            $this->ncx->addNavPoint($navPoint);
+            $this->ncx->chapterList[$chapterName] = $navPoint;
+		}
+        return $navPoint;
     }
 
 	/**
@@ -378,8 +406,8 @@ class EPub {
 	 * 
 	 * Subsequent chapters will be added to this level. 
 	 */
-	function subLevel() {
-		$this->ncx->subLevel();
+	function subLevel($navTitle = NULL, $navId = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
+		return $this->ncx->subLevel($this->decodeHtmlEntities($navTitle), $navId, $navClass, $isNavHidden, $writingDirection);
 	}
 
 	/**
@@ -468,8 +496,8 @@ class EPub {
             $this->opf->addItemRef("ref_" . $reference, FALSE);
             $this->opf->addReference($reference, $pageName, $fileName);
 
-            $this->referencesList[$reference] = $fileName;
-            $this->referencesName[$reference] = $pageName;
+            $this->ncx->referencesList[$reference] = $fileName;
+            $this->ncx->referencesName[$reference] = $pageName;
             return TRUE;
         }
         return FALSE;
@@ -551,10 +579,53 @@ class EPub {
             }
             $mimetype = "image/" . $ext;
         }
-
-        $coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">\n\t<head>\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n\t\t<title>Cover Image</title>\n\t\t<style type=\"text/css\" title=\"css\">\n\t\t\t@page, body, div, img {\n\t\t\t\tpadding: 0pt;\n\t\t\t\tmargin:0pt;\n\t\t\t}\n\t\t\tbody {\n\t\t\t\ttext-align: center;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div>\n\t\t\t<img src=\""
-        . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n\t\t</div>\n\t</body>\n</html>\n";
-
+		$coverPage = "";
+		
+		if ($this->isEPubVersion2()) {
+			$coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+				. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+				. "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+				. "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\" xml:lang=\"en\">\n"
+				. "\t<head>\n"
+				. "\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n"
+				. "\t\t<title>Cover Image</title>\n"
+				. "\t\t<style type=\"text/css\" title=\"css\">\n"
+				. "\t\t\t@page, body, div, img {\n"
+				. "\t\t\t\tpadding: 0pt;\n"
+				. "\t\t\t\tmargin:0pt;\n"
+				. "\t\t\t}\n\t\t\tbody {\n"
+				. "\t\t\t\ttext-align: center;\n"
+				. "\t\t\t}\n"
+				. "\t\t</style>\n"
+				. "\t</head>\n"
+				. "\t<body>\n"
+				. "\t\t<div>\n"
+				. "\t\t\t<img src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
+				. "\t\t</div>\n"
+				. "\t</body>\n"
+				. "</html>\n";
+		} else {
+		    $coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+				. "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
+				. "<head>"
+				. "\t<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n"
+				. "\t\t<title>Cover Image</title>\n"
+				. "\t\t<style type=\"text/css\" title=\"css\">\n"
+				. "\t\t\t@page, body, div, img {\n"
+				. "\t\t\t\tpadding: 0pt;\n"
+				. "\t\t\t\tmargin:0pt;\n"
+				. "\t\t\t}\n\t\t\tbody {\n"
+				. "\t\t\t\ttext-align: center;\n"
+				. "\t\t\t}\n"
+				. "\t\t</style>\n"
+				. "\t</head>\n"
+				. "\t<body>\n"
+				. "\t\t<section epub:type=\"cover\">\n"
+				. "\t\t\t<img src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
+				. "\t\t</section>\n"
+				. "\t</body>\n"
+				. "</html>\n";
+		}
 
         $this->addFile($imgPath, "CoverImage", $imageData, $mimetype);
 		$this->addReferencePage("CoverPage", "CoverPage.xhtml", $coverPage, "cover");
@@ -627,6 +698,10 @@ class EPub {
             // force pretty printing and correct formatting, should not be needed, but it is.
             $xml->loadXML($xml2Doc->saveXML());
             $doc = $xml->saveXML();
+			
+			if (!$this->isEPubVersion2()) {
+				$doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
+			}
         }
         return TRUE;
     }
@@ -1178,6 +1253,7 @@ class EPub {
             return FALSE;
         }
         $this->date = $timestamp;
+        $this->opf->date = $timestamp;
         return TRUE;
     }
 
@@ -1398,6 +1474,18 @@ class EPub {
         return TRUE;
     }
 
+	/**
+	 * Set the references title for the ePub 3 landmarks section
+	 * 
+	 * @param type $referencesTitle
+	 */
+	function setReferencesTitle($referencesTitle = "Guide") {
+        if ($this->isFinalized) {
+            return FALSE;
+        }
+		$this->ncx->referencesTitle = is_string($referencesTitle) ? trim($referencesTitle) : "Guide";
+	}
+	
     /**
      * Get Book status.
      *
@@ -1426,12 +1514,17 @@ class EPub {
             $title = "Table of Contents";
         }
 
-        $tocData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-        . "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
-        . "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-        . "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
-        . "<head>"
-        . "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n";
+		$tocData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+		
+		if ($this->isEPubVersion2()) {
+			$tocData .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+			. "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+			. "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+		    . "<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n";
+		} else {
+			$tocData .= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
+		    . "<head>\n<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n";
+		}
 
         if (!empty($cssFileName)) {
             $tocData .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"" . $cssFileName . "\" />\n";
@@ -1448,14 +1541,14 @@ class EPub {
 
         while (list($item, $descriptive) = each($this->referencesOrder)) {
             if ($item === "text") {
-                while (list($chapterName, $navPoint) = each($this->chapterList)) {
+                while (list($chapterName, $navPoint) = each($this->ncx->chapterList)) {
 					$fileName = $navPoint->getContentSrc();
 					$level = $navPoint->getLevel() -2;
-					$tocData .= "\t<p>" . str_repeat("&nbsp; &nbsp; &nbsp;", $level) . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
+					$tocData .= "\t<p>" . str_repeat(" &#160;  &#160;  &#160;", $level) . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
                 }
             } else if ($references === TRUE) {
-                if (array_key_exists($item, $this->referencesList)) {
-                    $tocData .= "\t<p><a href=\"" . $this->referencesList[$item] . "\">" . $descriptive . "</a></p>\n";
+                if (array_key_exists($item, $this->ncx->referencesList)) {
+                    $tocData .= "\t<p><a href=\"" . $this->ncx->referencesList[$item] . "\">" . $descriptive . "</a></p>\n";
                 } else if ($item === "toc") {
                     $tocData .= "\t<p><a href=\"TOC.xhtml\">" . $title . "</a></p>\n";
                 } else if ($item === "cover" && $this->isCoverImageSet) {
@@ -1468,7 +1561,31 @@ class EPub {
         $this->addReferencePage($title, "TOC.xhtml", $tocData, Reference::TABLE_OF_CONTENTS);
     }
 
-    /**
+	function isEPubVersion2() {
+		return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
+	}
+	
+	function buildEPub3TOC($cssFileName = NULL, $title = "Table of Contents") {
+		$this->ncx->referencesOrder = $this->referencesOrder;
+		$this->ncx->setDocTitle($this->decodeHtmlEntities($this->title));
+		return $this->ncx->finalizeEPub3($title, $cssFileName);
+	}	
+	
+	function addEPub3TOC($fileName, $tocData) {
+		if ($this->isEPubVersion2() || $this->isFinalized || array_key_exists($fileName, $this->fileList)) {
+            return FALSE;
+        }
+        $fileName = Zip::getRelativePath($fileName);
+        $fileName = preg_replace('#^[/\.]+#i', "", $fileName);
+
+        $this->zip->addFile($tocData, $this->bookRoot.$fileName);
+
+        $this->fileList[$fileName] = $fileName;
+        $this->opf->addItem("toc", $fileName, "application/xhtml+xml", "nav");
+        return TRUE;
+	}	
+
+	/**
      * Check for mandatory parameters and finalize the e-book.
      * Once finalized, the book is locked for further additions.
      *
@@ -1546,8 +1663,8 @@ class EPub {
             $this->opf->addMeta("generator", $this->decodeHtmlEntities($this->generator));
         }
 
-        reset($this->chapterList);
-        list($firstChapterName, $firstChapterNavPoint) = each($this->chapterList);
+        reset($this->ncx->chapterList);
+        list($firstChapterName, $firstChapterNavPoint) = each($this->ncx->chapterList);
 		$firstChapterFileName = $firstChapterNavPoint->getContentSrc();
 
         $this->opf->addReference(Reference::TEXT, $this->decodeHtmlEntities($firstChapterName), $firstChapterFileName);
@@ -1565,7 +1682,11 @@ class EPub {
         if (!empty($this->author)) {
             $this->ncx->setDocAuthor($this->decodeHtmlEntities($this->author));
         }
-
+		
+		if (!$this->isEPubVersion2()) {
+			$this->addEPub3TOC("epub3toc.xhtml", $this->buildEPub3TOC());
+		}
+		
         $this->opf = $this->fixEncoding($this->opf->finalize());
         $ncxFinal = $this->fixEncoding($this->ncx->finalize());
 
@@ -1711,12 +1832,12 @@ class EPub {
      *
      * Added for convinience
      *
-     * @param  int    $version UUID version to retrieve, See lib.uuid.manual.html for details.
+     * @param  int    $bookVersion UUID version to retrieve, See lib.uuid.manual.html for details.
      * @return string $url     The formatted uuid
      */
-    function createUUID($version = 4, $url = NULL) {
+    function createUUID($bookVersion = 4, $url = NULL) {
         include_once("lib.uuid.php");
-        return UUID::mint($version, $url, UUID::nsURL);
+        return UUID::mint($bookVersion, $url, UUID::nsURL);
     }
 
     /**
@@ -1822,7 +1943,9 @@ class EPub {
             if ($height*$ratio > $this->maxImageHeight) {
                 $ratio = $this->maxImageHeight/$height;
             }
-            if ($ratio < 1 || empty($mime) || ($mime != "image/jpeg" && $mime != "image/png")) { // Gifs can crash some early ADE based readers.
+            if ($ratio < 1 || empty($mime) || 
+					!($mime == "image/jpeg" || $mime == "image/png" || 
+					    ($this->isGifImagesEnabled && $mime == "image/gif"))) {
                 $image_o = imagecreatefromstring($image);
                 $image_p = imagecreatetruecolor($width*$ratio, $height*$ratio);
                 imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
@@ -1836,6 +1959,17 @@ class EPub {
                 $ext = "jpg";
             }
         }
+		if ($ext === "") {
+			static $mimeToExt = array (
+				'image/jpeg' => 'jpg',
+				'image/gif' => 'gif',
+				'image/png' => 'png'
+            );
+
+			if (isset($mimeToExt[$mime])) {
+				$ext = $mimeToExt[$mime];
+			}
+		}
 
         $rv = array();
         $rv['width'] = $width*$ratio;

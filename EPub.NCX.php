@@ -5,12 +5,14 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
+ * @version 3.00
  */
 class Ncx {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     const MIMETYPE = "application/x-dtbncx+xml";
+
+    private $bookVersion = EPub::BOOK_VERSION_EPUB2;
 
     private $navMap = NULL;
     private $uid = NULL;
@@ -18,20 +20,31 @@ class Ncx {
     private $docTitle = NULL;
     private $docAuthor = NULL;
 
-	private $currentLevel = NULL;
-	private $lastLevel = NULL;
+    private $currentLevel = NULL;
+    private $lastLevel = NULL;
+    
+    private $languageCode = "en";
+    private $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT;
 
-	/**
+    public $chapterList = array();
+    public $referencesTitle = "Guide";
+    public $referencesList = array();
+    public $referencesName = array();
+    public $referencesOrder = NULL;
+
+    /**
      * Class constructor.
      *
      * @return void
      */
-    function __construct($uid = NULL, $docTitle = NULL, $docAuthor = NULL) {
-        $this->navMap = new NavMap();
-		$this->currentLevel = $this->navMap;
+    function __construct($uid = NULL, $docTitle = NULL, $docAuthor = NULL, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
+        $this->navMap = new NavMap($writingDirection);
+        $this->currentLevel = $this->navMap;
         $this->setUid($uid);
         $this->setDocTitle($docTitle);
         $this->setDocAuthor($docAuthor);
+		$this->setLanguageCode($languageCode);
+		$this->setWritingDirection($writingDirection);
     }
 
     /**
@@ -42,6 +55,24 @@ class Ncx {
     function __destruct() {
         unset($this->navMap, $this->uid, $this->docTitle, $this->docAuthor);
     }
+
+    /**
+     *
+     * Enter description here ...
+     *
+     * @param unknown_type $ident
+     */
+    function setVersion($bookVersion) {
+        $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
+    }
+
+	/**
+	 * 
+	 * @return bool TRUE if the book is set to type ePub 2
+	 */
+    function isEPubVersion2() {
+        return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
+   }
 
     /**
      *
@@ -77,6 +108,26 @@ class Ncx {
      *
      * Enter description here ...
      *
+     * @param unknown_type $languageCode
+     */
+    function setLanguageCode($languageCode) {
+        $this->languageCode = is_string($languageCode) ? trim($languageCode) : "en";
+    }
+
+    /**
+     *
+     * Enter description here ...
+     *
+     * @param unknown_type $writingDirection
+     */
+    function setWritingDirection($writingDirection) {
+        $this->writingDirection = is_string($writingDirection) ? trim($writingDirection) : EPub::DIRECTION_LEFT_TO_RIGHT;
+    }
+
+    /**
+     *
+     * Enter description here ...
+     *
      * @param unknown_type $navMap
      */
     function setNavMap($navMap) {
@@ -85,72 +136,78 @@ class Ncx {
         }
     }
 
-	/**
-	 * Add one chapter level.
-	 * 
-	 * Subsequent chapters will be added to this level. 
-	 */
-	function subLevel() {
-		if ($this->lastLevel !== NULL) {
-			$this->currentLevel = $this->lastLevel;
+    /**
+     * Add one chapter level.
+     * 
+     * Subsequent chapters will be added to this level. 
+     */
+    function subLevel($navTitle = NULL, $navId = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
+		$navPoint = FALSE;
+		if (isset($navTitle) && isset($navClass)) {
+			$navPoint = new NavPoint($navTitle, NULL, $navId, $navClass, $isNavHidden, $writingDirection);
+			$this->addNavPoint($navPoint);
 		}
-	}
+        if ($this->lastLevel !== NULL) {
+            $this->currentLevel = $this->lastLevel;
+        }
+		return $navPoint;
+    }
 
-	/**
-	 * Step back one chapter level.
-	 * 
-	 * Subsequent chapters will be added to this chapters parent level. 
-	 */
-	function backLevel() {
-		$this->lastLevel = $this->currentLevel;
-		$this->currentLevel = $this->currentLevel->getParent();
-	}
+    /**
+     * Step back one chapter level.
+     * 
+     * Subsequent chapters will be added to this chapters parent level. 
+     */
+    function backLevel() {
+        $this->lastLevel = $this->currentLevel;
+        $this->currentLevel = $this->currentLevel->getParent();
+    }
 
-	/**
-	 * Step back to the root level.
-	 * 
-	 * Subsequent chapters will be added to the rooot NavMap. 
-	 */
-	function rootLevel() {
-		$this->lastLevel = $this->currentLevel;
-		$this->currentLevel = $this->navMap;
-	}
+    /**
+     * Step back to the root level.
+     * 
+     * Subsequent chapters will be added to the rooot NavMap. 
+     */
+    function rootLevel() {
+        $this->lastLevel = $this->currentLevel;
+        $this->currentLevel = $this->navMap;
+    }
 
-	/**
-	 * Step back to the given level.
-	 * Useful for returning to a previous level from deep within the structure. 
-	 * Values below 2 will have the same effect as rootLevel()
-	 * 
-	 * @param int $newLevel
-	 */
-	function setCurrentLevel($newLevel) {
-		if ($newLevel <= 1) {
-			$this->rootLevel();
-		} else {
-			while ($this->currentLevel->getLevel() > $newLevel) {
-				$this->backLevel();
-			}
-		}
-	}
+    /**
+     * Step back to the given level.
+     * Useful for returning to a previous level from deep within the structure. 
+     * Values below 2 will have the same effect as rootLevel()
+     * 
+     * @param int $newLevel
+     */
+    function setCurrentLevel($newLevel) {
+        if ($newLevel <= 1) {
+            $this->rootLevel();
+        } else {
+            while ($this->currentLevel->getLevel() > $newLevel) {
+                $this->backLevel();
+            }
+        }
+    }
 
-	/**
-	 * Get current level count.
-	 * The indentation of the current structure point.
-	 * 
-	 * @return current level count;
-	 */
-	function getCurrentLevel() {
-		return $this->currentLevel->getLevel();
-	}
+    /**
+     * Get current level count.
+     * The indentation of the current structure point.
+     * 
+     * @return current level count;
+     */
+    function getCurrentLevel() {
+        return $this->currentLevel->getLevel();
+    }
 
-	/**
+    /**
      * Add child NavPoints to current level.
      *
      * @param NavPoint $navPoint
      */
-	function addNavPoint($navPoint) {
-		$this->lastLevel = $this->currentLevel->addNavPoint($navPoint);
-	}
+    function addNavPoint($navPoint) {
+        $this->lastLevel = $this->currentLevel->addNavPoint($navPoint);
+    }
 
     /**
      *
@@ -187,10 +244,12 @@ class Ncx {
     function finalize() {
         $nav = $this->navMap->finalize();
 
-        $ncx = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        . "<!DOCTYPE ncx PUBLIC \"-//NISO//DTD ncx 2005-1//EN\"\n"
-        . "  \"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd\">\n"
-        . "<ncx xmlns=\"http://www.daisy.org/z3986/2005/ncx/\" version=\"2005-1\" xml:lang=\"en\">\n"
+        $ncx = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        if ($this->isEPubVersion2()) {
+            $ncx .= "<!DOCTYPE ncx PUBLIC \"-//NISO//DTD ncx 2005-1//EN\"\n"
+            . "  \"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd\">\n";
+        }
+        $ncx .= "<ncx xmlns=\"http://www.daisy.org/z3986/2005/ncx/\" version=\"2005-1\" xml:lang=\"" . $this->languageCode . "\" dir=\"" . $this->writingDirection . "\">\n"
         . "\t<head>\n"
         . "\t\t<meta name=\"dtb:uid\" content=\"" . $this->uid . "\" />\n"
         . "\t\t<meta name=\"dtb:depth\" content=\"" . $this->navMap->getNavLevels() . "\" />\n"
@@ -213,23 +272,89 @@ class Ncx {
 
         return $ncx . "</ncx>\n";
     }
+
+	/**
+	 * 
+	 * @param type $title
+	 * @param type $cssFileName
+	 * @return string
+	 */
+    function finalizeEPub3($title = "Table of Contents", $cssFileName = NULL) {
+        $end = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n"
+            . "      xmlns:epub=\"http://www.idpf.org/2007/ops\"\n"
+            . "      xml:lang=\"" . $this->languageCode . "\" lang=\"" . $this->languageCode . "\" dir=\"" . $this->writingDirection . "\">\n"
+            . "\t<head>\n"
+            . "\t\t<title>" . $this->docTitle . "</title>\n"
+            . "\t\t<meta http-equiv=\"default-style\" content=\"text/html; charset=utf-8\"/>\n";
+        if ($cssFileName !== NULL) {
+            $end .= "\t\t<link rel=\"stylesheet\" href=\"" . $cssFileName . "\" type=\"text/css\"/>\n";
+        }
+        $end .= "\t</head>\n"
+            . "\t<body epub:type=\"frontmatter toc\">\n"
+            . "\t\t<header>\n"
+            . "\t\t\t<h1>" . $title . "</h1>\n"
+            . "\t\t</header>\n"
+            . $this->navMap->finalizeEPub3()
+            . $this->finalizeEPub3Landmarks()
+            . "\t</body>\n"
+            . "</html>\n";
+
+        return $end;
+    }
+	
+	/**
+	 * Build the landmarks for the ePub 3 toc.
+	 * @return string
+	 */
+	function finalizeEPub3Landmarks() {
+		$lm = "";
+		if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
+			$lm = "\t\t\t<nav epub:type=\"landmarks\">\n"
+					. "\t\t\t\t<h2"
+					. ($this->writingDirection === EPub::DIRECTION_RIGHT_TO_LEFT ? " dir=\"rtl\"" : "") 
+					. ">" . $this->referencesTitle . "</h2>\n"
+					. "\t\t\t\t<ol>\n";
+
+			$li = "";
+			while (list($item, $descriptive) = each($this->referencesOrder)) {
+				if (array_key_exists($item, $this->referencesList)) {
+					$li .= "\t\t\t\t\t<li><a epub:type=\"" 
+							. $item 
+							. "\" href=\"" . $this->referencesList[$item] . "\">"
+							. (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item])
+							. "</a></li>\n";
+				}
+			}
+			if (empty($li)) {
+				return "";
+			}
+			
+			$lm .= $li 
+					. "\t\t\t\t</ol>\n"
+					. "\t\t\t</nav>\n";
+		}
+		return $lm;
+	}
 }
 
 /**
  * ePub NavMap class
  */
 class NavMap {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $navPoints = array();
     private $navLevels = 0;
+	private $writingDirection = NULL;
 
     /**
      * Class constructor.
      *
      * @return void
      */
-    function __construct() {
+    function __construct($writingDirection = NULL) {
+		$this->setWritingDirection($writingDirection);
     }
 
     /**
@@ -240,19 +365,36 @@ class NavMap {
     function __destruct() {
         unset($this->navPoints, $this->navLevels);
     }
+	
+    /**
+     * Set the writing direction to be used for this NavPoint.
+     *
+     * @param String $writingDirection
+     */
+    function setWritingDirection($writingDirection) {
+        $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : NULL;
+    }
+
+    function getWritingDirection() {
+        return $this->writingDirection;
+    }
 
     /**
      * Add a navPoint to the root of the NavMap.
      *
-     * @param unknown_type $navPoint
+     * @param type $navPoint
+     * @return NavMap
      */
     function addNavPoint($navPoint) {
         if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
-			$navPoint->setParent($this);
+            $navPoint->setParent($this);
+			if ($navPoint->getWritingDirection() == NULL) {
+				$navPoint->setWritingDirection($this->writingDirection);
+			}
             $this->navPoints[] = $navPoint;
-			return $navPoint;
+            return $navPoint;
         }
-		return $this;
+        return $this;
     }
 
     /**
@@ -265,13 +407,13 @@ class NavMap {
         return $this->navLevels+1;
     }
 
-	function getLevel() {
-		return 1;
-	}
+    function getLevel() {
+        return 1;
+    }
 
-	function getParent() {
-		return $this;
-	}
+    function getParent() {
+        return $this;
+    }
 
     /**
      * Finalize the navMap, the final max depth for the "dtb:depth" meta attribute can be retrieved with getNavLevels after finalization
@@ -279,11 +421,9 @@ class NavMap {
      */
     function finalize() {
         $playOrder = 0;
-        $level = 0;
         $this->navLevels = 0;
 
         $nav = "\t<navMap>\n";
-
         if (sizeof($this->navPoints) > 0) {
             $this->navLevels++;
             foreach ($this->navPoints as $navPoint) {
@@ -293,8 +433,34 @@ class NavMap {
                 }
             }
         }
-
         return $nav . "\t</navMap>\n";
+    }
+
+    /**
+     * Finalize the navMap, the final max depth for the "dtb:depth" meta attribute can be retrieved with getNavLevels after finalization
+     *
+     */
+    function finalizeEPub3() {
+        $playOrder = 0;
+        $level = 0;
+        $this->navLevels = 0;
+
+        $nav = "\t\t<nav epub:type=\"toc\" id=\"toc\">\n";
+
+        if (sizeof($this->navPoints) > 0) {
+            $this->navLevels++;
+
+            $nav .= str_repeat("\t", $level) . "\t\t\t<ol epub:type=\"list\">\n";
+            foreach ($this->navPoints as $navPoint) {
+                $retLevel = $navPoint->finalizeEPub3($nav, $playOrder, 0);
+                if ($retLevel > $this->navLevels) {
+                    $this->navLevels = $retLevel;
+                }
+            }
+            $nav .= str_repeat("\t", $level) . "\t\t\t</ol>\n";
+        }
+
+        return $nav . "\t\t</nav>\n";
     }
 }
 
@@ -302,12 +468,14 @@ class NavMap {
  * ePub NavPoint class
  */
 class NavPoint {
-    const _VERSION = 1.00;
+    const _VERSION = 3.00;
 
     private $label = NULL;
     private $contentSrc = NULL;
     private $id = NULL;
-    private $navPoints = array();
+    private $navClass = NULL;
+    private $isNavHidden = FALSE;
+	private $navPoints = array();
 	private $parent = NULL;
 
     /**
@@ -320,10 +488,13 @@ class NavPoint {
      * @param String $id
      * @return void
      */
-    function __construct($label, $contentSrc, $id = NULL) {
+    function __construct($label, $contentSrc = NULL, $id = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
         $this->setLabel($label);
         $this->setContentSrc($contentSrc);
         $this->setId($id);
+        $this->setNavClass($navClass);
+        $this->setNavHidden($isNavHidden);
+		$this->setWritingDirection($writingDirection);
     }
 
     /**
@@ -346,64 +517,64 @@ class NavPoint {
         $this->label = is_string($label) ? trim($label) : NULL;
     }
 
-	/**
+    /**
      * Get the Text label for the NavPoint.
-	 * 
-	 * @return string Label
-	 */
-	function getLabel() {
-		return $this->label;
-	}
-	
+     * 
+     * @return string Label
+     */
+    function getLabel() {
+        return $this->label;
+    }
+    
     /**
      * Set the src reference for the NavPoint.
      *
-     * The src is mandatory.
+     * The src is mandatory for ePub 2.
      *
      * @param String $contentSrc
      */
     function setContentSrc($contentSrc) {
-        $this->contentSrc = is_string($contentSrc) ? trim($contentSrc) : NULL;
+        $this->contentSrc =  isset($contentSrc) && is_string($contentSrc) ? trim($contentSrc) : NULL;
     }
 
-	/**
-	 * Get the src reference for the NavPoint.
-	 *
-	 * @return string content src url.
-	 */
-	function getContentSrc() {
-		return $this->contentSrc;
-	}
+    /**
+     * Get the src reference for the NavPoint.
+     *
+     * @return string content src url.
+     */
+    function getContentSrc() {
+        return $this->contentSrc;
+    }
     /**
      * Set the parent for this NavPoint.
      *
      * @param NavPoint or NavMap $parent
      */
     function setParent($parent) {
-		if ($parent != NULL && is_object($parent) && 
-				(get_class($parent) === "NavPoint" || get_class($parent) === "NavMap") ) {
-			$this->parent = $parent;
-		}
+        if ($parent != NULL && is_object($parent) && 
+                (get_class($parent) === "NavPoint" || get_class($parent) === "NavMap") ) {
+            $this->parent = $parent;
+        }
     }
 
-	/**
-	 * Get the parent to this NavPoint.
-	 * 
-	 * @return NavPoint, or NavMap if the parent is the root.
-	 */
-	function getParent() {
-		return $this->parent;
-	}
-	
-	/**
-	 * Get the current level. 1 = document root.
-	 * 
-	 * @return int level
-	 */
-	function getLevel() {
-		return $this->parent === NULL ? 1 : $this->parent->getLevel()+1;
-	}
-	
+    /**
+     * Get the parent to this NavPoint.
+     * 
+     * @return NavPoint, or NavMap if the parent is the root.
+     */
+    function getParent() {
+        return $this->parent;
+    }
+    
+    /**
+     * Get the current level. 1 = document root.
+     * 
+     * @return int level
+     */
+    function getLevel() {
+        return $this->parent === NULL ? 1 : $this->parent->getLevel()+1;
+    }
+    
     /**
      * Set the id for the NavPoint.
      *
@@ -416,17 +587,51 @@ class NavPoint {
     }
 
     /**
+     * Set the class to be used for this NavPoint.
+     *
+     * @param String $navClass
+     */
+    function setNavClass($navClass) {
+        $this->navClass = isset($navClass) && is_string($navClass) ? trim($navClass) : NULL;
+    }
+
+    /**
+     * Set the class to be used for this NavPoint.
+     *
+     * @param String $navClass
+     */
+    function setNavHidden($isNavHidden) {
+        $this->isNavHidden = $isNavHidden === TRUE;
+    }
+
+    /**
+     * Set the writing direction to be used for this NavPoint.
+     *
+     * @param String $writingDirection
+     */
+    function setWritingDirection($writingDirection) {
+        $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : NULL;
+    }
+
+    function getWritingDirection() {
+        return $this->writingDirection;
+    }
+
+	/**
      * Add child NavPoints for multi level NavMaps.
      *
      * @param NavPoint $navPoint
      */
     function addNavPoint($navPoint) {
         if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
-			$navPoint->setParent($this);
+            $navPoint->setParent($this);
+			if ($navPoint->getWritingDirection() == NULL) {
+				$navPoint->setWritingDirection($this->writingDirection);
+			}
             $this->navPoints[] = $navPoint;
-			return $navPoint;
+            return $navPoint;
         }
-		return $this;
+        return $this;
     }
 
     /**
@@ -440,28 +645,95 @@ class NavPoint {
      */
     function finalize(&$nav = "", &$playOrder = 0, $level = 0) {
         $maxLevel = $level;
-        $playOrder++;
-        if ($this->id == NULL) {
-            $this->id = "navpoint-" . $playOrder;
-        }
+        $levelAdjust = 0;
 
-        $nav .= str_repeat("\t", $level) . "\t\t<navPoint id=\"" . $this->id . "\" playOrder=\"" . $playOrder . "\">\n"
-        . str_repeat("\t", $level) . "\t\t\t<navLabel>\n"
-        . str_repeat("\t", $level) . "\t\t\t\t<text>" . $this->label . "</text>\n"
-        . str_repeat("\t", $level) . "\t\t\t</navLabel>\n"
-        . str_repeat("\t", $level) . "\t\t\t<content src=\"" . $this->contentSrc . "\" />\n";
+		if ($this->isNavHidden) {
+			return $maxLevel;
+		}
+		
+		if (isset($this->contentSrc)) {
+			$playOrder++;
+
+			if ($this->id == NULL) {
+				$this->id = "navpoint-" . $playOrder;
+			}
+			$nav .= str_repeat("\t", $level) . "\t\t<navPoint id=\"" . $this->id . "\" playOrder=\"" . $playOrder . "\">\n"
+			. str_repeat("\t", $level) . "\t\t\t<navLabel>\n"
+			. str_repeat("\t", $level) . "\t\t\t\t<text>" . $this->label . "</text>\n"
+			. str_repeat("\t", $level) . "\t\t\t</navLabel>\n"
+			. str_repeat("\t", $level) . "\t\t\t<content src=\"" . $this->contentSrc . "\" />\n";
+		} else {
+			$levelAdjust++;
+		}
 
         if (sizeof($this->navPoints) > 0) {
             $maxLevel++;
             foreach ($this->navPoints as $navPoint) {
-                $retLevel = $navPoint->finalize($nav, $playOrder, ($level+1));
+                $retLevel = $navPoint->finalize($nav, $playOrder, ($level+1+$levelAdjust));
                 if ($retLevel > $maxLevel) {
                     $maxLevel = $retLevel;
                 }
             }
         }
 
-        $nav .= str_repeat("\t", $level) . "\t\t</navPoint>\n";
+		if (isset($this->contentSrc)) {
+	        $nav .= str_repeat("\t", $level) . "\t\t</navPoint>\n";
+		}
+
+        return $maxLevel;
+    }
+
+    /**
+     *
+     * Enter description here ...
+     *
+     * @param unknown_type $nav
+     * @param unknown_type $playOrder
+     * @param unknown_type $level
+     * @return unknown
+     */
+    function finalizeEPub3(&$nav = "", &$playOrder = 0, $level = 0, $subLevelClass = NULL, $subLevelHidden = FALSE) {
+        $maxLevel = $level;
+
+        if ($this->id == NULL) {
+            $this->id = "navpoint-" . $playOrder;
+        }
+		$indent = str_repeat("\t", $level) . "\t\t\t\t";
+		
+        $nav .= $indent . "<li id=\"" . $this->id . "\"";
+		if (isset($this->writingDirection)) {
+			$nav .= " dir=\"" . $this->writingDirection . "\"";
+		}
+		$nav .=  ">\n";
+		
+		if (isset($this->contentSrc)) {
+			$nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\">" . $this->label . "</a>\n";
+		} else {
+			$nav .= $indent . "\t<span>" . $this->label . "</span>\n";
+		}
+
+        if (sizeof($this->navPoints) > 0) {
+            $maxLevel++;
+
+			$nav .= $indent . "\t<ol epub:type=\"list\"";
+            if (isset($subLevelClass)) {
+				$nav .= " class=\"" . $subLevelClass . "\"";
+			}
+            if ($subLevelHidden) {
+				$nav .= " hidden=\"hidden\"";
+			}
+            $nav .= ">\n";
+
+            foreach ($this->navPoints as $navPoint) {
+                $retLevel = $navPoint->finalizeEPub3($nav, $playOrder, ($level+2), $subLevelClass, $subLevelHidden);
+                if ($retLevel > $maxLevel) {
+                    $maxLevel = $retLevel;
+                }
+            }
+            $nav .= $indent . "\t</ol>\n";
+        }
+
+        $nav .= $indent . "</li>\n";
 
         return $maxLevel;
     }

@@ -5,6 +5,7 @@
  * @author A. Grandt
  * @copyright A. Grandt 2009-2013
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @version 3.00
  */
 global $htmlEntities;
 $htmlEntities = array();

@@ -5,18 +5,29 @@
  * Split size is considered max target size. The actual size is the result of an even split across the resulting files.
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2012 A. Grandt
+ * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
- * @version 2.02
+ * @version 3.00
  */
 class EPubChapterSplitter {
-    const VERSION = 2.02;
+    const VERSION = 3.00;
     
     private $splitDefaultSize = 250000;
+    private $bookVersion = EPub::BOOK_VERSION_EPUB2;
 
     /**
+     *
+     * Enter description here ...
+     *
+     * @param unknown_type $ident
+     */
+    function setVersion($bookVersion) {
+        $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
+    }
+	
+	/**
      * Set default chapter target size.
      * Default is 250000 bytes, and minimum is 10240 bytes.
      *
@@ -175,7 +186,13 @@ class EPubChapterSplitter {
             // force pretty printing and correct formatting, should not be needed, but it is.
             $xml->loadXML($xml2Doc->saveXML());
             
-            $chapterData[$splitOnSearchString ? $chapterNames[$idx] : $idx] = $xml->saveXML();
+			$doc = $xml->saveXML();
+					
+			if ($this->bookVersion === EPub::BOOK_VERSION_EPUB3) {
+				$doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
+			}
+
+            $chapterData[$splitOnSearchString ? $chapterNames[$idx] : $idx] = $doc;
         }
 
         return $chapterData;
