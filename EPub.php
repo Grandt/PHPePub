@@ -409,8 +409,7 @@ class EPub {
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
             $this->ncx->addNavPoint($navPoint);
             $this->ncx->chapterList[$chapterName] = $navPoint;
-		}
-    } else if (!isset($chapterData) && $fileName=="TOC.xhtml") {
+		} else if (!isset($chapterData) && $fileName=="TOC.xhtml") {
             $this->chapterCount++;
             $this->opf->addItemRef("toc");
 
