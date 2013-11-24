@@ -884,7 +884,7 @@ class Reference {
     const TABLE_OF_CONTENTS = "toc";
 
     /** Page with possibly title, author, publisher, and other metadata */
-    const TITLE_PAGE = "title-page";
+    const TITLE_PAGE = "titlepage";
 
     /** First page of the book, ie. first page of the first chapter */
     const TEXT = "text";

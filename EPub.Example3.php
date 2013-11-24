@@ -81,6 +81,7 @@ $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "im
 $log->logLine("Set Cover Image");
 
 $cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n" . $bookEnd;
+$book->addChapter("Table of Contents", "TOC.xhtml", NULL, false, EPub::EXTERNAL_REF_IGNORE);
 $book->addChapter("Notices", "Cover.html", $cover);
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
