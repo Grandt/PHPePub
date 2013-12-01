@@ -1,5 +1,10 @@
+---------------------------------------------------------------------
+Rev. 3.20 - 2014-01-01
+* 
+---------------------------------------------------------------------
 Rev. 3.10 - 2013-12-01
 * Changes to TOC generation and references handling for improved results in specifically ePub 3
+* Added better support for RTL writing direction in generated pages (TOC)
 * Fixed: Author was not correctly added to the book metadata.
 * Code clean up and comment documentation
 ---------------------------------------------------------------------

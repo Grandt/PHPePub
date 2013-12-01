@@ -3,12 +3,12 @@
  * ePub NCX file structure
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2013 A. Grandt
+ * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.00
+ * @version 3.20
  */
 class Ncx {
-    const _VERSION = 3.00;
+    const _VERSION = 3.20;
 
     const MIMETYPE = "application/x-dtbncx+xml";
 
