@@ -200,7 +200,7 @@ class Opf {
             $dc->addOpfAttr("role", trim($role));
         }
 
-        $this->dc[] = $dc;
+        $this->metadata->addDublinCore($dc);
     }
 
     /**
@@ -222,7 +222,7 @@ class Opf {
             $dc->addOpfAttr("role", trim($role));
         }
 
-        $this->dc[] = $dc;
+        $this->metadata->addDublinCore($dc);
     }
 }
 
