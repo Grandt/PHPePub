@@ -9,10 +9,10 @@
  * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
- * @version 3.00
+ * @version 3.10
  */
 class EPubChapterSplitter {
-    const VERSION = 3.00;
+    const VERSION = 3.10;
 
     private $splitDefaultSize = 250000;
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;

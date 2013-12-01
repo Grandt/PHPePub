@@ -5,10 +5,10 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2013 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.00
+ * @version 3.10
  */
 class Opf {
-    const _VERSION = 3.00;
+    const _VERSION = 3.10;
 
     /* Core Media types.
      * These types are the only guaranteed mime types any ePub reader must understand.
