@@ -82,6 +82,9 @@ $log->logLine("Set Cover Image");
 
 $cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n" . $bookEnd;
 $book->addChapter("Notices", "Cover.html", $cover);
+$book->buildTOC(NULL, "toc", "Table of Contents", TRUE, TRUE);
+//    function buildTOC($cssFileName = NULL, $tocCSSClass = "toc", $title = "Table of Contents", $addReferences = TRUE, $addToIndex = FALSE, $tocFileName = "TOC.xhtml") {
+
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . "<h2>Lorem ipsum</h2>\n"
@@ -309,8 +312,8 @@ $book->addChapter("Chapter 7.3.1", "Chapter00731.html", $content_start . "<h2>Ch
 // If you have nested chapters, you can call ->rootLevel() to return your hierachy to the root of the navMap.
 $book->rootLevel();
 
-$log->logLine("Add TOC");
-$book->buildTOC();
+// $log->logLine("Add TOC");
+// $book->buildTOC();
 
 $book->addChapter("Log", "Log.html", $content_start . $log->getLog() . "\n</pre>" . $bookEnd);
 
@@ -340,7 +343,7 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 //$book->saveBook('epub-filename', '.');
 
 // Send the book to the client. ".epub" will be appended if missing.
-$zipData = $book->sendBook("ExampleBook2");
+$zipData = $book->sendBook("ExampleBook1");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.

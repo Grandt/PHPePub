@@ -78,7 +78,7 @@ class Logger {
 			$logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $this->name . $line;
             $this->log .= $logline;
             $this->tLast = $tTemp;
-			
+
 		    if ($this->isDebugging) {
 				echo "<pre>" . $logline . "\n</pre>\n";
 			}
