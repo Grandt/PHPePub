@@ -1,3 +1,8 @@
+Rev. 3.10 - 2013-12-01
+* Changes to TOC generation and references handling for improved results in specifically ePub 3
+* Fixed: Author was not correctly added to the book metadata.
+* Code clean up and comment documentation
+---------------------------------------------------------------------
 Rev. 3.00 - 2013-11-03
 ---------------------------------------------------------------------
 * Added: ePub 3 support. The ePub 3 still contains the NCX for backwards combatability to ePub 2 readers, though there is no gurantee that it'll work on all readers.
