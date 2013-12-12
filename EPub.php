@@ -705,8 +705,19 @@ class EPub {
         if ($isDocAString) {
             //$html = $xmlDoc->saveXML();
 
-            $head = $xmlDoc->getElementsByTagName("head");
-            $body = $xmlDoc->getElementsByTagName("body");
+            $htmlNode = $xmlDoc->getElementsByTagName("html");
+            $headNode = $xmlDoc->getElementsByTagName("head");
+            $bodyNode = $xmlDoc->getElementsByTagName("body");
+
+			$htmlNS = "";
+			for ($index = 0; $index < $htmlNode->item(0)->attributes->length; $index++) {
+				$nodeName = $htmlNode->item(0)->attributes->item($index)->nodeName;
+				$nodeValue = $htmlNode->item(0)->attributes->item($index)->nodeValue;
+
+				if ($nodeName != "xmlns") {
+					$htmlNS .= " $nodeName=\"$nodeValue\"";
+				}
+			}
 
             $xml = new DOMDocument('1.0', "utf-8");
             $xml->lookupPrefix("http://www.w3.org/1999/xhtml");
@@ -715,10 +726,10 @@ class EPub {
 
             $xml2Doc = new DOMDocument('1.0', "utf-8");
             $xml2Doc->lookupPrefix("http://www.w3.org/1999/xhtml");
-            $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n</html>\n");
+            $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\"$htmlNS>\n</html>\n");
             $html = $xml2Doc->getElementsByTagName("html")->item(0);
-            $html->appendChild($xml2Doc->importNode($head->item(0), TRUE));
-            $html->appendChild($xml2Doc->importNode($body->item(0), TRUE));
+            $html->appendChild($xml2Doc->importNode($headNode->item(0), TRUE));
+            $html->appendChild($xml2Doc->importNode($bodyNode->item(0), TRUE));
 
             // force pretty printing and correct formatting, should not be needed, but it is.
             $xml->loadXML($xml2Doc->saveXML());
@@ -728,7 +739,7 @@ class EPub {
 				$doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
 			}
         }
-        return TRUE;
+		return TRUE;
     }
 
     /**
