@@ -1,6 +1,10 @@
 ---------------------------------------------------------------------
 Rev. 3.20 - 2014-01-01
-* 
+* Fixed: Issue #15, where name space declarations were erroneously stripped off the html tag of added chapters.
+* Fixed: An issue, where PNG images exceeding the maximum specified sizes were broken during resizing.
+* Fixed: Issue #16, where ePub 3 multimedia needed to be added to the automatic chapter processing.
+* Fixed: Potential issue related to Issue #16 with loading large files from external sources, where these might result in memory errors. These will now be loaded into a temp file on the server, before being added to the book.
+
 ---------------------------------------------------------------------
 Rev. 3.10 - 2013-12-01
 * Changes to TOC generation and references handling for improved results in specifically ePub 3
