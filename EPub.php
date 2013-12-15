@@ -1020,10 +1020,22 @@ class EPub {
             $imageData = $this->getImage($source);
         } else if (strpos($source, "/") === 0) {
             $internalPath = pathinfo($source, PATHINFO_DIRNAME);
-	        $imageData = $this->getImage($this->docRoot . $source);
+
+			$path = $source;
+			if (!file_exists($path)) {
+				$path = $this->docRoot . $path;
+			}
+
+			$imageData = $this->getImage($path);
         } else {
             $internalPath = $htmlDir . "/" . preg_replace('#^[/\.]+#', '', pathinfo($source, PATHINFO_DIRNAME));
-            $imageData = $this->getImage($baseDir . "/" . $source);
+			
+			$path = $baseDir . "/" . $source;
+			if (!file_exists($path)) {
+				$path = $this->docRoot . $path;
+			}
+			
+            $imageData = $this->getImage($path);
         }
         if ($imageData !== FALSE) {
 			$iSrcInfo = pathinfo($internalSrc);
@@ -1055,7 +1067,7 @@ class EPub {
         if ($this->isFinalized) {
             return FALSE;
         }
-        $mediaPath  = NULL;
+        $mediaPath = NULL;
 		$tmpFile;
 
         if (preg_match('#^(http|ftp)s?://#i', $source) == 1) {
@@ -1066,14 +1078,22 @@ class EPub {
             }
             $internalPath = $urlinfo["scheme"] . "/" . $urlinfo["host"] . "/" . pathinfo($urlinfo["path"], PATHINFO_DIRNAME);
             $isSourceExternal = TRUE;
-            @$mediaPath = $this->getFileContents($source, true);
+            $mediaPath = $this->getFileContents($source, true);
 			$tmpFile = $mediaPath;
 		} else if (strpos($source, "/") === 0) {
             $internalPath = pathinfo($source, PATHINFO_DIRNAME);
-            @$mediaPath = $this->docRoot . $source;
+			
+			$mediaPath = $source;
+			if (!file_exists($mediaPath)) {
+				$mediaPath = $this->docRoot . $mediaPath;
+			}
         } else {
             $internalPath = $htmlDir . "/" . preg_replace('#^[/\.]+#', '', pathinfo($source, PATHINFO_DIRNAME));
-            @$mediaPath = $baseDir . "/" . $source;
+			
+			$mediaPath = $baseDir . "/" . $source;
+			if (!file_exists($mediaPath)) {
+				$mediaPath = $this->docRoot . $mediaPath;
+			}
         }
 
         if ($mediaPath !== FALSE) {
