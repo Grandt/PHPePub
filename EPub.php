@@ -2279,7 +2279,7 @@ class EPub {
         }
 
         if ($ext !== FALSE) {
-            return getMimeTypeFromExtension($ext);
+            return $this->getMimeTypeFromExtension($ext);
         }
         return "application/octet-stream";
     }
@@ -2427,4 +2427,3 @@ class EPub {
         return $this->log->getLog();
     }
 }
-?>
