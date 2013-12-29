@@ -9,15 +9,15 @@
  * Thanks to: Adam Schmalhofer and Kirstyn Fox for invaluable input and for "nudging" me in the right direction :)
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2013 A. Grandt
+ * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL 2.1
- * @version 3.10
+ * @version 3.20
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
- * @uses Zip.php version 1.40; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
+ * @uses Zip.php version 1.50; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION = 3.10;
+    const VERSION = 3.20;
     const REQ_ZIP_VERSION = 1.50;
 
     const IDENTIFIER_UUID = 'UUID';
@@ -701,12 +701,24 @@ class EPub {
         $this->processChapterStyles($xmlDoc, $externalReferences, $baseDir, $htmlDir);
         $this->processChapterLinks($xmlDoc, $externalReferences, $baseDir, $htmlDir, $backPath);
         $this->processChapterImages($xmlDoc, $externalReferences, $baseDir, $htmlDir, $backPath);
+        $this->processChapterSources($xmlDoc, $externalReferences, $baseDir, $htmlDir, $backPath);
 
         if ($isDocAString) {
             //$html = $xmlDoc->saveXML();
 
-            $head = $xmlDoc->getElementsByTagName("head");
-            $body = $xmlDoc->getElementsByTagName("body");
+            $htmlNode = $xmlDoc->getElementsByTagName("html");
+            $headNode = $xmlDoc->getElementsByTagName("head");
+            $bodyNode = $xmlDoc->getElementsByTagName("body");
+
+			$htmlNS = "";
+			for ($index = 0; $index < $htmlNode->item(0)->attributes->length; $index++) {
+				$nodeName = $htmlNode->item(0)->attributes->item($index)->nodeName;
+				$nodeValue = $htmlNode->item(0)->attributes->item($index)->nodeValue;
+
+				if ($nodeName != "xmlns") {
+					$htmlNS .= " $nodeName=\"$nodeValue\"";
+				}
+			}
 
             $xml = new DOMDocument('1.0', "utf-8");
             $xml->lookupPrefix("http://www.w3.org/1999/xhtml");
@@ -715,10 +727,10 @@ class EPub {
 
             $xml2Doc = new DOMDocument('1.0', "utf-8");
             $xml2Doc->lookupPrefix("http://www.w3.org/1999/xhtml");
-            $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n</html>\n");
+            $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\"$htmlNS>\n</html>\n");
             $html = $xml2Doc->getElementsByTagName("html")->item(0);
-            $html->appendChild($xml2Doc->importNode($head->item(0), TRUE));
-            $html->appendChild($xml2Doc->importNode($body->item(0), TRUE));
+            $html->appendChild($xml2Doc->importNode($headNode->item(0), TRUE));
+            $html->appendChild($xml2Doc->importNode($bodyNode->item(0), TRUE));
 
             // force pretty printing and correct formatting, should not be needed, but it is.
             $xml->loadXML($xml2Doc->saveXML());
@@ -728,7 +740,7 @@ class EPub {
 				$doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
 			}
         }
-        return TRUE;
+		return TRUE;
     }
 
     /**
@@ -887,9 +899,11 @@ class EPub {
         $postProcDomElememts = array();
         $images = $xmlDoc->getElementsByTagName("img");
         $itemCount = $images->length;
+		
         for ($idx = 0; $idx < $itemCount; $idx++) {
             $img = $images->item($idx);
-            if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
+
+			if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
                 $postProcDomElememts[] = $img;
             } else if ($externalReferences === EPub::EXTERNAL_REF_REPLACE_IMAGES) {
                 $altNode = $img->attributes->getNamedItem("alt");
@@ -923,6 +937,59 @@ class EPub {
         }
         return TRUE;
     }
+	
+    /**
+     * Process source tags in a DOMDocument.
+     * $externalReferences will determine what will happen to these images, and the img src will be rewritten accordingly.
+     *
+     * @param DOMDocument &$xmlDoc             (referenced)
+     * @param int          $externalReferences How to handle external references, EPub::EXTERNAL_REF_IGNORE, EPub::EXTERNAL_REF_ADD or EPub::EXTERNAL_REF_REMOVE_IMAGES? Default is EPub::EXTERNAL_REF_ADD.
+     * @param string       $baseDir            Default is "", meaning it is pointing to the document root.
+     * @param string       $htmlDir            The path to the parent HTML file's directory from the root of the archive.
+     * @param string       $backPath           The path to get back to the root of the archive from $htmlDir.
+     *
+     * @return bool  FALSE if uncuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
+     */
+	protected function processChapterSources(&$xmlDoc, $externalReferences = EPub::EXTERNAL_REF_ADD, $baseDir = "", $htmlDir = "", $backPath = "") {
+		if ($this->isFinalized || $externalReferences === EPub::EXTERNAL_REF_IGNORE) {
+			return FALSE;
+		}
+
+		if ($this->bookVersion !== EPub::BOOK_VERSION_EPUB3) {
+			// ePub 2 does not support multimedia formats, and they must be removed.
+			$externalReferences = EPub::EXTERNAL_REF_REMOVE_IMAGES;
+		}
+		
+		$postProcDomElememts = array();
+		$images = $xmlDoc->getElementsByTagName("source");
+		$itemCount = $images->length;
+		for ($idx = 0; $idx < $itemCount; $idx++) {
+			$img = $images->item($idx);
+			if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
+				$postProcDomElememts[] = $img;
+			} else if ($externalReferences === EPub::EXTERNAL_REF_REPLACE_IMAGES) {
+				$altNode = $img->attributes->getNamedItem("alt");
+				$alt = "image";
+				if ($altNode !== NULL && strlen($altNode->nodeValue) > 0) {
+					$alt = $altNode->nodeValue;
+				}
+				$postProcDomElememts[] = array($img, $this->createDomFragment($xmlDoc, "[" . $alt . "]"));
+			} else {
+				$source = $img->attributes->getNamedItem("src")->nodeValue;
+
+				$parsedSource = parse_url($source);
+				$internalSrc = $this->sanitizeFileName(urldecode(pathinfo($parsedSource['path'], PATHINFO_BASENAME)));
+				$internalPath = "";
+				$isSourceExternal = FALSE;
+
+				if ($this->resolveMedia($source, $internalPath, $internalSrc, $isSourceExternal, $baseDir, $htmlDir, $backPath)) {
+					$img->setAttribute("src", $backPath . $internalPath);
+				} else if ($isSourceExternal) {
+					$postProcDomElememts[] = $img; // External image is missing
+				} // else do nothing, if the image is local, and missing, assume it's been generated.
+			}
+		}
+	}
 
     /**
      * Resolve an image src and determine it's target location and add it to the book.
@@ -940,7 +1007,7 @@ class EPub {
             return FALSE;
         }
         $imageData  = NULL;
-
+		
         if (preg_match('#^(http|ftp)s?://#i', $source) == 1) {
             $urlinfo = parse_url($source);
 			$urlPath = pathinfo($urlinfo['path']);
@@ -953,18 +1020,30 @@ class EPub {
             $imageData = $this->getImage($source);
         } else if (strpos($source, "/") === 0) {
             $internalPath = pathinfo($source, PATHINFO_DIRNAME);
-            $imageData = $this->getImage($this->docRoot . $source);
+
+			$path = $source;
+			if (!file_exists($path)) {
+				$path = $this->docRoot . $path;
+			}
+
+			$imageData = $this->getImage($path);
         } else {
             $internalPath = $htmlDir . "/" . preg_replace('#^[/\.]+#', '', pathinfo($source, PATHINFO_DIRNAME));
-            $imageData = $this->getImage($this->docRoot . $baseDir . "/" . $source);
+			
+			$path = $baseDir . "/" . $source;
+			if (!file_exists($path)) {
+				$path = $this->docRoot . $path;
+			}
+			
+            $imageData = $this->getImage($path);
         }
         if ($imageData !== FALSE) {
 			$iSrcInfo = pathinfo($internalSrc);
 			if (!empty($imageData['ext']) && $imageData['ext'] != $iSrcInfo['extension']) {
 				$internalSrc = $iSrcInfo['filename'] . "." . $imageData['ext'];
-			}
+    		}
             $internalPath = Zip::getRelativePath("images/" . $internalPath . "/" . $internalSrc);
-            if (!array_key_exists($internalPath, $this->fileList)) {
+        if (!array_key_exists($internalPath, $this->fileList)) {
                 $this->addFile($internalPath, "i_" . $internalSrc, $imageData['image'], $imageData['mime']);
                 $this->fileList[$internalPath] = $source;
             }
@@ -988,7 +1067,8 @@ class EPub {
         if ($this->isFinalized) {
             return FALSE;
         }
-        $mediaPath  = NULL;
+        $mediaPath = NULL;
+		$tmpFile;
 
         if (preg_match('#^(http|ftp)s?://#i', $source) == 1) {
             $urlinfo = parse_url($source);
@@ -998,22 +1078,35 @@ class EPub {
             }
             $internalPath = $urlinfo["scheme"] . "/" . $urlinfo["host"] . "/" . pathinfo($urlinfo["path"], PATHINFO_DIRNAME);
             $isSourceExternal = TRUE;
-            @$mediaPath = $source;
-        } else if (strpos($source, "/") === 0) {
+            $mediaPath = $this->getFileContents($source, true);
+			$tmpFile = $mediaPath;
+		} else if (strpos($source, "/") === 0) {
             $internalPath = pathinfo($source, PATHINFO_DIRNAME);
-            @$mediaPath = $this->docRoot . $source;
+			
+			$mediaPath = $source;
+			if (!file_exists($mediaPath)) {
+				$mediaPath = $this->docRoot . $mediaPath;
+			}
         } else {
             $internalPath = $htmlDir . "/" . preg_replace('#^[/\.]+#', '', pathinfo($source, PATHINFO_DIRNAME));
-            @$mediaPath = $this->docRoot . $baseDir . "/" . $source;
+			
+			$mediaPath = $baseDir . "/" . $source;
+			if (!file_exists($mediaPath)) {
+				$mediaPath = $this->docRoot . $mediaPath;
+			}
         }
 
         if ($mediaPath !== FALSE) {
             $mime = $this->getMime($source);
             $internalPath = Zip::getRelativePath("media/" . $internalPath . "/" . $internalSrc);
+			
             if (!array_key_exists($internalPath, $this->fileList) &&
-            $this->addLargeFile($internalPath, "m_" . $internalSrc, $mediaPath, $mime)) {
+					$this->addLargeFile($internalPath, "m_" . $internalSrc, $mediaPath, $mime)) {
                 $this->fileList[$internalPath] = $source;
             }
+			if (isset($tmpFile)) {
+				unlink($tmpFile);
+			}
             return TRUE;
         }
         return FALSE;
@@ -2033,22 +2126,37 @@ class EPub {
                 $ratio = $this->maxImageHeight/$height;
             }
 
-			if ($ratio < 1 || empty($mime) ||
-					!($mime == "image/jpeg" || $mime == "image/png" ||
-					    ($this->isGifImagesEnabled !== FALSE && $mime == "image/gif"))) {
-                $image_o = imagecreatefromstring($image);
-                $image_p = imagecreatetruecolor($width*$ratio, $height*$ratio);
-                imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
-                ob_start();
-                imagejpeg($image_p, NULL, 80);
-                $image = ob_get_contents();
-                ob_end_clean();
-                imagedestroy($image_o);
-                imagedestroy($image_p);
-                $mime = "image/jpeg";
-                $ext = "jpg";
-            }
+			if ($ratio < 1 || empty($mime) || ($this->isGifImagesEnabled !== FALSE && $mime == "image/gif")) {
+				$image_o = imagecreatefromstring($image);
+				$image_p = imagecreatetruecolor($width*$ratio, $height*$ratio);
+				
+				if ($mime == "image/png") {
+					imagealphablending($image_p, false);
+					imagesavealpha($image_p, true);  
+					imagealphablending($image_o, true);
+					
+					imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
+					ob_start();
+					imagepng($image_p, NULL, 9);
+					$image = ob_get_contents();
+					ob_end_clean();
+
+					$ext = "png";
+				} else {
+					imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
+					ob_start();
+					imagejpeg($image_p, NULL, 80);
+					$image = ob_get_contents();
+					ob_end_clean();
+
+					$mime = "image/jpeg";
+					$ext = "jpg";
+				}
+				imagedestroy($image_o);
+				imagedestroy($image_p);
+			}
         }
+
 		if ($ext === "") {
 			static $mimeToExt = array (
 				'image/jpeg' => 'jpg',
@@ -2077,20 +2185,46 @@ class EPub {
      * @param string $source
      * @return bool
      */
-    function getFileContents($source) {
+    function getFileContents($source, $toTempFile = FALSE) {
         $isExternal = preg_match('#^(http|ftp)s?://#i', $source) == 1;
 
         if ($isExternal && $this->isCurlInstalled) {
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $source);
+			$outFile = NULL;
+			$fp = NULL;
+			$res = FALSE;
+			$info = array('http_code' => 500);
+			
+		    curl_setopt($ch, CURLOPT_HEADER, 0); 
+            curl_setopt($ch, CURLOPT_URL, str_replace(" ","%20",$source));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $res = curl_exec($ch);
-            $info = curl_getinfo($ch);
-            curl_close($ch);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			curl_setopt($ch, CURLOPT_BUFFERSIZE, 4096);
+			
+			if ($toTempFile) {
+				$outFile = tempnam(sys_get_temp_dir(), "EPub_v" . EPub::VERSION . "_");
+				$fp = fopen($outFile, "w+b");
+				curl_setopt($ch, CURLOPT_FILE, $fp); 
+
+				$res = curl_exec($ch);
+				$info = curl_getinfo($ch);
+				
+				curl_close($ch);
+				fclose($fp);
+			} else {
+				$res = curl_exec($ch);
+				$info = curl_getinfo($ch);
+				
+				curl_close($ch);
+			}
 
             if ($info['http_code'] == 200 && $res != false) {
+				if ($toTempFile) {
+					return $outFile;
+				}
                 return $res;
             }
+			return FALSE;
         }
 
         if ($this->isFileGetContentsInstalled && (!$isExternal || $this->isFileGetContentsExtInstalled)) {
@@ -2293,4 +2427,3 @@ class EPub {
         return $this->log->getLog();
     }
 }
-?>
