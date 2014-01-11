@@ -18,7 +18,7 @@
  */
 class EPub {
     const VERSION = 3.20;
-    const REQ_ZIP_VERSION = 1.50;
+    const REQ_ZIP_VERSION = 1.60;
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI = 'URI';
