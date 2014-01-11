@@ -9,14 +9,14 @@
  * License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2009-2013 A. Grandt
+ * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6110
  * @link https://github.com/Grandt/PHPZip
- * @version 1.50
+ * @version 1.60
  */
 class Zip {
-    const VERSION = 1.50;
+    const VERSION = 1.60;
 
     const ZIP_LOCAL_FILE_HEADER = "\x50\x4b\x03\x04"; // Local file header signature
     const ZIP_CENTRAL_FILE_HEADER = "\x50\x4b\x01\x02"; // Central file header signature
@@ -236,7 +236,7 @@ class Zip {
             $this->zipflush();
         }
 
-        $this->buildZipEntry($filePath, $fileComment, $gpFlags, $gzType, $timestamp, $fileCRC32, $gzLength, $dataLength, self::EXT_FILE_ATTR_FILE);
+        $this->buildZipEntry($filePath, $fileComment, $gpFlags, $gzType, $timestamp, $fileCRC32, $gzLength, $dataLength, $extFileAttr);
 
         $this->zipwrite($gzData);
 
@@ -540,11 +540,13 @@ class Zip {
     /**
      * Send the archive as a zip download
      *
-     * @param string $fileName The name of the Zip archive, ie. "archive.zip".
-     * @param string $contentType Content mime type. Optional, defaults to "application/zip".
+     * @param String $fileName The name of the Zip archive, in ISO-8859-1 (or ASCII) encoding, ie. "archive.zip". Optional, defaults to NULL, which means that no ISO-8859-1 encoded file name will be specified.
+     * @param String $contentType Content mime type. Optional, defaults to "application/zip".
+     * @param String $utf8FileName The name of the Zip archive, in UTF-8 encoding. Optional, defaults to NULL, which means that no UTF-8 encoded file name will be specified.
+     * @param bool $inline Use Content-Disposition with "inline" instead of "attached". Optional, defaults to FALSE.
      * @return bool $success
      */
-    function sendZip($fileName, $contentType = "application/zip") {
+    function sendZip($fileName = null, $contentType = "application/zip", $utf8FileName = null, $inline = false) {
         if (!$this->isFinalized) {
             $this->finalize();
         }
@@ -552,7 +554,7 @@ class Zip {
         $headerFile = null;
         $headerLine = null;
         if (!headers_sent($headerFile, $headerLine) or die("<p><strong>Error:</strong> Unable to send file $fileName. HTML Headers have already been sent from <strong>$headerFile</strong> in line <strong>$headerLine</strong></p>")) {
-            if ((ob_get_contents() === FALSE || ob_get_contents() == '') or die("\n<p><strong>Error:</strong> Unable to send file <strong>$fileName.epub</strong>. Output buffer contains the following text (typically warnings or errors):<br>" . ob_get_contents() . "</p>")) {
+            if ((ob_get_contents() === FALSE || ob_get_contents() == '') or die("\n<p><strong>Error:</strong> Unable to send file <strong>$fileName</strong>. Output buffer contains the following text (typically warnings or errors):<br>" . htmlentities(ob_get_contents()) . "</p>")) {
                 if (ini_get('zlib.output_compression')) {
                     ini_set('zlib.output_compression', 'Off');
                 }
@@ -563,8 +565,19 @@ class Zip {
                 header("Accept-Ranges: bytes");
                 header("Connection: close");
                 header("Content-Type: " . $contentType);
-                header('Content-Disposition: attachment; filename="' . $fileName . '"');
-                header("Content-Transfer-Encoding: binary");
+                $cd = "Content-Disposition: ";
+                if ($inline) {
+                    $cd .= "inline";
+				} else{
+                    $cd .= "attached";
+				}
+                if ($fileName) {
+                    $cd .= '; filename="' . $fileName . '"';
+				}
+                if ($utf8FileName) {
+                    $cd .= "; filename*=UTF-8''" . rawurlencode($utf8FileName);
+				}
+                header($cd);
                 header("Content-Length: ". $this->getArchiveSize());
 
                 if (!is_resource($this->zipFile)) {
@@ -729,7 +742,7 @@ class Zip {
 	 * Sometimes, when a path is generated from multiple fragments, 
 	 *  you can get something like "../data/html/../images/image.jpeg"
 	 * This will normalize that example path to "../data/images/image.jpeg"
-	 * 
+     *
      * @param string $path The path to clean up
      * @return string the clean path
      */
