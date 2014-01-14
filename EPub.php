@@ -11,7 +11,7 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL 2.1
- * @version 3.20
+ * @version 3.21
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.60; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
@@ -19,7 +19,7 @@
  * @uses GIFEncoder by László Zsidi (optional); http://www.phpclasses.org/package/3163
  */
 class EPub {
-    const VERSION = 3.20;
+    const VERSION = 3.21;
     const REQ_ZIP_VERSION = 1.60;
 
     const IDENTIFIER_UUID = 'UUID';
@@ -238,7 +238,7 @@ class EPub {
 		if ($this->isInitialized) {
 			return;
 		}
-		if (strlen($this->bookRoot) != 0 || $this->bookRoot != "OEBPS/") {
+		if (strlen($this->bookRoot) != 0 && $this->bookRoot != "OEBPS/") {
 			$this->setBookRoot($this->bookRoot);
 		}
 
