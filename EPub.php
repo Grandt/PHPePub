@@ -2309,7 +2309,7 @@ class EPub {
 		    curl_setopt($ch, CURLOPT_HEADER, 0); 
             curl_setopt($ch, CURLOPT_URL, str_replace(" ","%20",$source));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			// curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 			curl_setopt($ch, CURLOPT_BUFFERSIZE, 4096);
 			
 			if ($toTempFile) {
