@@ -19,6 +19,8 @@ $book->setDate(time()); // Strictly not needed as the book date defaults to time
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
 $book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBook.html");
 
+$book->isGifImagesEnabled = TRUE;
+
 $cssData = "body {\n  margin-left: .5em;\n  margin-right: .5em;\n  text-align: justify;\n}\n\np {\n  font-family: serif;\n  font-size: 10pt;\n  text-align: justify;\n  text-indent: 1em;\n  margin-top: 0px;\n  margin-bottom: 1ex;\n}\n\nh1, h2 {\n  font-family: sans-serif;\n  font-style: italic;\n  text-align: center;\n  background-color: #6b879c;\n  color: white;\n  width: 100%;\n}\n\nh1 {\n    margin-bottom: 2px;\n}\n\nh2 {\n    margin-top: -2px;\n    margin-bottom: 2px;\n}\n";
 $book->addCSSFile("Styles/styles.css", "css1", $cssData);
 
@@ -43,11 +45,10 @@ $chapter = $content_start . "<p><img src='demo/512x700_g1.gif' alt='Image' /></p
 		. "<p><img src='demo/rxhVVUP.gif' alt='Animated Gif' /></p>\n"
 		. "<p><img src='demo/512x700_2.jpg' alt='none' /></p>\n"
 		. "<p><img src='demo/512x700_3.jpg' alt='Demo 2' /></p>\n"
-. $bookEnd;
+		. $bookEnd;
 
-$book->isGifImagesEnabled = TRUE;
 $book->setCoverImage('demo/512x700_1.jpg');
-
+//$book->maxImageWidth = 150;
 $book->addChapter("Prologue", "Texts/Prologue.html", $content_start . "<h2>Prologue</h2>\n" . $bookEnd);
 $book->addChapter("Chapter 1", "Texts/Chapter1.html", $chapter, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 $book->addChapter("Chapter 2", "Texts/Chapter2.html", $chapter, false, EPub::EXTERNAL_REF_REPLACE_IMAGES, $fileDir);
