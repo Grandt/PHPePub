@@ -1,4 +1,8 @@
 <?php
+namespace com\grandt;
+
+use DirectoryIterator;
+use ZipArchive;
 /**
  * Class to create and manage a Zip file.
  *
@@ -13,10 +17,10 @@
  * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6110
  * @link https://github.com/Grandt/PHPZip
- * @version 1.61
+ * @version 1.62
  */
 class Zip {
-    const VERSION = 1.61;
+    const VERSION = 1.62;
 
     const ZIP_LOCAL_FILE_HEADER = "\x50\x4b\x03\x04"; // Local file header signature
     const ZIP_CENTRAL_FILE_HEADER = "\x50\x4b\x01\x02"; // Central file header signature

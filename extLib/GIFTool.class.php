@@ -1,19 +1,19 @@
 <?php
+namespace com\grandt;
+
+use GIFDecoder;
+use GIFEncoder;
+
 /**
  * ePub GIFTool
  *
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.20
- */
-
-/**
- * Description of GIFTool
- *
- * @author Grandt
+ * @version 3.30
  */
 class GIFTool {
+    const _VERSION = 3.30;
 
 	/**
 	 * resize AnimatedGIF

@@ -1,9 +1,10 @@
 <?php
+namespace com\grandt;
 /**
  * Simple log line aggregator.
  *
  * @author A. Grandt <php@grandt.com>
- * @copyright 2012-2013 A. Grandt
+ * @copyright 2012-2014 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  * @version 1.00
  */

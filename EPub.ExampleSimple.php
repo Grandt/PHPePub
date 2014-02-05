@@ -1,4 +1,8 @@
 <?php
+// Using use merely makes this a little easier.
+// Normally you'll only need to use EPub, unless you specifically need the others.
+use com\grandt\EPub;
+
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
 ini_set('display_errors', 1);

@@ -1,4 +1,9 @@
 <?php
+namespace com\grandt;
+
+use DOMDocument;
+use DOMNode;
+use DrUUID\UUID;
 /**
  * Create an ePub compatible book file.
  *
@@ -11,7 +16,7 @@
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL 2.1
- * @version 3.21
+ * @version 3.30
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
  * @uses Zip.php version 1.60; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
@@ -19,8 +24,8 @@
  * @uses GIFEncoder by László Zsidi (optional); http://www.phpclasses.org/package/3163
  */
 class EPub {
-    const VERSION = 3.21;
-    const REQ_ZIP_VERSION = 1.60;
+    const VERSION = 3.30;
+    const REQ_ZIP_VERSION = 1.62;
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI = 'URI';
@@ -157,8 +162,11 @@ class EPub {
             $this->log->dumpInstalledModules();
         }
 
-        if (!defined("Zip::VERSION") || Zip::VERSION < self::REQ_ZIP_VERSION) {
-            die("<p>EPub version " . self::VERSION . " requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher.<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
+        if (!defined("\com\grandt\Zip::VERSION")) {
+            die("<p>EPub version " . self::VERSION . " requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher, but were unable to determine the Zip.php version.<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
+        }
+        if (Zip::VERSION < self::REQ_ZIP_VERSION) {
+            die("<p>EPub version " . self::VERSION . " requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher, but found Zip.php version " . Zip::VERSION . ".<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
         }
 
         include_once("EPubChapterSplitter.php");

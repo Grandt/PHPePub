@@ -1,11 +1,12 @@
 <?php
+namespace com\grandt;
 /**
  * This should be a complete list of all HTML entities, mapped to their UTF-8 character codes.
  *
  * @author A. Grandt
  * @copyright A. Grandt 2009-2013
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.00
+ * @version 3.30
  */
 global $htmlEntities;
 $htmlEntities = array();

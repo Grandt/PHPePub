@@ -1,4 +1,7 @@
 <?php
+namespace com\grandt;
+
+use DOMDocument;
 /**
  * Split an HTML file into smaller html files, retaining the formatting and structure for the individual parts.
  * What this splitter does is using DOM to try and retain any formatting in the file, including rebuilding the DOM tree for subsequent parts.
@@ -9,10 +12,10 @@
  * @license GNU LGPL 2.1
  * @link http://www.phpclasses.org/package/6115
  * @link https://github.com/Grandt/PHPePub
- * @version 3.20
+ * @version 3.30
  */
 class EPubChapterSplitter {
-    const VERSION = 3.20;
+    const VERSION = 3.30;
 
     private $splitDefaultSize = 250000;
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;

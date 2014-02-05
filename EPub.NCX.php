@@ -1,14 +1,15 @@
 <?php
+namespace com\grandt;
 /**
  * ePub NCX file structure
  *
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.20
+ * @version 3.30
  */
 class Ncx {
-    const _VERSION = 3.20;
+    const _VERSION = 3.30;
 
     const MIMETYPE = "application/x-dtbncx+xml";
 
@@ -141,7 +142,7 @@ class Ncx {
      * @param NavMap $navMap
      */
     function setNavMap($navMap) {
-        if ($navMap != NULL && is_object($navMap) && get_class($navMap) === "NavMap") {
+        if ($navMap != NULL && is_object($navMap) && get_class($navMap) === "com\grandt\NavMap") {
             $this->navMap = $navMap;
         }
     }
@@ -380,7 +381,7 @@ class Ncx {
  * ePub NavMap class
  */
 class NavMap {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $navPoints = array();
     private $navLevels = 0;
@@ -424,7 +425,7 @@ class NavMap {
      * @return NavMap
      */
     function addNavPoint($navPoint) {
-        if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
+        if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "com\grandt\NavPoint") {
             $navPoint->setParent($this);
 			if ($navPoint->getWritingDirection() == NULL) {
 				$navPoint->setWritingDirection($this->writingDirection);
@@ -506,7 +507,7 @@ class NavMap {
  * ePub NavPoint class
  */
 class NavPoint {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $label = NULL;
     private $contentSrc = NULL;
@@ -593,7 +594,7 @@ class NavPoint {
      */
     function setParent($parent) {
         if ($parent != NULL && is_object($parent) &&
-                (get_class($parent) === "NavPoint" || get_class($parent) === "NavMap") ) {
+                (get_class($parent) === "com\grandt\NavPoint" || get_class($parent) === "com\grandt\NavMap") ) {
             $this->parent = $parent;
         }
     }
@@ -664,7 +665,7 @@ class NavPoint {
      * @param NavPoint $navPoint
      */
     function addNavPoint($navPoint) {
-        if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
+        if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "com\grandt\NavPoint") {
             $navPoint->setParent($this);
 			if ($navPoint->getWritingDirection() == NULL) {
 				$navPoint->setWritingDirection($this->writingDirection);

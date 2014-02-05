@@ -1,14 +1,15 @@
 <?php
+namespace com\grandt;
 /**
  * ePub OPF file structure
  *
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.20
+ * @version 3.30
  */
 class Opf {
-    const _VERSION = 3.20;
+    const _VERSION = 3.30;
 
     /* Core Media types.
      * These types are the only guaranteed mime types any ePub reader must understand.
@@ -230,7 +231,7 @@ class Opf {
  * ePub OPF Metadata structures
  */
 class Metadata {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $dc = array();
     private $meta = array();
@@ -259,7 +260,7 @@ class Metadata {
      * @param DublinCore $dc
      */
     function addDublinCore($dc) {
-        if ($dc != NULL && is_object($dc) && get_class($dc) === "DublinCore") {
+        if ($dc != NULL && is_object($dc) && get_class($dc) === "com\grandt\DublinCore") {
             $this->dc[] = $dc;
         }
     }
@@ -316,7 +317,7 @@ class Metadata {
  * ePub OPF Dublin Core (dc:) Metadata structures
  */
 class DublinCore {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     const CONTRIBUTOR = "contributor";
     const COVERAGE = "coverage";
@@ -437,7 +438,7 @@ class DublinCore {
  * ePub OPF Manifest structure
  */
 class Manifest {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $items = array();
 
@@ -465,7 +466,7 @@ class Manifest {
      * @param Item $item
      */
     function addItem($item) {
-        if ($item != NULL && is_object($item) && get_class($item) === "Item") {
+        if ($item != NULL && is_object($item) && get_class($item) === "com\grandt\Item") {
             $this->items[] = $item;
         }
     }
@@ -488,7 +489,7 @@ class Manifest {
  * ePub OPF Item structure
  */
 class Item {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $id = NULL;
     private $href = NULL;
@@ -631,7 +632,7 @@ class Item {
  * ePub OPF Spine structure
  */
 class Spine {
-    const _VERSION = 1.00;
+    const _VERSION = 3.30;
 
     private $itemrefs = array();
     private $toc = NULL;
@@ -673,7 +674,7 @@ class Spine {
     function addItemref($itemref) {
         if ($itemref != NULL 
 				&& is_object($itemref) 
-				&& get_class($itemref) === "Itemref" 
+				&& get_class($itemref) === "com\grandt\Itemref" 
 				&& !isset($this->itemrefs[$itemref->getIdref()])) {
             $this->itemrefs[$itemref->getIdref()] = $itemref;
         }
@@ -698,7 +699,7 @@ class Spine {
  * ePub OPF ItemRef structure
  */
 class Itemref {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $idref = NULL;
     private $linear = TRUE;
@@ -771,7 +772,7 @@ class Itemref {
  * ePub OPF Guide structure
  */
 class Guide {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     private $references = array();
 
@@ -808,7 +809,7 @@ class Guide {
      * @param Reference $reference
      */
     function addReference($reference) {
-        if ($reference != NULL && is_object($reference) && get_class($reference) === "Reference") {
+        if ($reference != NULL && is_object($reference) && get_class($reference) === "com\grandt\Reference") {
             $this->references[] = $reference;
         }
     }
@@ -836,7 +837,7 @@ class Guide {
  * Reference constants
  */
 class Reference {
-    const _VERSION = 1.00;
+    const _VERSION = 3.30;
 
     /* REFERENCE types are derived from the "Chicago Manual of Style"
      */
@@ -979,7 +980,7 @@ class Reference {
  * Ref: http://www.loc.gov/marc/relators/
  */
 class MarcCode {
-    const _VERSION = 3.00;
+    const _VERSION = 3.30;
 
     /**
      * Adapter

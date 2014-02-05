@@ -1,4 +1,7 @@
 <?php
+namespace DrUUID;
+
+use Exception;
 /*
  DrUUID RFC4122 library for PHP5
 by J. King (http://jkingweb.ca/)

@@ -1,4 +1,11 @@
 <?php
+// Using use merely makes this a little easier.
+// Normally you'll only need to use EPub, unless you specifically need the others.
+use com\grandt\DublinCore;
+use com\grandt\EPub;
+use com\grandt\Logger;
+use com\grandt\Zip;
+
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
 ini_set('display_errors', 1);
@@ -32,7 +39,7 @@ $log->logLine("include EPub");
 // ePub 3 is not fully implemented. but aspects of it is, in order to help inmplementers.
 // ePub 3 uses HTML5, formatted strictly as if it was XHTML but still using just the HTML5 doctype (aka XHTML5)
 $book = new EPub(EPub::BOOK_VERSION_EPUB3, "en", EPub::DIRECTION_LEFT_TO_RIGHT); // Default is ePub 2
-$log->logLine("new EPub()");
+$log->logLine("new \com\grandt\EPub()");
 $log->logLine("EPub class version: " . EPub::VERSION);
 $log->logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
 $log->logLine("Zip version: " . Zip::VERSION);

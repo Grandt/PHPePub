@@ -1,4 +1,11 @@
 <?php
+
+use com\grandt\DublinCore;
+use com\grandt\EPub;
+use com\grandt\EPubChapterSplitter;
+use com\grandt\Logger;
+use com\grandt\Zip;
+
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
 ini_set('display_errors', 1);
@@ -31,7 +38,8 @@ $fileDir = './PHPePub';
 include_once("EPub.php");
 $log->logLine("include EPub");
 
-$book = new EPub(); // Default is EPub::BOOK_VERSION_EPUB2
+// Default is EPub::BOOK_VERSION_EPUB2
+$book = new EPub(); 
 $log->logLine("new EPub()");
 $log->logLine("EPub class version: " . EPub::VERSION);
 $log->logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
@@ -203,7 +211,7 @@ $log->logLine("include EPubChapterSplitter.php");
 
 $splitter = new EPubChapterSplitter();
 $splitter->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
-$log->logLine("new EPubChapterSplitter()");
+$log->logLine("new \com\grandt\EPubChapterSplitter()");
 
 /* Using the # as regexp delimiter here, it makes writing the regexp easier.
  *  in this case we could have just searched for "Chapter ", or if we were using regexp '#^<h1>Chapter #i',
