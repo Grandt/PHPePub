@@ -9,7 +9,7 @@ use DrUUID\UUID;
  *
  * Please note, once finalized a book can no longer have chapters of data added or changed.
  *
- * License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * License: GNU LGPL 2.1.
  *
  * Thanks to: Adam Schmalhofer and Kirstyn Fox for invaluable input and for "nudging" me in the right direction :)
  *
@@ -2314,11 +2314,18 @@ class EPub {
 			$res = FALSE;
 			$info = array('http_code' => 500);
 			
-		    curl_setopt($ch, CURLOPT_HEADER, 0); 
-            curl_setopt($ch, CURLOPT_URL, str_replace(" ","%20",$source));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			// curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($ch, CURLOPT_BUFFERSIZE, 4096);
+			curl_setopt($ch, CURLOPT_HEADER         , 0); 
+			curl_setopt($ch, CURLOPT_URL            , str_replace(" ","%20",$source));
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER , true);
+			curl_setopt($ch, CURLOPT_BUFFERSIZE     , 4096);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION , true);     // follow redirects
+			curl_setopt($ch, CURLOPT_ENCODING       , "");       // handle all encodings
+			curl_setopt($ch, CURLOPT_USERAGENT      , "EPub (Version " . self::VERSION . ") by A. Grandt"); // who am i
+			curl_setopt($ch, CURLOPT_AUTOREFERER    , true);     // set referer on redirect
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT , 120);      // timeout on connect
+			curl_setopt($ch, CURLOPT_TIMEOUT        , 120);      // timeout on response
+			curl_setopt($ch, CURLOPT_MAXREDIRS      , 10);       // stop after 10 redirects
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , false);    // Disabled SSL Cert checks
 			
 			if ($toTempFile) {
 				$outFile = tempnam(sys_get_temp_dir(), "EPub_v" . EPub::VERSION . "_");

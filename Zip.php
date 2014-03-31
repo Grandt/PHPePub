@@ -10,7 +10,7 @@ use ZipArchive;
  * and
  * http://www.pkware.com/documents/casestudies/APPNOTE.TXT Zip file specification.
  *
- * License: GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * License: GNU LGPL 2.1.
  *
  * @author A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
@@ -96,6 +96,11 @@ class Zip {
     private $streamData = NULL;
     private $streamFileLength = 0;
 	private $streamExtFileAttr = null;
+	/**
+	 * A custom temporary folder, or a callable that returns a custom temporary file.
+	 * @var string|callable
+	 */
+	public static $temp = null;
 
     /**
      * Constructor.
@@ -364,7 +369,7 @@ class Zip {
             $this->closeStream();
         }
 
-        $this->streamFile = tempnam(sys_get_temp_dir(), 'Zip');
+        $this->streamFile = self::getTemporaryFile();
         $this->streamData = fopen($this->streamFile, "wb");
         $this->streamFilePath = $filePath;
         $this->streamTimestamp = $timestamp;
@@ -388,11 +393,11 @@ class Zip {
 
         $length = fwrite($this->streamData, $data, strlen($data));
         if ($length != strlen($data)) {
-            die ("<p>Length mismatch</p>\n");
-        }
-        $this->streamFileLength += $length;
-
-        return $length;
+			die ("<p>File IO: Error writing; Length mismatch: Expected " . strlen($data) . " bytes, wrote " . ($length === FALSE ? "NONE!" : $length) . "</p>\n");
+		}
+		$this->streamFileLength += $length;
+        
+		return $length;
     }
 
     /**
@@ -430,7 +435,7 @@ class Zip {
             return FALSE;
         }
 
-        $tempzip = tempnam(sys_get_temp_dir(), 'ZipStream');
+        $tempzip = self::getTemporaryFile();
 
         $zip = new ZipArchive;
         if ($zip->open($tempzip) === TRUE) {
@@ -842,5 +847,18 @@ class Zip {
 		}
 		return FALSE;
 	}
+	/**
+	 * Returns the path to a temporary file.
+	 * @return string
+	 */
+	private static function getTemporaryFile() {
+		if(is_callable(self::$temp)) {
+			$temporaryFile = @call_user_func(self::$temp);
+			if(is_string($temporaryFile) && strlen($temporaryFile) && is_writable($temporaryFile)) {
+				return $temporaryFile;
+			}
+		}
+		$temporaryDirectory = (is_string(self::$temp) && strlen(self::$temp)) ? self::$temp : sys_get_temp_dir();
+		return tempnam($temporaryDirectory, 'Zip');
+	}
 }
-?>

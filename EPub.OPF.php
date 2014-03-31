@@ -1224,4 +1224,3 @@ class MarcCode {
      */
     const TRANSLATOR = "trl";
 }
-?>
