@@ -1,5 +1,5 @@
 <?php
-namespace com\grandt;
+namespace PHPePub\Core;
 /**
  * Simple log line aggregator.
  *
@@ -20,8 +20,6 @@ class Logger {
 
     /**
      * Class constructor.
-     *
-     * @return void
      */
     function __construct($name = NULL, $isLogging = FALSE) {
         if ($name === NULL) {

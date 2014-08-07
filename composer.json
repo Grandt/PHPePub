@@ -1,22 +1,27 @@
 {
-    "repositories": [
+    "name": "grandt/phpepub",
+    "type": "library",
+    "description": "Package to create and stream e-books in the ePub 2.0 and 3.0 formats.",
+    "keywords": ["epub", "e-book"],
+    "homepage": "https://github.com/Grandt/PHPZip",
+    "license": "LGPL-2.1",
+    "version": "4.0.0",
+    "authors": [
         {
-            "type": "package",
-            "package": {
-                "name": "grandt/phpepub",
-                "version": "dev-master",
-                "source": {
-                    "url": "https://github.com/Grandt/PHPePub",
-                    "type": "git",
-                    "reference": "master"
-                },
-                "autoload": {
-                    "classmap": ["EPub.php", "EPub.HtmlEntities.php", "EPub.NCX.php", "EPub.OPF.php", "EPubChapterSplitter.php", "lib.uuid.php", "Logger.php", "Zip.php"]
-                }
-            }
+            "name": "A. Grandt",
+            "email": "php@grandt.com",
+            "homepage": "http://grandt.com",
+            "role": "Developer"
         }
     ],
     "require": {
-        "grandt/phpepub": "@dev"
+        "phpzip/phpzip": ">=2.0.6",
+        "roverwolf/druuid": "dev-master",
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PHPePub\\": "src/PHPePub"
+        }
     }
 }

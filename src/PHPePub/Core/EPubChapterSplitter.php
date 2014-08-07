@@ -1,5 +1,5 @@
 <?php
-namespace com\grandt;
+namespace PHPePub\Core;
 
 use DOMDocument;
 /**
@@ -24,7 +24,7 @@ class EPubChapterSplitter {
      *
      * Enter description here ...
      *
-     * @param unknown_type $ident
+     * @param string $bookVersion
      */
     function setVersion($bookVersion) {
         $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
@@ -34,7 +34,7 @@ class EPubChapterSplitter {
      * Set default chapter target size.
      * Default is 250000 bytes, and minimum is 10240 bytes.
      *
-     * @param $size segment size in bytes
+     * @param int $size segment size in bytes
      * @return void
      */
     function setSplitSize($size) {
@@ -47,7 +47,7 @@ class EPubChapterSplitter {
     /**
      * Get the chapter target size.
      *
-     * @return $size
+     * @return int $size
      */
     function getSplitSize() {
         return $this->splitDefaultSize;
@@ -147,7 +147,9 @@ class EPubChapterSplitter {
                         reset($domClonedPath);
                         $oneDomClonedPath = each($domClonedPath);
                         while ($oneDomClonedPath) {
+                            /** @noinspection PhpUnusedLocalVariableInspection */
                             list($k, $v) = $oneDomClonedPath;
+                            /** @var $v \DOMNode */
                             $newParent = $v->cloneNode(false);
                             $curParent->appendChild($newParent);
                             $curParent        = $newParent;
@@ -171,7 +173,6 @@ class EPubChapterSplitter {
         } while ($node != null);
 
         $curFile = null;
-        $curSize = 0;
 
         $xml = new DOMDocument('1.0', $xmlDoc->xmlEncoding);
         $xml->lookupPrefix("http://www.w3.org/1999/xhtml");

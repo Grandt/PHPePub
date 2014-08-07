@@ -46,3 +46,6 @@ nbproject/private/
 nbproject
 demo/georgia-pls-ssml/
 .idea
+vendor
+/*.phar
+/composer.lock
