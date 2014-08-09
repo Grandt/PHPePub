@@ -1,5 +1,6 @@
 <?php
 namespace PHPePub\Core\Structure\OPF;
+
 use PHPePub\Core\EPub;
 
 /**
@@ -32,7 +33,7 @@ class Manifest {
      * @param Item $item
      */
     function addItem($item) {
-        if ($item != NULL && is_object($item) && $item instanceof Item) {
+        if ($item != null && is_object($item) && $item instanceof Item) {
             $this->items[] = $item;
         }
     }
@@ -40,6 +41,7 @@ class Manifest {
     /**
      *
      * @param string $bookVersion
+     *
      * @return string
      */
     function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {

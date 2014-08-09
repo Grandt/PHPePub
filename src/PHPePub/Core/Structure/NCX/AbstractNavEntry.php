@@ -8,7 +8,6 @@
 
 namespace PHPePub\Core\Structure\NCX;
 
-
 abstract class AbstractNavEntry {
     /**
      * @return AbstractNavEntry
@@ -19,5 +18,6 @@ abstract class AbstractNavEntry {
      * @return int level
      */
     abstract public function getLevel();
+
     abstract public function addNavPoint($navPoint);
 }

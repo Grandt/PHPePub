@@ -1,12 +1,13 @@
 <?php
 namespace PHPePub\Core;
+
 /**
  * Simple log line aggregator.
  *
- * @author A. Grandt <php@grandt.com>
+ * @author    A. Grandt <php@grandt.com>
  * @copyright 2012-2014 A. Grandt
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 1.00
+ * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @version   1.00
  */
 class Logger {
     const VERSION = 1.00;
@@ -14,15 +15,15 @@ class Logger {
     private $log = "";
     private $tStart;
     private $tLast;
-    private $name = NULL;
-    private $isLogging = FALSE;
-    private $isDebugging = FALSE;
+    private $name = null;
+    private $isLogging = false;
+    private $isDebugging = false;
 
     /**
      * Class constructor.
      */
-    function __construct($name = NULL, $isLogging = FALSE) {
-        if ($name === NULL) {
+    function __construct($name = null, $isLogging = false) {
+        if ($name === null) {
             $this->name = "";
         } else {
             $this->name = $name . " : ";
@@ -70,9 +71,9 @@ class Logger {
     function logLine($line) {
         if ($this->isLogging) {
             $tTemp = gettimeofday();
-            $tS    = $this->tStart['sec'] + (((int) ($this->tStart['usec'] / 100)) / 10000);
-            $tL    = $this->tLast['sec'] + (((int) ($this->tLast['usec'] / 100)) / 10000);
-            $tT    = $tTemp['sec'] + (((int) ($tTemp['usec'] / 100)) / 10000);
+            $tS    = $this->tStart['sec'] + (((int)($this->tStart['usec'] / 100)) / 10000);
+            $tL    = $this->tLast['sec'] + (((int)($this->tLast['usec'] / 100)) / 10000);
+            $tT    = $tTemp['sec'] + (((int)($tTemp['usec'] / 100)) / 10000);
 
             $logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT - $tS), ($tT - $tL)) . $this->name . $line;
             $this->log .= $logline;

@@ -1,5 +1,6 @@
 <?php
 namespace PHPePub\Core\Structure;
+
 use PHPePub\Core\EPub;
 use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Structure\OPF\Guide;
@@ -12,10 +13,10 @@ use PHPePub\Core\Structure\OPF\Spine;
 /**
  * ePub OPF file structure
  *
- * @author A. Grandt <php@grandt.com>
+ * @author    A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
- * @license GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version 3.30
+ * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
+ * @version   3.30
  */
 class Opf {
     const _VERSION = 3.30;
@@ -24,14 +25,14 @@ class Opf {
      * These types are the only guaranteed mime types any ePub reader must understand.
      * Any other type muse define a fall back whose fallback chain will end in one of these.
      */
-    const TYPE_GIF = "image/gif";
-    const TYPE_JPEG = "image/jpeg";
-    const TYPE_PNG = "image/png";
-    const TYPE_SVG = "image/svg+xml";
-    const TYPE_XHTML = "application/xhtml+xml";
-    const TYPE_DTBOOK = "application/x-dtbook+xml";
-    const TYPE_CSS = "text/css";
-    const TYPE_XML = "application/xml";
+    const TYPE_GIF      = "image/gif";
+    const TYPE_JPEG     = "image/jpeg";
+    const TYPE_PNG      = "image/png";
+    const TYPE_SVG      = "image/svg+xml";
+    const TYPE_XHTML    = "application/xhtml+xml";
+    const TYPE_DTBOOK   = "application/x-dtbook+xml";
+    const TYPE_CSS      = "text/css";
+    const TYPE_XML      = "application/xml";
     const TYPE_OEB1_DOC = "text/x-oeb1-document"; // Deprecated
     const TYPE_OEB1_CSS = "text/x-oeb1-css"; // Deprecated
     const TYPE_NCX = "application/x-dtbncx+xml";
@@ -39,11 +40,11 @@ class Opf {
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;
     private $ident = "BookId";
 
-    public $date = NULL;
-    public $metadata = NULL;
-    public $manifest = NULL;
-    public $spine = NULL;
-    public $guide = NULL;
+    public $date = null;
+    public $metadata = null;
+    public $manifest = null;
+    public $spine = null;
+    public $guide = null;
 
     /**
      * Class constructor.
@@ -101,7 +102,7 @@ class Opf {
      */
     function finalize() {
         $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-        . "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
+                . "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
 
         $opf .= $this->metadata->finalize($this->bookVersion, $this->date);
         $opf .= $this->manifest->finalize($this->bookVersion);
@@ -144,7 +145,7 @@ class Opf {
      * @param string $mediaType
      * @param string $properties
      */
-    function addItem($id, $href, $mediaType, $properties = NULL) {
+    function addItem($id, $href, $mediaType, $properties = null) {
         $this->manifest->addItem(new Item($id, $href, $mediaType, $properties));
     }
 
@@ -155,7 +156,7 @@ class Opf {
      * @param string $idref
      * @param bool   $linear
      */
-    function addItemRef($idref, $linear = TRUE) {
+    function addItemRef($idref, $linear = true) {
         $this->spine->addItemref(new Itemref($idref, $linear));
     }
 
@@ -201,14 +202,14 @@ class Opf {
      * @param string $fileAs
      * @param string $role Use the MarcCode constants
      */
-    function addCreator($name, $fileAs = NULL, $role = NULL) {
+    function addCreator($name, $fileAs = null, $role = null) {
         $dc = new DublinCore(DublinCore::CREATOR, trim($name));
 
-        if ($fileAs !== NULL) {
+        if ($fileAs !== null) {
             $dc->addOpfAttr("file-as", trim($fileAs));
         }
 
-        if ($role !== NULL) {
+        if ($role !== null) {
             $dc->addOpfAttr("role", trim($role));
         }
 
@@ -223,14 +224,14 @@ class Opf {
      * @param string $fileAs
      * @param string $role Use the MarcCode constants
      */
-    function addColaborator($name, $fileAs = NULL, $role = NULL) {
+    function addColaborator($name, $fileAs = null, $role = null) {
         $dc = new DublinCore(DublinCore::CONTRIBUTOR, trim($name));
 
-        if ($fileAs !== NULL) {
+        if ($fileAs !== null) {
             $dc->addOpfAttr("file-as", trim($fileAs));
         }
 
-        if ($role !== NULL) {
+        if ($role !== null) {
             $dc->addOpfAttr("role", trim($role));
         }
 
@@ -270,7 +271,7 @@ class Metadata {
      * @param DublinCore $dc
      */
     function addDublinCore($dc) {
-        if ($dc != NULL && is_object($dc) && $dc instanceof DublinCore) {
+        if ($dc != null && is_object($dc) && $dc instanceof DublinCore) {
             $this->dc[] = $dc;
         }
     }
@@ -283,13 +284,13 @@ class Metadata {
      * @param string $content
      */
     function addMeta($name, $content) {
-        $name = is_string($name) ? trim($name) : NULL;
+        $name = is_string($name) ? trim($name) : null;
         if (isset($name)) {
-            $content = is_string($content) ? trim($content) : NULL;
+            $content = is_string($content) ? trim($content) : null;
         }
         if (isset($content)) {
             $this->meta[] = array(
-                $name => $content
+                    $name => $content
             );
         }
     }
@@ -298,9 +299,10 @@ class Metadata {
      *
      * @param string $bookVersion
      * @param int    $date
+     *
      * @return string
      */
-    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = NULL) {
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = null) {
         $metadata = "\t<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
         if ($bookVersion === EPub::BOOK_VERSION_EPUB2) {
             $metadata .= "\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";

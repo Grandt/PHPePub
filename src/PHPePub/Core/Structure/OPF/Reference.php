@@ -75,10 +75,9 @@ class Reference {
     /** Ancillary material occurring after the document body, such as indices, appendices, etc. */
     const BACKMATTER = "backmatter";
 
-
-    private $type = NULL;
-    private $title = NULL;
-    private $href = NULL;
+    private $type = null;
+    private $title = null;
+    private $href = null;
 
     /**
      * Class constructor.
@@ -109,7 +108,7 @@ class Reference {
      * @param string $type
      */
     function setType($type) {
-        $this->type = is_string($type) ? trim($type) : NULL;
+        $this->type = is_string($type) ? trim($type) : null;
     }
 
     /**
@@ -119,7 +118,7 @@ class Reference {
      * @param string $title
      */
     function setTitle($title) {
-        $this->title = is_string($title) ? trim($title) : NULL;
+        $this->title = is_string($title) ? trim($title) : null;
     }
 
     /**
@@ -129,7 +128,7 @@ class Reference {
      * @param string $href
      */
     function setHref($href) {
-        $this->href = is_string($href) ? trim($href) : NULL;
+        $this->href = is_string($href) ? trim($href) : null;
     }
 
     /**

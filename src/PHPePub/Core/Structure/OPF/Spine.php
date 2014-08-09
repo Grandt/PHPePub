@@ -8,7 +8,7 @@ class Spine {
     const _VERSION = 3.30;
 
     private $itemrefs = array();
-    private $toc = NULL;
+    private $toc = null;
 
     /**
      * Class constructor.
@@ -33,7 +33,7 @@ class Spine {
      * @param string $toc
      */
     function setToc($toc) {
-        $this->toc = is_string($toc) ? trim($toc) : NULL;
+        $this->toc = is_string($toc) ? trim($toc) : null;
     }
 
     /**
@@ -43,10 +43,11 @@ class Spine {
      * @param Itemref $itemref
      */
     function addItemref($itemref) {
-        if ($itemref != NULL
-            && is_object($itemref)
-            && $itemref instanceof Itemref
-            && !isset($this->itemrefs[$itemref->getIdref()])) {
+        if ($itemref != null
+                && is_object($itemref)
+                && $itemref instanceof Itemref
+                && !isset($this->itemrefs[$itemref->getIdref()])
+        ) {
             $this->itemrefs[$itemref->getIdref()] = $itemref;
         }
     }

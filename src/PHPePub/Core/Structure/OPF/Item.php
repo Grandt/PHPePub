@@ -1,5 +1,6 @@
 <?php
 namespace PHPePub\Core\Structure\OPF;
+
 use PHPePub\Core\EPub;
 
 /**
@@ -8,24 +9,24 @@ use PHPePub\Core\EPub;
 class Item {
     const _VERSION = 3.30;
 
-    private $id = NULL;
-    private $href = NULL;
-    private $mediaType = NULL;
-    private $properties = NULL;
-    private $requiredNamespace = NULL;
-    private $requiredModules = NULL;
-    private $fallback = NULL;
-    private $fallbackStyle = NULL;
+    private $id = null;
+    private $href = null;
+    private $mediaType = null;
+    private $properties = null;
+    private $requiredNamespace = null;
+    private $requiredModules = null;
+    private $fallback = null;
+    private $fallbackStyle = null;
 
     /**
      * Class constructor.
      *
-     * @param $id
-     * @param $href
-     * @param $mediaType
+     * @param      $id
+     * @param      $href
+     * @param      $mediaType
      * @param null $properties
      */
-    function __construct($id, $href, $mediaType, $properties = NULL) {
+    function __construct($id, $href, $mediaType, $properties = null) {
         $this->setId($id);
         $this->setHref($href);
         $this->setMediaType($mediaType);
@@ -49,7 +50,7 @@ class Item {
      * @param string $id
      */
     function setId($id) {
-        $this->id = is_string($id) ? trim($id) : NULL;
+        $this->id = is_string($id) ? trim($id) : null;
     }
 
     /**
@@ -59,7 +60,7 @@ class Item {
      * @param string $href
      */
     function setHref($href) {
-        $this->href = is_string($href) ? trim($href) : NULL;
+        $this->href = is_string($href) ? trim($href) : null;
     }
 
     /**
@@ -69,7 +70,7 @@ class Item {
      * @param string $mediaType
      */
     function setMediaType($mediaType) {
-        $this->mediaType = is_string($mediaType) ? trim($mediaType) : NULL;
+        $this->mediaType = is_string($mediaType) ? trim($mediaType) : null;
     }
 
     /**
@@ -79,7 +80,7 @@ class Item {
      * @param string $properties
      */
     function setProperties($properties) {
-        $this->properties = is_string($properties) ? trim($properties) : NULL;
+        $this->properties = is_string($properties) ? trim($properties) : null;
     }
 
     /**
@@ -89,7 +90,7 @@ class Item {
      * @param string $requiredNamespace
      */
     function setRequiredNamespace($requiredNamespace) {
-        $this->requiredNamespace = is_string($requiredNamespace) ? trim($requiredNamespace) : NULL;
+        $this->requiredNamespace = is_string($requiredNamespace) ? trim($requiredNamespace) : null;
     }
 
     /**
@@ -99,7 +100,7 @@ class Item {
      * @param string $requiredModules
      */
     function setRequiredModules($requiredModules) {
-        $this->requiredModules = is_string($requiredModules) ? trim($requiredModules) : NULL;
+        $this->requiredModules = is_string($requiredModules) ? trim($requiredModules) : null;
     }
 
     /**
@@ -109,7 +110,7 @@ class Item {
      * @param string $fallback
      */
     function setfallback($fallback) {
-        $this->fallback = is_string($fallback) ? trim($fallback) : NULL;
+        $this->fallback = is_string($fallback) ? trim($fallback) : null;
     }
 
     /**
@@ -119,12 +120,13 @@ class Item {
      * @param string $fallbackStyle
      */
     function setFallbackStyle($fallbackStyle) {
-        $this->fallbackStyle = is_string($fallbackStyle) ? trim($fallbackStyle) : NULL;
+        $this->fallbackStyle = is_string($fallbackStyle) ? trim($fallbackStyle) : null;
     }
 
     /**
      *
      * @param string $bookVersion
+     *
      * @return string
      */
     function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {

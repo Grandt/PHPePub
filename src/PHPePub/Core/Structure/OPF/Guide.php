@@ -40,7 +40,7 @@ class Guide {
      * @param Reference $reference
      */
     function addReference($reference) {
-        if ($reference != NULL && is_object($reference) && $reference instanceof Reference) {
+        if ($reference != null && is_object($reference) && $reference instanceof Reference) {
             $this->references[] = $reference;
         }
     }

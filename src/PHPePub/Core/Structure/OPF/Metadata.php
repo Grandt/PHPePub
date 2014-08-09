@@ -1,5 +1,6 @@
 <?php
 namespace PHPePub\Core\Structure\OPF;
+
 use PHPePub\Core\EPub;
 
 /**
@@ -33,7 +34,7 @@ class Metadata {
      * @param DublinCore $dc
      */
     function addDublinCore($dc) {
-        if ($dc != NULL && is_object($dc) && $dc instanceof DublinCore) {
+        if ($dc != null && is_object($dc) && $dc instanceof DublinCore) {
             $this->dc[] = $dc;
         }
     }
@@ -46,13 +47,13 @@ class Metadata {
      * @param string $content
      */
     function addMeta($name, $content) {
-        $name = is_string($name) ? trim($name) : NULL;
+        $name = is_string($name) ? trim($name) : null;
         if (isset($name)) {
-            $content = is_string($content) ? trim($content) : NULL;
+            $content = is_string($content) ? trim($content) : null;
         }
         if (isset($content)) {
             $this->meta[] = array(
-                $name => $content
+                    $name => $content
             );
         }
     }
@@ -61,9 +62,10 @@ class Metadata {
      *
      * @param string $bookVersion
      * @param int    $date
+     *
      * @return string
      */
-    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = NULL) {
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = null) {
         $metadata = "\t<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
         if ($bookVersion === EPub::BOOK_VERSION_EPUB2) {
             $metadata .= "\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";

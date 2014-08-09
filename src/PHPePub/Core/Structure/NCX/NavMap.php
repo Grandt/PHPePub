@@ -10,14 +10,14 @@ class NavMap extends AbstractNavEntry {
 
     private $navPoints = array();
     private $navLevels = 0;
-    private $writingDirection = NULL;
+    private $writingDirection = null;
 
     /**
      * Class constructor.
      *
      * @param string $writingDirection
      */
-    function __construct($writingDirection = NULL) {
+    function __construct($writingDirection = null) {
         $this->setWritingDirection($writingDirection);
     }
 
@@ -36,7 +36,7 @@ class NavMap extends AbstractNavEntry {
      * @param string $writingDirection
      */
     function setWritingDirection($writingDirection) {
-        $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : NULL;
+        $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : null;
     }
 
     function getWritingDirection() {
@@ -47,12 +47,13 @@ class NavMap extends AbstractNavEntry {
      * Add a navPoint to the root of the NavMap.
      *
      * @param NavPoint $navPoint
+     *
      * @return NavMap
      */
     function addNavPoint($navPoint) {
-        if ($navPoint != NULL && is_object($navPoint) && $navPoint instanceof NavPoint) {
+        if ($navPoint != null && is_object($navPoint) && $navPoint instanceof NavPoint) {
             $navPoint->setParent($this);
-            if ($navPoint->getWritingDirection() == NULL) {
+            if ($navPoint->getWritingDirection() == null) {
                 $navPoint->setWritingDirection($this->writingDirection);
             }
             $this->navPoints[] = $navPoint;

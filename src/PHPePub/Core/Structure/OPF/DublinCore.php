@@ -1,5 +1,6 @@
 <?php
 namespace PHPePub\Core\Structure\OPF;
+
 use PHPePub\Core\EPub;
 
 /**
@@ -9,23 +10,23 @@ class DublinCore {
     const _VERSION = 3.30;
 
     const CONTRIBUTOR = "contributor";
-    const COVERAGE = "coverage";
-    const CREATOR = "creator";
-    const DATE = "date";
+    const COVERAGE    = "coverage";
+    const CREATOR     = "creator";
+    const DATE        = "date";
     const DESCRIPTION = "description";
-    const FORMAT = "format";
-    const IDENTIFIER = "identifier";
-    const LANGUAGE = "language";
-    const PUBLISHER = "publisher";
-    const RELATION = "relation";
-    const RIGHTS = "rights";
-    const SOURCE = "source";
-    const SUBJECT = "subject";
-    const TITLE = "title";
-    const TYPE = "type";
+    const FORMAT      = "format";
+    const IDENTIFIER  = "identifier";
+    const LANGUAGE    = "language";
+    const PUBLISHER   = "publisher";
+    const RELATION    = "relation";
+    const RIGHTS      = "rights";
+    const SOURCE      = "source";
+    const SUBJECT     = "subject";
+    const TITLE       = "title";
+    const TYPE        = "type";
 
-    private $dcName = NULL;
-    private $dcValue = NULL;
+    private $dcName = null;
+    private $dcValue = null;
     private $attr = array();
     private $opfAttr = array();
 
@@ -53,12 +54,12 @@ class DublinCore {
      * @param string $value
      */
     function setDc($name, $value) {
-        $this->dcName = is_string($name) ? trim($name) : NULL;
+        $this->dcName = is_string($name) ? trim($name) : null;
         if (isset($this->dcName)) {
-            $this->dcValue = isset($value) ? (string) $value : NULL;
+            $this->dcValue = isset($value) ? (string)$value : null;
         }
         if (!isset($this->dcValue)) {
-            $this->dcName = NULL;
+            $this->dcName = null;
         }
     }
 
@@ -70,9 +71,9 @@ class DublinCore {
      * @param string $attrValue
      */
     function addAttr($attrName, $attrValue) {
-        $attrName = is_string($attrName) ? trim($attrName) : NULL;
+        $attrName = is_string($attrName) ? trim($attrName) : null;
         if (isset($attrName)) {
-            $attrValue = is_string($attrValue) ? trim($attrValue) : NULL;
+            $attrValue = is_string($attrValue) ? trim($attrValue) : null;
         }
         if (isset($attrValue)) {
             $this->attr[$attrName] = $attrValue;
@@ -87,19 +88,19 @@ class DublinCore {
      * @param string $opfAttrValue
      */
     function addOpfAttr($opfAttrName, $opfAttrValue) {
-        $opfAttrName = is_string($opfAttrName) ? trim($opfAttrName) : NULL;
+        $opfAttrName = is_string($opfAttrName) ? trim($opfAttrName) : null;
         if (isset($opfAttrName)) {
-            $opfAttrValue = is_string($opfAttrValue) ? trim($opfAttrValue) : NULL;
+            $opfAttrValue = is_string($opfAttrValue) ? trim($opfAttrValue) : null;
         }
         if (isset($opfAttrValue)) {
             $this->opfAttr[$opfAttrName] = $opfAttrValue;
         }
     }
 
-
     /**
      *
      * @param string $bookVersion
+     *
      * @return string
      */
     function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
