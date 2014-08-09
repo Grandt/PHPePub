@@ -23,16 +23,14 @@ use PHPZip\Zip\File\Zip;
  * @author    A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license   GNU LGPL 2.1
- * @version   3.30
+ * @version   4.0.0
  * @link      http://www.phpclasses.org/package/6115
  * @link      https://github.com/Grandt/PHPePub
- * @uses      Zip.php version 1.60; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
- * @uses      GIFDecoder by László Zsidi (optional); http://www.phpclasses.org/package/3234
- * @uses      GIFEncoder by László Zsidi (optional); http://www.phpclasses.org/package/3163
+ * @uses      Zip.php version 2.0.5; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION         = 3.30;
-    const REQ_ZIP_VERSION = 1.62;
+    const VERSION         = '4.0.0';
+    const REQ_ZIP_VERSION = '2.0.5';
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI  = 'URI';
@@ -47,11 +45,11 @@ class EPub {
     /** Process the file for external references and add them to the book, but replace images, and img tags with [image] */
     const EXTERNAL_REF_REPLACE_IMAGES = 3;
 
-    const DIRECTION_LEFT_TO_RIGHT = "ltr";
-    const DIRECTION_RIGHT_TO_LEFT = "rtl";
+    const DIRECTION_LEFT_TO_RIGHT = 'ltr';
+    const DIRECTION_RIGHT_TO_LEFT = 'rtl';
 
-    const BOOK_VERSION_EPUB2 = "2.0";
-    const BOOK_VERSION_EPUB3 = "3.0";
+    const BOOK_VERSION_EPUB2 = '2.0';
+    const BOOK_VERSION_EPUB3 = '3.0';
 
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;
 
@@ -68,20 +66,20 @@ class EPub {
     /** @var $Zip Zip */
     private $zip;
 
-    private $title = "";
-    private $language = "en";
-    private $identifier = "";
-    private $identifierType = "";
-    private $description = "";
-    private $author = "";
-    private $authorSortKey = "";
-    private $publisherName = "";
-    private $publisherURL = "";
+    private $title = '';
+    private $language = 'en';
+    private $identifier = '';
+    private $identifierType = '';
+    private $description = '';
+    private $author = '';
+    private $authorSortKey = '';
+    private $publisherName = '';
+    private $publisherURL = '';
     private $date = 0;
-    private $rights = "";
-    private $coverage = "";
-    private $relation = "";
-    private $sourceURL = "";
+    private $rights = '';
+    private $coverage = '';
+    private $relation = '';
+    private $sourceURL = '';
 
     private $chapterCount = 0;
     /** @var $opf Opf */
@@ -100,7 +98,7 @@ class EPub {
 
     private $fileList = array();
     private $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT;
-    private $languageCode = "en";
+    private $languageCode = 'en';
 
     /**
      * Used for building the TOC.
@@ -119,13 +117,13 @@ class EPub {
     protected $isFileGetContentsExtInstalled;
     protected $isAnimatedGifResizeInstalled = false;
 
-    public $pluginDir = "extLib";
+    public $pluginDir = 'extLib';
 
     private $docRoot = null;
 
-    private $bookRoot = "OEBPS/";
+    private $bookRoot = 'OEBPS/';
     private $EPubMark = true;
-    private $generator = "";
+    private $generator = '';
 
     private $log = null;
     public $isLogging = true;
@@ -138,26 +136,26 @@ class EPub {
     /**
      * Class constructor.
      */
-    function __construct($bookVersion = EPub::BOOK_VERSION_EPUB2, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
+    function __construct($bookVersion = EPub::BOOK_VERSION_EPUB2, $languageCode = 'en', $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
         $this->bookVersion      = $bookVersion;
         $this->writingDirection = $writingDirection;
         $this->languageCode     = $languageCode;
 
-        $this->log = new Logger("EPub", $this->isLogging);
+        $this->log = new Logger('EPub', $this->isLogging);
 
         /* Prepare Logging. Just in case it's used. later */
         if ($this->isLogging) {
-            $this->log->logLine("EPub class version....: " . self::VERSION);
-            $this->log->logLine("EPub req. Zip version.: " . self::REQ_ZIP_VERSION);
-            $this->log->logLine("Zip version...........: " . Zip::VERSION);
+            $this->log->logLine('EPub class version....: ' . self::VERSION);
+            $this->log->logLine('EPub req. Zip version.: ' . self::REQ_ZIP_VERSION);
+            $this->log->logLine('Zip version...........: ' . Zip::VERSION);
             $this->log->dumpInstalledModules();
         }
 
         if (!defined('PHPZip\Zip\File\Zip::VERSION')) {
-            die("<p>EPub version " . self::VERSION . " requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher, but were unable to determine the Zip.php version.<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
+            die('<p>EPub version ' . self::VERSION . ' requires Zip.php at version ' . self::REQ_ZIP_VERSION . ' or higher, but were unable to determine the Zip.php version.<br />You can obtain the latest version from <a href="http://www.phpclasses.org/browse/package/6110.html">http://www.phpclasses.org/browse/package/6110.html</a>.</p>');
         }
         if (Zip::VERSION < self::REQ_ZIP_VERSION) {
-            die("<p>EPub version " . self::VERSION . " requires Zip.php at version " . self::REQ_ZIP_VERSION . " or higher, but found Zip.php version " . Zip::VERSION . ".<br />You can obtain the latest version from <a href=\"http://www.phpclasses.org/browse/package/6110.html\">http://www.phpclasses.org/browse/package/6110.html</a>.</p>");
+            die('<p>EPub version ' . self::VERSION . ' requires Zip.php at version ' . self::REQ_ZIP_VERSION . ' or higher, but found Zip.php version ' . Zip::VERSION . '.<br />You can obtain the latest version from <a href="http://www.phpclasses.org/browse/package/6110.html">http://www.phpclasses.org/browse/package/6110.html</a>.</p>');
         }
 
         $this->setUp();
@@ -188,26 +186,26 @@ class EPub {
 
     private function setUp() {
         $this->referencesOrder = array(
-                Reference::COVER                 => "Cover Page",
-                Reference::TITLE_PAGE            => "Title Page",
-                Reference::ACKNOWLEDGEMENTS      => "Acknowledgements",
-                Reference::BIBLIOGRAPHY          => "Bibliography",
-                Reference::COLOPHON              => "Colophon",
-                Reference::COPYRIGHT_PAGE        => "Copyright",
-                Reference::DEDICATION            => "Dedication",
-                Reference::EPIGRAPH              => "Epigraph",
-                Reference::FOREWORD              => "Foreword",
-                Reference::TABLE_OF_CONTENTS     => "Table of Contents",
-                Reference::NOTES                 => "Notes",
-                Reference::PREFACE               => "Preface",
-                Reference::TEXT                  => "First Page",
-                Reference::LIST_OF_ILLUSTRATIONS => "List of Illustrations",
-                Reference::LIST_OF_TABLES        => "List of Tables",
-                Reference::GLOSSARY              => "Glossary",
-                Reference::INDEX                 => "Index"
+                Reference::COVER                 => 'Cover Page',
+                Reference::TITLE_PAGE            => 'Title Page',
+                Reference::ACKNOWLEDGEMENTS      => 'Acknowledgements',
+                Reference::BIBLIOGRAPHY          => 'Bibliography',
+                Reference::COLOPHON              => 'Colophon',
+                Reference::COPYRIGHT_PAGE        => 'Copyright',
+                Reference::DEDICATION            => 'Dedication',
+                Reference::EPIGRAPH              => 'Epigraph',
+                Reference::FOREWORD              => 'Foreword',
+                Reference::TABLE_OF_CONTENTS     => 'Table of Contents',
+                Reference::NOTES                 => 'Notes',
+                Reference::PREFACE               => 'Preface',
+                Reference::TEXT                  => 'First Page',
+                Reference::LIST_OF_ILLUSTRATIONS => 'List of Illustrations',
+                Reference::LIST_OF_TABLES        => 'List of Tables',
+                Reference::GLOSSARY              => 'Glossary',
+                Reference::INDEX                 => 'Index'
         );
 
-        $this->docRoot = filter_input(INPUT_SERVER, "DOCUMENT_ROOT") . '/';
+        $this->docRoot = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT') . '/';
 
         $this->isCurlInstalled               = extension_loaded('curl') && function_exists('curl_version');
         $this->isGdInstalled                 = (extension_loaded('gd') || extension_loaded('gd2')) && function_exists('gd_info');
@@ -217,9 +215,9 @@ class EPub {
 
         $this->zip = new Zip();
         $this->zip->setExtraField(false);
-        $this->zip->addFile("application/epub+zip", "mimetype");
+        $this->zip->addFile('application/epub+zip', 'mimetype');
         $this->zip->setExtraField(true);
-        $this->zip->addDirectory("META-INF");
+        $this->zip->addDirectory('META-INF');
 
         $this->ncx = new Ncx(null, null, null, $this->languageCode, $this->writingDirection);
         $this->opf = new Opf();
@@ -232,7 +230,7 @@ class EPub {
         if ($this->isInitialized) {
             return;
         }
-        if (strlen($this->bookRoot) != 0 && $this->bookRoot != "OEBPS/") {
+        if (strlen($this->bookRoot) != 0 && $this->bookRoot != 'OEBPS/') {
             $this->setBookRoot($this->bookRoot);
         }
 
@@ -240,8 +238,8 @@ class EPub {
 
         // GIF Resize requires the GD extension to be available.
         if ($this->isGdInstalled && $this->isGifImagesEnabled
-                && file_exists($this->pluginDir . "/GIFEncoder.class.php")) {
-            $this->isAnimatedGifResizeInstalled = class_exists("GIFDecoder") && class_exists("GIFEncoder");
+                && file_exists($this->pluginDir . '/GIFEncoder.class.php')) {
+            $this->isAnimatedGifResizeInstalled = class_exists('GIFDecoder') && class_exists('GIFEncoder');
         }
 
         if (!$this->isEPubVersion2()) {
