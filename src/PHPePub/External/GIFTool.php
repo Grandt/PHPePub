@@ -8,10 +8,6 @@ namespace PHPePub\External;
  * @copyright 2009-2014 A. Grandt
  * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  *
- * GIFDecoder and GIFEncoder by László Zsidi, can be found here:
- * GIFDecoder: http://www.phpclasses.org/package/3234
- * GIFEncoder: http://www.phpclasses.org/package/3163
- *
  * @version   3.30
  */
 class GIFTool {
@@ -29,25 +25,7 @@ class GIFTool {
      */
     static function resizeAnimatedGif($imageData, $width, $height, $ratio) {
         if (GIFTool::isAnimatedGif($imageData)) {
-            // $gifDecoder = new GIFDecoder(fread(fopen('data://text/plain,' . $imageData,'rb'), strlen($imageData)));
-            $gifDecoder = new GIFDecoder($imageData);
-            //$gifDisposal = $gifDecoder->GIFGetDisposal();
-
-            $newFrames = array();
-            foreach ($gifDecoder->GIFGetFrames() as $frame) {
-                $newFrames[] = GIFTool::resizeGif($frame, $width, $height, $ratio);
-            }
-
-            $anim = new GIFEncoder($newFrames,
-                    $gifDecoder->GIFGetDelays(),
-                    $gifDecoder->GIFGetLoop(),
-                    2, // (is_array($gifDisposal) && sizeof($gifDisposal) > 0 ? $gifDisposal[0] : 2),
-                    0, // $gifDecoder->GIFGetTransparentR(),
-                    0, // $gifDecoder->GIFGetTransparentG(),
-                    0, // $gifDecoder->GIFGetTransparentB(),
-                    "bin");
-
-            return $anim->GetAnimation();
+            // get animation here
         }
         return GIFTool::resizeGif($imageData, $width, $height, $ratio);
     }
