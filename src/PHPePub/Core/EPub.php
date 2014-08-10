@@ -1,6 +1,7 @@
 <?php
 namespace PHPePub\Core;
 
+use com\grandt\BinStringStatic;
 use DOMDocument;
 use DOMNode;
 use PHPePub\Core\Structure\Ncx;
@@ -698,7 +699,7 @@ class EPub {
      * @param string $baseDir            Default is "", meaning it is pointing to the document root.
      * @param string $htmlDir            The path to the parent HTML file's directory from the root of the archive.
      *
-     * @return bool  FALSE if uncuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
+     * @return bool  false if unsuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
      */
     protected function processChapterExternalReferences(&$doc, $externalReferences = EPub::EXTERNAL_REF_ADD, $baseDir = "", $htmlDir = "") {
         if ($this->isFinalized || $externalReferences === EPub::EXTERNAL_REF_IGNORE) {
@@ -710,6 +711,8 @@ class EPub {
         $xmlDoc       = null;
 
         if ($isDocAString) {
+            $doc = self::removeComments($doc);
+
             $xmlDoc = new DOMDocument();
             @$xmlDoc->loadHTML($doc);
         } else {
@@ -745,7 +748,9 @@ class EPub {
 
             $xml2Doc = new DOMDocument('1.0', "utf-8");
             $xml2Doc->lookupPrefix("http://www.w3.org/1999/xhtml");
-            $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\"" . $htmlNS . ">\n</html>\n");
+            $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+                    ."   \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+                    ."<html xmlns=\"http://www.w3.org/1999/xhtml\"" . $htmlNS . ">\n</html>\n");
             $html = $xml2Doc->getElementsByTagName("html")->item(0);
             $html->appendChild($xml2Doc->importNode($headNode->item(0), true));
             $html->appendChild($xml2Doc->importNode($bodyNode->item(0), true));
@@ -2462,6 +2467,43 @@ class EPub {
         $node = $dom->createDocumentFragment();
         $node->appendXML($markup);
         return $node;
+    }
+
+    /**
+     * @param $doc
+     *
+     * @return mixed
+     */
+    protected static function removeComments(&$doc) {
+        $cPos = BinStringStatic::_strpos($doc, "<!--");
+        if ($cPos !== false) {
+            $startCount = substr_count($doc, "<!--");
+            $endCount   = substr_count($doc, "-->");
+
+            $lastCPos = -1;
+
+            while ($cPos !== false && $lastCPos != $cPos) {
+                $lastCPos = $cPos;
+                $lastEPos = $cPos;
+                $ePos     = $cPos;
+                do {
+                    $ePos = BinStringStatic::_strpos($doc, "-->", $ePos + 1);
+                    if ($ePos !== false) {
+                        $lastEPos   = $ePos;
+                        $comment    = BinStringStatic::_substr($doc, $cPos, ($lastEPos + 3) - $cPos);
+                        $startCount = substr_count($comment, "<!--");
+                        $endCount   = substr_count($comment, "-->");
+                    } elseif ($lastEPos == $cPos) {
+                        $lastEPos = BinStringStatic::_strlen($doc) - 3;
+                    }
+                } while ($startCount != $endCount && $ePos !== false);
+
+                $doc  = substr_replace($doc, "", $cPos, ($lastEPos + 3) - $cPos);
+                $cPos = BinStringStatic::_strpos($doc, "<!--");
+            }
+            return $doc;
+        }
+        return $doc;
     }
 
     /**
