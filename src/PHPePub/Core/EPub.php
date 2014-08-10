@@ -26,11 +26,10 @@ use PHPZip\Zip\File\Zip;
  * @version   4.0.0
  * @link      http://www.phpclasses.org/package/6115
  * @link      https://github.com/Grandt/PHPePub
- * @uses      Zip.php version 2.0.5; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
+ * @uses      Zip.php version 2.0.6; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
     const VERSION         = '4.0.0';
-    const REQ_ZIP_VERSION = '2.0.5';
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI  = 'URI';
@@ -146,18 +145,8 @@ class EPub {
         /* Prepare Logging. Just in case it's used. later */
         if ($this->isLogging) {
             $this->log->logLine('EPub class version....: ' . self::VERSION);
-            $this->log->logLine('EPub req. Zip version.: ' . self::REQ_ZIP_VERSION);
-            $this->log->logLine('Zip version...........: ' . Zip::VERSION);
             $this->log->dumpInstalledModules();
         }
-
-        if (!defined('PHPZip\Zip\File\Zip::VERSION')) {
-            die('<p>EPub version ' . self::VERSION . ' requires Zip.php at version ' . self::REQ_ZIP_VERSION . ' or higher, but were unable to determine the Zip.php version.<br />You can obtain the latest version from <a href="http://www.phpclasses.org/browse/package/6110.html">http://www.phpclasses.org/browse/package/6110.html</a>.</p>');
-        }
-        if (Zip::VERSION < self::REQ_ZIP_VERSION) {
-            die('<p>EPub version ' . self::VERSION . ' requires Zip.php at version ' . self::REQ_ZIP_VERSION . ' or higher, but found Zip.php version ' . Zip::VERSION . '.<br />You can obtain the latest version from <a href="http://www.phpclasses.org/browse/package/6110.html">http://www.phpclasses.org/browse/package/6110.html</a>.</p>');
-        }
-
         $this->setUp();
     }
 
