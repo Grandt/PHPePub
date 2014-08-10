@@ -1,10 +1,11 @@
 <?php
+include 'vendor/autoload.php';
 
-use com\grandt\DublinCore;
-use com\grandt\EPub;
-use com\grandt\EPubChapterSplitter;
-use com\grandt\Logger;
-use com\grandt\Zip;
+use PHPePub\Core\EPub;
+use PHPePub\Core\EPubChapterSplitter;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Core\Logger;
+use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
@@ -30,13 +31,9 @@ $bookEnd = "</body>\n</html>\n";
 // setting timezone for time functions used for logging to work properly
 date_default_timezone_set('Europe/Berlin');
 
-include_once("Logger.php");
 $log = new Logger("Example", TRUE);
 
 $fileDir = './PHPePub';
-
-include_once("EPub.php");
-$log->logLine("include EPub");
 
 // Default is EPub::BOOK_VERSION_EPUB2
 $book = new EPub();
@@ -49,11 +46,11 @@ $log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("Test book");
-$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBook.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, prefered for published books, or a UUID.
+$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBook.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
 $book->setLanguage("en"); // Not needed, but included for the example, Language is mandatory, but EPub defaults to "en". Use RFC3066 Language codes, such as "en", "da", "fr" etc.
 $book->setDescription("This is a brief description\nA test ePub book as an example of building a book in PHP");
 $book->setAuthor("John Doe Johnson", "Johnson, John Doe");
-$book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existant address :)
+$book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existent address :)
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
 $book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBook.html");
@@ -79,8 +76,8 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 $log->logLine("Add Cover Image");
 $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
 
-// A better way is to let EPub handle the image itself, as it may need resizing. Most Ebooks are only about 600x800
-//  pixels, adding megapix images is a waste of place and spends bandwidth. setCoverImage can resize the image.
+// A better way is to let EPub handle the image itself, as it may need resizing. Most e-books are only about 600x800
+//  pixels, adding mega-pixel images is a waste of place and spends bandwidth. setCoverImage can resize the image.
 //  When using this method, the given image path must be the absolute path from the servers Document root.
 
 /* $book->setCoverImage("/absolute/path/to/demo/cover-image.jpg"); */
@@ -194,7 +191,7 @@ $book->addLargeFile("demo/DemoInlineImage.jpg", "DemoInlineImage", "demo/DemoInl
 $log->logLine("Add Chapter 3");
 $book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
 
-// Autosplit a chapter:
+// Auto split a chapter:
 $log->logLine("Add Chapter 4");
 $book->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
 $book->addChapter("Chapter 4: Vivamus bibendum massa split", "Chapter004.html", $chapter4, true);
@@ -206,19 +203,16 @@ $book->backLevel();
 
 // More advanced use of the splitter:
 // Still using Chapter 4, but as you can see, "Chapter 4" also contains a header for Chapter 5.
-require_once 'EPubChapterSplitter.php';
-$log->logLine("include EPubChapterSplitter.php");
-
 $splitter = new EPubChapterSplitter();
 $splitter->setSplitSize(15000); // For this test, we split at approx 15k. Default is 250000 had we left it alone.
-$log->logLine("new \com\grandt\EPubChapterSplitter()");
+$log->logLine("new EPubChapterSplitter()");
 
 /* Using the # as regexp delimiter here, it makes writing the regexp easier.
  *  in this case we could have just searched for "Chapter ", or if we were using regexp '#^<h1>Chapter #i',
  *  using regular text (no regexp delimiters) will look for the text after the first tag. Meaning had we used
  *  "Chapter ", any paragraph or header starting with "Chapter " would have matched. The regexp equivalent of
  *  "Chapter " is '#^<.+?>Chapter #'
- * Essentially, the search strnig is looking for lines starting with...
+ * Essentially, the search string is looking for lines starting with...
  */
 $log->logLine("Add Chapter 5");
 $html2 = $splitter->splitChapter($chapter5, true, "Chapter ");/* '#^<.+?>Chapter \d*#i'); */
@@ -234,7 +228,7 @@ while (list($k, $v) = each($html2)) {
     preg_match('#^<(\w+)\ *.*?>(.+)</\ *\1>$#i', $k, $cName);
 
     // because of the back reference, the tag name is in $cName[1], and the content is in $cName[2]
-    // Change any line breakes in the chapter name to " - "
+    // Change any line breaks in the chapter name to " - "
     $cName = preg_replace('#<br.+?>#i', " - ", $cName[2]);
     // Remove any other tags
     $cName = preg_replace('#<.+?>#i', " ", $cName);
@@ -257,7 +251,7 @@ while (list($k, $v) = each($html2)) {
 //     It is used to resolve any links in the HTML.
 
 // BEWARE!
-// Using EPub::EXTERNAL_REF_ADD means EPub will try to download the imagees from the internet if they are external. This WILL slow down book generation a lot.
+// Using EPub::EXTERNAL_REF_ADD means EPub will try to download the images from the internet if they are external. This WILL slow down book generation a lot.
 // $book->addChapter("Chapter 6: External Image test", "Chapter006.html", $chapter1, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 //$log->logLine("add chapter 6");
 
@@ -304,7 +298,7 @@ $book->addChapter("Chapter 7.1.3.4", "Chapter007134.html", $content_start . "<h2
 $log->logLine("Add Chapter 7.2.0.0");
 // We went deep with Chapter 7.1.3.x, and sometimes the generating class knows exactly where it is anyway,
 //  so instead of relying on multiple ->backLevel() calls, you can set the target level directly.
-// This only works for going back in the hieracy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
+// This only works for going back in the hierarchy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
 $book->setCurrentLevel(2);
 $book->addChapter("Chapter 7.2", "Chapter00720.html", $content_start . "<h2>Chapter 7.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
@@ -317,7 +311,7 @@ $log->logLine("Add Chapter 7.3.1.0");
 $book->subLevel();
 $book->addChapter("Chapter 7.3.1", "Chapter00731.html", $content_start . "<h2>Chapter 7.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
-// If you have nested chapters, you can call ->rootLevel() to return your hierachy to the root of the navMap.
+// If you have nested chapters, you can call ->rootLevel() to return your hierarchy to the root of the navMap.
 $book->rootLevel();
 
 // $log->logLine("Add TOC");
@@ -346,7 +340,7 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 */
 
 // Save book as a file relative to your script (for local ePub generation)
-// Notice that the extions .epub will be added by the script.
+// Notice that the extension .epub will be added by the script.
 // The second parameter is a directory name which is '.' by default. Don't use trailing slash!
 //$book->saveBook('epub-filename', '.');
 

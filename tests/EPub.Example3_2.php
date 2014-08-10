@@ -1,10 +1,10 @@
 <?php
-// Using use merely makes this a little easier.
-// Normally you'll only need to use EPub, unless you specifically need the others.
-use com\grandt\DublinCore;
-use com\grandt\EPub;
-use com\grandt\Logger;
-use com\grandt\Zip;
+include 'vendor/autoload.php';
+
+use PHPePub\Core\EPub;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Core\Logger;
+use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
@@ -28,18 +28,14 @@ $bookEnd = "</body>\n</html>\n";
 // setting timezone for time functions used for logging to work properly
 date_default_timezone_set('Europe/Berlin');
 
-include_once("Logger.php");
 $log = new Logger("Example", TRUE);
 
 $fileDir = './PHPePub';
 
-include_once("EPub.php");
-$log->logLine("include EPub");
-
-// ePub 3 is not fully implemented. but aspects of it is, in order to help inmplementers.
+// ePub 3 is not fully implemented. but aspects of it is, in order to help implementers.
 // ePub 3 uses HTML5, formatted strictly as if it was XHTML but still using just the HTML5 doctype (aka XHTML5)
 $book = new EPub(EPub::BOOK_VERSION_EPUB3, "en", EPub::DIRECTION_LEFT_TO_RIGHT); // Default is ePub 2
-$log->logLine("new \com\grandt\EPub()");
+$log->logLine("new EPub()");
 $log->logLine("EPub class version: " . EPub::VERSION);
 $log->logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
 $log->logLine("Zip version: " . Zip::VERSION);
@@ -48,11 +44,11 @@ $log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("ePub 3 Test book");
-$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, prefered for published books, or a UUID.
+$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
 $book->setLanguage("en"); // Not needed, but included for the example, Language is mandatory, but EPub defaults to "en". Use RFC3066 Language codes, such as "en", "da", "fr" etc.
 $book->setDescription("This is a brief description\nA test ePub book as an example of building a book in PHP");
 $book->setAuthor("John Doe Johnson", "Johnson, John Doe");
-$book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existant address :)
+$book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existent address :)
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
 $book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookEPub3.html");

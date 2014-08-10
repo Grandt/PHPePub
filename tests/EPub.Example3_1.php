@@ -1,10 +1,10 @@
 <?php
-// Using use merely makes this a little easier.
-// Normally you'll only need to use EPub, unless you specifically need the others.
-use com\grandt\DublinCore;
-use com\grandt\EPub;
-use com\grandt\Logger;
-use com\grandt\Zip;
+include 'vendor/autoload.php';
+
+use PHPePub\Core\EPub;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Core\Logger;
+use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
@@ -28,18 +28,14 @@ $bookEnd = "</body>\n</html>\n";
 // setting timezone for time functions used for logging to work properly
 date_default_timezone_set('Europe/Berlin');
 
-include_once("Logger.php");
 $log = new Logger("Example", TRUE);
 
 $fileDir = './PHPePub';
 
-include_once("EPub.php");
-$log->logLine("include EPub");
-
-// ePub 3 is not fully implemented. but aspects of it is, in order to help inmplementers.
+// ePub 3 is not fully implemented. but aspects of it is, in order to help implementers.
 // ePub 3 uses HTML5, formatted strictly as if it was XHTML but still using just the HTML5 doctype (aka XHTML5)
 $book = new EPub(EPub::BOOK_VERSION_EPUB3, "en", EPub::DIRECTION_LEFT_TO_RIGHT); // Default is ePub 2
-$log->logLine("new \com\grandt\EPub()");
+$log->logLine("new EPub()");
 $log->logLine("EPub class version: " . EPub::VERSION);
 $log->logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
 $log->logLine("Zip version: " . Zip::VERSION);
@@ -48,11 +44,11 @@ $log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("ePub 3 Test book");
-$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, prefered for published books, or a UUID.
+$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
 $book->setLanguage("en"); // Not needed, but included for the example, Language is mandatory, but EPub defaults to "en". Use RFC3066 Language codes, such as "en", "da", "fr" etc.
 $book->setDescription("This is a brief description\nA test ePub book as an example of building a book in PHP");
 $book->setAuthor("John Doe Johnson", "Johnson, John Doe");
-$book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existant address :)
+$book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existent address :)
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
 $book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookEPub3.html");
@@ -63,7 +59,7 @@ $book->setSubject("Test book");
 $book->setSubject("keywords");
 $book->setSubject("Chapter levels");
 
-// Insert custom meta data to the book, in this cvase, Calibre series index information.
+// Insert custom meta data to the book, in this case, Calibre series index information.
 $book->addCustomMetadata("calibre:series", "PHPePub Test books");
 $book->addCustomMetadata("calibre:series_index", "3");
 
@@ -78,8 +74,8 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 $log->logLine("Add Cover Image");
 $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
 
-// A better way is to let EPub handle the image itself, as it may need resizing. Most Ebooks are only about 600x800
-//  pixels, adding megapix images is a waste of place and spends bandwidth. setCoverImage can resize the image.
+// A better way is to let EPub handle the image itself, as it may need resizing. Most e-books are only about 600x800
+//  pixels, adding mega-pixel images is a waste of place and spends bandwidth. setCoverImage can resize the image.
 //  When using this method, the given image path must be the absolute path from the servers Document root.
 
 /* $book->setCoverImage("/absolute/path/to/demo/cover-image.jpg"); */
@@ -217,7 +213,7 @@ $book->addChapter("Chapter 5.1.3.4", "Chapter005134.html", $content_start . "<h2
 $log->logLine("Add Chapter 5.2.0.0");
 // We went deep with Chapter 5.1.3.x, and sometimes the generating class knows exactly where it is anyway,
 //  so instead of relying on multiple ->backLevel() calls, you can set the target level directly.
-// This only works for going back in the hieracy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
+// This only works for going back in the hierarchy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
 $book->setCurrentLevel(2);
 $book->addChapter("Chapter 5.2", "Chapter00520.html", $content_start . "<h2>Chapter 5.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
@@ -230,7 +226,7 @@ $log->logLine("Add Chapter 5.3.1.0");
 $book->subLevel();
 $book->addChapter("Chapter 5.3.1", "Chapter00531.html", $content_start . "<h2>Chapter 5.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
-// If you have nested chapters, you can call ->rootLevel() to return your hierachy to the root of the navMap.
+// If you have nested chapters, you can call ->rootLevel() to return your hierarchy to the root of the navMap.
 $book->rootLevel();
 
 $log->logLine("Add TOC");

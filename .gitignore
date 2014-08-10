@@ -49,3 +49,4 @@ demo/georgia-pls-ssml/
 vendor
 /*.phar
 /composer.lock
+/tests/*.lock
