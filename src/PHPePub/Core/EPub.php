@@ -2033,7 +2033,7 @@ class EPub {
      * @param string $fileName
      * @param string $baseDir If empty baseDir is absolute to server path, if omitted it's relative to script path
      *
-     * @return string The sent file name if successfull, FALSE if it failed.
+     * @return string The sent file name if successful, FALSE if it failed.
      */
     function saveBook($fileName, $baseDir = '.') {
 
@@ -2472,9 +2472,11 @@ class EPub {
     /**
      * @param $doc
      *
-     * @return mixed
+     * @return string
      */
-    protected static function removeComments(&$doc) {
+    public static function removeComments($doc) {
+        $doc = preg_replace('~--\s+>~', '-->', $doc);
+        $doc = preg_replace('~<\s*!\s*--~', '<!--', $doc);
         $cPos = BinStringStatic::_strpos($doc, "<!--");
         if ($cPos !== false) {
             $startCount = substr_count($doc, "<!--");
@@ -2501,8 +2503,8 @@ class EPub {
                 $doc  = substr_replace($doc, "", $cPos, ($lastEPos + 3) - $cPos);
                 $cPos = BinStringStatic::_strpos($doc, "<!--");
             }
-            return $doc;
         }
+        // print "<pre>\n" . htmlentities($doc) . "\n</pre>\n";
         return $doc;
     }
 
