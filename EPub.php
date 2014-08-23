@@ -1824,7 +1824,7 @@ class EPub {
         }
 
         if ($this->isCoverImageSet) {
-            $this->opf->addMeta("cover", "coverImage");
+            $this->opf->addMeta("cover", "CoverImage");
         }
 
         if (!empty($this->generator)) {
