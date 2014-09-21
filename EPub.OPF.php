@@ -13,8 +13,8 @@ class Opf {
 
     /* Core Media types.
      * These types are the only guaranteed mime types any ePub reader must understand.
-    * Any other type muse define a fall back whose fallback chain will end in one of these.
-    */
+     * Any other type muse define a fall back whose fallback chain will end in one of these.
+     */
     const TYPE_GIF = "image/gif";
     const TYPE_JPEG = "image/jpeg";
     const TYPE_PNG = "image/png";
@@ -28,7 +28,7 @@ class Opf {
     const TYPE_NCX = "application/x-dtbncx+xml";
 
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;
-	private $ident = "BookId";
+    private $ident = "BookId";
 
     public $date = NULL;
     public $metadata = NULL;
@@ -46,8 +46,8 @@ class Opf {
         $this->setVersion($bookVersion);
         $this->metadata = new Metadata();
         $this->manifest = new Manifest();
-        $this->spine = new Spine();
-        $this->guide = new Guide();
+        $this->spine    = new Spine();
+        $this->guide    = new Guide();
     }
 
     /**
@@ -56,7 +56,7 @@ class Opf {
      * @return void
      */
     function __destruct() {
-        unset ($this->bookVersion, $this->ident, $this->date, $this->metadata, $this->manifest, $this->spine, $this->guide);
+        unset($this->bookVersion, $this->ident, $this->date, $this->metadata, $this->manifest, $this->spine, $this->guide);
     }
 
     /**
@@ -69,9 +69,9 @@ class Opf {
         $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
     }
 
-	function isEPubVersion2() {
-		return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
-	}
+    function isEPubVersion2() {
+        return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
+    }
 
     /**
      *
@@ -91,9 +91,9 @@ class Opf {
      */
     function finalize() {
         $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				. "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
+        . "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
 
-		$opf .= $this->metadata->finalize($this->bookVersion, $this->date);
+        $opf .= $this->metadata->finalize($this->bookVersion, $this->date);
         $opf .= $this->manifest->finalize($this->bookVersion);
         $opf .= $this->spine->finalize();
 
@@ -250,7 +250,7 @@ class Metadata {
      * @return void
      */
     function __destruct() {
-        unset ($this->dc, $this->meta);
+        unset($this->dc, $this->meta);
     }
 
     /**
@@ -278,27 +278,29 @@ class Metadata {
             $content = is_string($content) ? trim($content) : NULL;
         }
         if (isset($content)) {
-            $this->meta[] = array ($name => $content);
+            $this->meta[] = array(
+                $name => $content
+            );
         }
     }
 
-	/**
-	 *
-	 * @param string $bookVersion
-	 * @param int    $date
-	 * @return string
-	 */
+    /**
+     *
+     * @param string $bookVersion
+     * @param int    $date
+     * @return string
+     */
     function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = NULL) {
         $metadata = "\t<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
-		if ($bookVersion === EPub::BOOK_VERSION_EPUB2) {
-			$metadata .= "\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-		} else {
-			$metadata .= "\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-			if (!isset($date)) {
-				$date = time();
-			}
-			$metadata .= "\t\t<meta property=\"dcterms:modified\">" . gmdate("Y-m-d\TH:i:s\Z", $date) . "</meta>\n";
-		}
+        if ($bookVersion === EPub::BOOK_VERSION_EPUB2) {
+            $metadata .= "\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+        } else {
+            $metadata .= "\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+            if (!isset($date)) {
+                $date = time();
+            }
+            $metadata .= "\t\t<meta property=\"dcterms:modified\">" . gmdate("Y-m-d\TH:i:s\Z", $date) . "</meta>\n";
+        }
 
         foreach ($this->dc as $dc) {
             $metadata .= $dc->finalize($bookVersion);
@@ -355,7 +357,7 @@ class DublinCore {
      * @return void
      */
     function __destruct() {
-        unset ($this->dcName, $this->dcValue, $this->attr, $this->opfAttr);
+        unset($this->dcName, $this->dcValue, $this->attr, $this->opfAttr);
     }
 
     /**
@@ -368,9 +370,9 @@ class DublinCore {
     function setDc($name, $value) {
         $this->dcName = is_string($name) ? trim($name) : NULL;
         if (isset($this->dcName)) {
-            $this->dcValue = isset($value) ? (string)$value : NULL;
+            $this->dcValue = isset($value) ? (string) $value : NULL;
         }
-        if (! isset($this->dcValue)) {
+        if (!isset($this->dcValue)) {
             $this->dcName = NULL;
         }
     }
@@ -410,11 +412,11 @@ class DublinCore {
     }
 
 
-	/**
-	 *
-	 * @param string $bookVersion
-	 * @return string
-	 */
+    /**
+     *
+     * @param string $bookVersion
+     * @return string
+     */
     function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $dc = "\t\t<dc:" . $this->dcName;
 
@@ -456,7 +458,7 @@ class Manifest {
      * @return void
      */
     function __destruct() {
-        unset ($this->items);
+        unset($this->items);
     }
 
     /**
@@ -471,12 +473,12 @@ class Manifest {
         }
     }
 
-	/**
-	 *
-	 * @param string $bookVersion
-	 * @return string
-	 */
-	function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
+    /**
+     *
+     * @param string $bookVersion
+     * @return string
+     */
+    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $manifest = "\n\t<manifest>\n";
         foreach ($this->items as $item) {
             $manifest .= $item->finalize($bookVersion);
@@ -494,7 +496,7 @@ class Item {
     private $id = NULL;
     private $href = NULL;
     private $mediaType = NULL;
-	private $properties = NULL;
+    private $properties = NULL;
     private $requiredNamespace = NULL;
     private $requiredModules = NULL;
     private $fallback = NULL;
@@ -518,8 +520,8 @@ class Item {
      * @return void
      */
     function __destruct() {
-        unset ($this->id, $this->href, $this->mediaType);
-        unset ($this->properties, $this->requiredNamespace, $this->requiredModules, $this->fallback, $this->fallbackStyle);
+        unset($this->id, $this->href, $this->mediaType);
+        unset($this->properties, $this->requiredNamespace, $this->requiredModules, $this->fallback, $this->fallbackStyle);
     }
 
     /**
@@ -602,14 +604,14 @@ class Item {
         $this->fallbackStyle = is_string($fallbackStyle) ? trim($fallbackStyle) : NULL;
     }
 
-	/**
-	 *
-	 * @param string $bookVersion
-	 * @return string
-	 */
+    /**
+     *
+     * @param string $bookVersion
+     * @return string
+     */
     function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2) {
         $item = "\t\t<item id=\"" . $this->id . "\" href=\"" . $this->href . "\" media-type=\"" . $this->mediaType . "\" ";
-		if ($bookVersion === EPub::BOOK_VERSION_EPUB3 && isset($this->properties)) {
+        if ($bookVersion === EPub::BOOK_VERSION_EPUB3 && isset($this->properties)) {
             $item .= "properties=\"" . $this->properties . "\" ";
         }
         if (isset($this->requiredNamespace)) {
@@ -652,7 +654,7 @@ class Spine {
      * @return void
      */
     function __destruct() {
-        unset ($this->itemrefs, $this->toc);
+        unset($this->itemrefs, $this->toc);
     }
 
     /**
@@ -672,10 +674,10 @@ class Spine {
      * @param Itemref $itemref
      */
     function addItemref($itemref) {
-        if ($itemref != NULL 
-				&& is_object($itemref) 
-				&& get_class($itemref) === "com\grandt\Itemref" 
-				&& !isset($this->itemrefs[$itemref->getIdref()])) {
+        if ($itemref != NULL
+            && is_object($itemref)
+            && get_class($itemref) === "com\grandt\Itemref"
+            && !isset($this->itemrefs[$itemref->getIdref()])) {
             $this->itemrefs[$itemref->getIdref()] = $itemref;
         }
     }
@@ -720,7 +722,7 @@ class Itemref {
      * @return void
      */
     function __destruct() {
-        unset ($this->idref, $this->linear);
+        unset($this->idref, $this->linear);
     }
 
     /**
@@ -733,7 +735,7 @@ class Itemref {
         $this->idref = is_string($idref) ? trim($idref) : NULL;
     }
 
-	/**
+    /**
      *
      * Enter description here ...
      *
@@ -790,7 +792,7 @@ class Guide {
      * @return void
      */
     function __destruct() {
-        unset ($this->references);
+        unset($this->references);
     }
 
     /**
@@ -890,35 +892,35 @@ class Reference {
     /** First page of the book, ie. first page of the first chapter */
     const TEXT = "text";
 
-	// ******************
-	// ePub3 constants
-	// ******************
+    // ******************
+    // ePub3 constants
+    // ******************
 
-	// Document partitions
-	/** The publications cover(s), jacket information, etc. This is officially in ePub3, but works for ePub 2 as well */
-	const COVER = "cover";
+    // Document partitions
+    /** The publications cover(s), jacket information, etc. This is officially in ePub3, but works for ePub 2 as well */
+    const COVER = "cover";
 
-	/** Preliminary material to the content body, such as tables of contents, dedications, etc. */
-	const FRONTMATTER = "frontmatter";
+    /** Preliminary material to the content body, such as tables of contents, dedications, etc. */
+    const FRONTMATTER = "frontmatter";
 
-	/** The main (body) content of a document. */
-	const BODYMATTER = "bodymatter";
+    /** The main (body) content of a document. */
+    const BODYMATTER = "bodymatter";
 
-	/** Ancillary material occurring after the document body, such as indices, appendices, etc. */
-	const BACKMATTER = "backmatter";
+    /** Ancillary material occurring after the document body, such as indices, appendices, etc. */
+    const BACKMATTER = "backmatter";
 
 
-	private $type = NULL;
+    private $type = NULL;
     private $title = NULL;
     private $href = NULL;
 
     /**
      * Class constructor.
-	 *
-	 * @param string $type
-	 * @param string $title
-	 * @param string $href
-	 */
+     *
+     * @param string $type
+     * @param string $title
+     * @param string $href
+     */
     function __construct($type, $title, $href) {
         $this->setType($type);
         $this->setTitle($title);
@@ -931,7 +933,7 @@ class Reference {
      * @return void
      */
     function __destruct() {
-        unset ($this->type, $this->title, $this->href);
+        unset($this->type, $this->title, $this->href);
     }
 
     /**
