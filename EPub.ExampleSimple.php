@@ -82,3 +82,4 @@ $zipData = $book->sendBook("ExampleBookSimple");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
+?>

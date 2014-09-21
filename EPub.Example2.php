@@ -100,7 +100,7 @@ $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . "<p>Vivamus purus elit, ornare eget accumsan ut, luctus et orci. Sed vestibulum turpis ut quam vehicula id hendrerit velit suscipit. Pellentesque pulvinar, libero vitae sagittis scelerisque, felis ante faucibus risus, ut viverra velit mi at tortor. Aliquam lacinia condimentum felis, eu elementum ligula laoreet vitae. Sed placerat tempus turpis a fringilla. Etiam porta accumsan feugiat. Phasellus et cursus magna. Suspendisse vitae odio sit amet urna vulputate consectetur. Vestibulum massa magna, sagittis at dictum vitae, sagittis scelerisque erat. Donec viverra tincidunt lacus. Maecenas fermentum erat et mauris tincidunt sed eleifend quam tempus. In at augue mi, in tincidunt arcu. Duis dapibus aliquet mi, ac ullamcorper est semper quis. Sed nec nulla nec odio malesuada viverra id sed nulla. Donec lobortis euismod aliquam. Praesent sit amet dolor quis lacus auctor lobortis. In hac habitasse platea dictumst. Sed at nisi sed nisi ullamcorper pellentesque. Vivamus eget enim sem, non laoreet leo. Sed vel odio lacus.</p>\n"
     . $bookEnd;
 
-$chapter2 =
+$chapter2 = 
       "<h2>Vivamus bibendum massa</h2>\n"
     . "<p><img src=\"demo/DemoInlineImage.jpg\" alt=\"Demo Inline Image!\" /></p>\n"
     . "<p>Vivamus bibendum massa ac magna congue gravida. Curabitur nulla ante, accumsan sit amet luctus a, fermentum ut diam. Maecenas porttitor faucibus mattis. Ut auctor aliquet ligula nec posuere. Nullam arcu turpis, dapibus sit amet tempor nec, cursus at augue. Aliquam sed sem velit, id sagittis mauris. Donec sed ipsum nisi, id scelerisque felis. Cras lacus est, fermentum in ultricies eu, congue in elit. Nulla tincidunt posuere eros, eget suscipit tellus porta vel. Aliquam ut sollicitudin libero. Suspendisse potenti. Sed cursus dignissim nulla in elementum. Aliquam id quam justo, sit amet laoreet ligula. Etiam pellentesque tellus a nisi commodo eu sodales ante commodo. Vestibulum ultricies sapien arcu. Proin nunc mauris, ultrices id imperdiet ac, malesuada ac nunc. Nunc a mi quis nunc ultricies rhoncus. Mauris pellentesque eros eu augue congue ac tincidunt est gravida.</p>\n"
@@ -148,7 +148,7 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
     . "<p>Duis ut aliquam mauris. Vestibulum lobortis porta dolor at fermentum. Proin at elit lacus, quis accumsan turpis. Aenean molestie lobortis sollicitudin. Praesent velit est, molestie sed cursus id, consectetur non turpis. Quisque a purus dui, nec faucibus libero. Cras porta molestie elementum. Phasellus sit amet facilisis eros. Ut et mi malesuada mi cursus vulputate vitae et lectus. Sed ac massa quis nisi egestas convallis. Duis interdum aliquam dui, nec laoreet turpis auctor a. Mauris consectetur eros eu elit tempus tincidunt. Suspendisse tellus elit, viverra eu aliquam nec, auctor volutpat quam.</p>\n"
     . "<p>Morbi pretium lectus laoreet sapien tincidunt ac volutpat erat ullamcorper. Vivamus dolor neque, blandit non ultrices vitae, mollis venenatis nisi. Fusce at mollis ante. Sed id libero id purus eleifend rutrum. Fusce eget lacus eget libero euismod elementum. Phasellus ac eros non mi luctus pulvinar vestibulum vitae nibh. Proin elementum ultricies mauris, non hendrerit massa egestas quis. Maecenas consectetur consequat quam, vitae tempor leo aliquam sed. Proin iaculis fringilla ante id laoreet. In facilisis vestibulum mollis. Etiam ut arcu mi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at fermentum nisl. Proin odio justo, condimentum euismod mollis et, malesuada ac tortor. Aliquam ac elit euismod nibh pulvinar sodales id vitae nibh. Curabitur ut libero metus, eu bibendum turpis.</p>\n"
     . "<p>Nam faucibus nibh non nulla aliquet id aliquet tortor tincidunt. Fusce at nisi ac mauris pulvinar vehicula at sed velit. Pellentesque vitae eros nec justo semper egestas ut id nisl. Quisque et est lectus. Cras eget nibh et odio pretium venenatis non nec tellus. Aliquam placerat odio non diam facilisis at sollicitudin turpis tempus. Etiam vitae magna dui, nec dignissim odio. Donec dui tellus, adipiscing vel dictum in, vehicula ut diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse est elit, porta non lobortis rutrum, placerat non urna. Integer nisi tellus, imperdiet ac dapibus at, interdum ut enim. Mauris fringilla tempus risus at dapibus. Quisque enim nunc, posuere vel dapibus vel, posuere vel sapien. Suspendisse potenti. Nullam pulvinar nibh nisi, nec porttitor nisi. Donec iaculis euismod elit at porttitor. Mauris quis nunc ut risus semper auctor. Pellentesque pulvinar cursus augue mattis luctus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>\n"
-    . "<p>Pellentesque pharetra tincidunt velit, ac laoreet ipsum dictum quis. Cras hendrerit neque eu tellus pellentesque condimentum. Suspendisse metus mi, dignissim eu faucibus vel, molestie quis tortor. Suspendisse vel orci non orci gravida ultrices eu in dui. Vivamus vitae dolor vitae mauris congue auctor. Nulla iaculis, est tempor sagittis condimentum, libero erat fermentum libero, id dapibus tortor sem sit amet sapien. Pellentesque id ipsum eu elit pharetra tristique non ac nibh. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, lorem id elementum feugiat, orci arcu tincidunt diam, quis placerat sem lectus convallis nulla. Proin eget est quis libero molestie faucibus. Cras et est vitae lacus lacinia auctor. Mauris ligula justo, ullamcorper molestie fermentum vel, tincidunt at nunc. Sed ullamcorper fringilla lectus in pharetra. Sed libero erat, lobortis nec tempor ac, volutpat id orci. Phasellus orci elit, blandit a sollicitudin at, dignissim in mi. Ut facilisis gravida cursus. Duis risus lacus, pretium vitae egestas varius, interdum non ipsum.</p>\n"
+    . "<p>Pellentesque pharetra tincidunt velit, ac laoreet ipsum dictum quis. Cras hendrerit neque eu tellus pellentesque condimentum. Suspendisse metus mi, dignissim eu faucibus vel, molestie quis tortor. Suspendisse vel orci non orci gravida ultrices eu in dui. Vivamus vitae dolor vitae mauris congue auctor. Nulla iaculis, est tempor sagittis condimentum, libero erat fermentum libero, id dapibus tortor sem sit amet sapien. Pellentesque id ipsum eu elit pharetra tristique non ac nibh. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, lorem id elementum feugiat, orci arcu tincidunt diam, quis placerat sem lectus convallis nulla. Proin eget est quis libero molestie faucibus. Cras et est vitae lacus lacinia auctor. Mauris ligula justo, ullamcorper molestie fermentum vel, tincidunt at nunc. Sed ullamcorper fringilla lectus in pharetra. Sed libero erat, lobortis nec tempor ac, volutpat id orci. Phasellus orci elit, blandit a sollicitudin at, dignissim in mi. Ut facilisis gravida cursus. Duis risus lacus, pretium vitae egestas varius, interdum non ipsum.</p>\n"     
     . $bookEnd;
 
 $chapter5 = $content_start . "<h1>Chapter 5</h1>\n"
@@ -172,7 +172,7 @@ $chapter5 = $content_start . "<h1>Chapter 5</h1>\n"
     . "<p>Duis ut aliquam mauris. Vestibulum lobortis porta dolor at fermentum. Proin at elit lacus, quis accumsan turpis. Aenean molestie lobortis sollicitudin. Praesent velit est, molestie sed cursus id, consectetur non turpis. Quisque a purus dui, nec faucibus libero. Cras porta molestie elementum. Phasellus sit amet facilisis eros. Ut et mi malesuada mi cursus vulputate vitae et lectus. Sed ac massa quis nisi egestas convallis. Duis interdum aliquam dui, nec laoreet turpis auctor a. Mauris consectetur eros eu elit tempus tincidunt. Suspendisse tellus elit, viverra eu aliquam nec, auctor volutpat quam.</p>\n"
     . "<p>Morbi pretium lectus laoreet sapien tincidunt ac volutpat erat ullamcorper. Vivamus dolor neque, blandit non ultrices vitae, mollis venenatis nisi. Fusce at mollis ante. Sed id libero id purus eleifend rutrum. Fusce eget lacus eget libero euismod elementum. Phasellus ac eros non mi luctus pulvinar vestibulum vitae nibh. Proin elementum ultricies mauris, non hendrerit massa egestas quis. Maecenas consectetur consequat quam, vitae tempor leo aliquam sed. Proin iaculis fringilla ante id laoreet. In facilisis vestibulum mollis. Etiam ut arcu mi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at fermentum nisl. Proin odio justo, condimentum euismod mollis et, malesuada ac tortor. Aliquam ac elit euismod nibh pulvinar sodales id vitae nibh. Curabitur ut libero metus, eu bibendum turpis.</p>\n"
     . "<p>Nam faucibus nibh non nulla aliquet id aliquet tortor tincidunt. Fusce at nisi ac mauris pulvinar vehicula at sed velit. Pellentesque vitae eros nec justo semper egestas ut id nisl. Quisque et est lectus. Cras eget nibh et odio pretium venenatis non nec tellus. Aliquam placerat odio non diam facilisis at sollicitudin turpis tempus. Etiam vitae magna dui, nec dignissim odio. Donec dui tellus, adipiscing vel dictum in, vehicula ut diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse est elit, porta non lobortis rutrum, placerat non urna. Integer nisi tellus, imperdiet ac dapibus at, interdum ut enim. Mauris fringilla tempus risus at dapibus. Quisque enim nunc, posuere vel dapibus vel, posuere vel sapien. Suspendisse potenti. Nullam pulvinar nibh nisi, nec porttitor nisi. Donec iaculis euismod elit at porttitor. Mauris quis nunc ut risus semper auctor. Pellentesque pulvinar cursus augue mattis luctus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>\n"
-    . "<p>Pellentesque pharetra tincidunt velit, ac laoreet ipsum dictum quis. Cras hendrerit neque eu tellus pellentesque condimentum. Suspendisse metus mi, dignissim eu faucibus vel, molestie quis tortor. Suspendisse vel orci non orci gravida ultrices eu in dui. Vivamus vitae dolor vitae mauris congue auctor. Nulla iaculis, est tempor sagittis condimentum, libero erat fermentum libero, id dapibus tortor sem sit amet sapien. Pellentesque id ipsum eu elit pharetra tristique non ac nibh. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, lorem id elementum feugiat, orci arcu tincidunt diam, quis placerat sem lectus convallis nulla. Proin eget est quis libero molestie faucibus. Cras et est vitae lacus lacinia auctor. Mauris ligula justo, ullamcorper molestie fermentum vel, tincidunt at nunc. Sed ullamcorper fringilla lectus in pharetra. Sed libero erat, lobortis nec tempor ac, volutpat id orci. Phasellus orci elit, blandit a sollicitudin at, dignissim in mi. Ut facilisis gravida cursus. Duis risus lacus, pretium vitae egestas varius, interdum non ipsum.</p>\n"
+    . "<p>Pellentesque pharetra tincidunt velit, ac laoreet ipsum dictum quis. Cras hendrerit neque eu tellus pellentesque condimentum. Suspendisse metus mi, dignissim eu faucibus vel, molestie quis tortor. Suspendisse vel orci non orci gravida ultrices eu in dui. Vivamus vitae dolor vitae mauris congue auctor. Nulla iaculis, est tempor sagittis condimentum, libero erat fermentum libero, id dapibus tortor sem sit amet sapien. Pellentesque id ipsum eu elit pharetra tristique non ac nibh. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus facilisis, lorem id elementum feugiat, orci arcu tincidunt diam, quis placerat sem lectus convallis nulla. Proin eget est quis libero molestie faucibus. Cras et est vitae lacus lacinia auctor. Mauris ligula justo, ullamcorper molestie fermentum vel, tincidunt at nunc. Sed ullamcorper fringilla lectus in pharetra. Sed libero erat, lobortis nec tempor ac, volutpat id orci. Phasellus orci elit, blandit a sollicitudin at, dignissim in mi. Ut facilisis gravida cursus. Duis risus lacus, pretium vitae egestas varius, interdum non ipsum.</p>\n"     
     . $bookEnd;
 
 $log->logLine("Build Chapters");
@@ -183,7 +183,7 @@ $book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1, true, 
 $log->logLine("Add Chapter 2");
 $book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $content_start . "<h1>Chapter 2</h1>\n" . $chapter2);
 
-// Chapter 2 contains an image reference "demo/DemoInlineImage.jpg" which we didn't get it to import
+// Chapter 2 contains an image reference "demo/DemoInlineImage.jpg" which we didn't get it to import 
 // automatically. So we will do that manually.
 $log->logLine("Add referenced image from Chapter 2");
 $book->addLargeFile("demo/DemoInlineImage.jpg", "DemoInlineImage", "demo/DemoInlineImage.jpg", "image/jpeg");
@@ -226,10 +226,10 @@ while (list($k, $v) = each($html2)) {
     $idx++;
     // Because we used a string search in the splitter, the returned hits are put in the key part of the array.
     // The entire HTML tag of the line matching the chapter search.
-
+    
     // find the text inside the tags
     preg_match('#^<(\w+)\ *.*?>(.+)</\ *\1>$#i', $k, $cName);
-
+    
     // because of the back reference, the tag name is in $cName[1], and the content is in $cName[2]
     // Change any line breakes in the chapter name to " - "
     $cName = preg_replace('#<br.+?>#i', " - ", $cName[2]);
@@ -237,7 +237,7 @@ while (list($k, $v) = each($html2)) {
     $cName = preg_replace('#<.+?>#i', " ", $cName);
     // clean the chapter name by removing any double spaces left behind to single space.
     $cName = preg_replace('#\s+#i', " ", $cName);
-
+    
     $book->addChapter($cName, "Chapter005_" . $idx . ".html", $v, true);
 }
 
@@ -299,10 +299,10 @@ $book->addChapter("Chapter 7.1.3.4", "Chapter007134.html", $content_start . "<h2
 
 
 $log->logLine("Add Chapter 7.2.0.0");
-// We went deep with Chapter 7.1.3.x, and sometimes the generating class knows exactly where it is anyway,
+// We went deep with Chapter 7.1.3.x, and sometimes the generating class knows exactly where it is anyway, 
 //  so instead of relying on multiple ->backLevel() calls, you can set the target level directly.
 // This only works for going back in the hieracy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
-$book->setCurrentLevel(2);
+$book->setCurrentLevel(2); 
 $book->addChapter("Chapter 7.2", "Chapter00720.html", $content_start . "<h2>Chapter 7.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
@@ -341,8 +341,8 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
     fclose($f);
 }
  * or just:
-    $bufferData = ob_get_contents();
-    ob_end_clean();
+	$bufferData = ob_get_contents();
+	ob_end_clean();
  */
 
 // Save book as a file relative to your script (for local ePub generation)
@@ -355,3 +355,4 @@ $zipData = $book->sendBook("ExampleBook2");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
+?>

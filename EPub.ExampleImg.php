@@ -46,10 +46,10 @@ $fileDir = './PHPePub';
 date_default_timezone_set('Europe/Berlin');
 
 $chapter = $content_start . "<p><img src='demo/512x700_g1.gif' alt='Image' /></p>\n"
-        . "<p><img src='demo/rxhVVUP.gif' alt='Animated Gif' /></p>\n"
-        . "<p><img src='demo/512x700_2.jpg' alt='none' /></p>\n"
-        . "<p><img src='demo/512x700_3.jpg' alt='Demo 2' /></p>\n"
-        . $bookEnd;
+		. "<p><img src='demo/rxhVVUP.gif' alt='Animated Gif' /></p>\n"
+		. "<p><img src='demo/512x700_2.jpg' alt='none' /></p>\n"
+		. "<p><img src='demo/512x700_3.jpg' alt='Demo 2' /></p>\n"
+		. $bookEnd;
 
 $book->setCoverImage('demo/512x700_1.jpg');
 //$book->maxImageWidth = 150;
@@ -65,3 +65,4 @@ $zipData = $book->sendBook("ExampleBookImg");
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
 
+?>
