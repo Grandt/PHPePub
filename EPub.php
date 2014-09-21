@@ -1642,7 +1642,7 @@ class EPub {
 		$this->tocTitle = $title;
 		$this->tocFileName = $this->normalizeFileName($tocFileName);
 		if (!empty($cssFileName)) {
-			$this->tocCSSFileName = $this->normalizeFileName($cssFileName);
+			$this->tocCssFileName = $this->normalizeFileName($cssFileName);
 		}
 		$this->tocCSSClass = $tocCSSClass;
 		$this->tocAddReferences = $addReferences;
