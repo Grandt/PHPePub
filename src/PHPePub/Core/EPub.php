@@ -27,13 +27,12 @@ use RelativePath;
  * @author    A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license   GNU LGPL 2.1
- * @version   4.0.1
+ * @version   4.0.0
  * @link      http://www.phpclasses.org/package/6115
  * @link      https://github.com/Grandt/PHPePub
- * @uses      Zip.php version 2.0.6; http://www.phpclasses.org/browse/package/6110.html or https://github.com/Grandt/PHPZip
  */
 class EPub {
-    const VERSION = '4.0.1';
+    const VERSION = '4.0.0';
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI = 'URI';
