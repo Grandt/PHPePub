@@ -30,6 +30,10 @@ class NavMap extends AbstractNavEntry {
         unset($this->navPoints, $this->navLevels, $this->writingDirection);
     }
 
+    function getWritingDirection() {
+        return $this->writingDirection;
+    }
+
     /**
      * Set the writing direction to be used for this NavPoint.
      *
@@ -37,10 +41,6 @@ class NavMap extends AbstractNavEntry {
      */
     function setWritingDirection($writingDirection) {
         $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : null;
-    }
-
-    function getWritingDirection() {
-        return $this->writingDirection;
     }
 
     /**
@@ -57,8 +57,10 @@ class NavMap extends AbstractNavEntry {
                 $navPoint->setWritingDirection($this->writingDirection);
             }
             $this->navPoints[] = $navPoint;
+
             return $navPoint;
         }
+
         return $this;
     }
 
@@ -88,7 +90,7 @@ class NavMap extends AbstractNavEntry {
      *
      */
     function finalize() {
-        $playOrder       = 0;
+        $playOrder = 0;
         $this->navLevels = 0;
 
         $nav = "\t<navMap>\n";
@@ -102,6 +104,7 @@ class NavMap extends AbstractNavEntry {
                 }
             }
         }
+
         return $nav . "\t</navMap>\n";
     }
 
@@ -110,8 +113,8 @@ class NavMap extends AbstractNavEntry {
      *
      */
     function finalizeEPub3() {
-        $playOrder       = 0;
-        $level           = 0;
+        $playOrder = 0;
+        $level = 0;
         $this->navLevels = 0;
 
         $nav = "\t\t<nav epub:type=\"toc\" id=\"toc\">\n";

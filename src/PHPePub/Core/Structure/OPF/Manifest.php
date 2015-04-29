@@ -50,6 +50,7 @@ class Manifest {
             /** @var $item Item */
             $manifest .= $item->finalize($bookVersion);
         }
+
         return $manifest . "\t</manifest>\n";
     }
 }

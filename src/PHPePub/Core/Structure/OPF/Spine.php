@@ -18,6 +18,16 @@ class Spine {
     }
 
     /**
+     *
+     * Enter description here ...
+     *
+     * @param string $toc
+     */
+    function setToc($toc) {
+        $this->toc = is_string($toc) ? trim($toc) : null;
+    }
+
+    /**
      * Class destructor
      *
      * @return void
@@ -30,23 +40,13 @@ class Spine {
      *
      * Enter description here ...
      *
-     * @param string $toc
-     */
-    function setToc($toc) {
-        $this->toc = is_string($toc) ? trim($toc) : null;
-    }
-
-    /**
-     *
-     * Enter description here ...
-     *
      * @param Itemref $itemref
      */
     function addItemref($itemref) {
         if ($itemref != null
-                && is_object($itemref)
-                && $itemref instanceof Itemref
-                && !isset($this->itemrefs[$itemref->getIdref()])
+            && is_object($itemref)
+            && $itemref instanceof Itemref
+            && !isset($this->itemrefs[$itemref->getIdref()])
         ) {
             $this->itemrefs[$itemref->getIdref()] = $itemref;
         }
@@ -64,6 +64,7 @@ class Spine {
             /** @var $itemref ItemRef */
             $spine .= $itemref->finalize();
         }
+
         return $spine . "\t</spine>\n";
     }
 }

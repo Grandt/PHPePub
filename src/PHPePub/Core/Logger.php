@@ -32,6 +32,33 @@ class Logger {
         $this->start();
     }
 
+    function start() {
+        /* Prepare Logging. Just in case it's used. later */
+        if ($this->isLogging) {
+            $this->tStart = gettimeofday();
+            $this->tLast = $this->tStart;
+            $this->log = "<h1>Log: " . $this->name . "</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $this->tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
+            $this->logLine("Start");
+        }
+    }
+
+    function logLine($line) {
+        if ($this->isLogging) {
+            $tTemp = gettimeofday();
+            $tS = $this->tStart['sec'] + (((int)($this->tStart['usec'] / 100)) / 10000);
+            $tL = $this->tLast['sec'] + (((int)($this->tLast['usec'] / 100)) / 10000);
+            $tT = $tTemp['sec'] + (((int)($tTemp['usec'] / 100)) / 10000);
+
+            $logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT - $tS), ($tT - $tL)) . $this->name . $line;
+            $this->log .= $logline;
+            $this->tLast = $tTemp;
+
+            if ($this->isDebugging) {
+                echo "<pre>" . $logline . "\n</pre>\n";
+            }
+        }
+    }
+
     /**
      * Class destructor
      *
@@ -42,22 +69,12 @@ class Logger {
         unset($this->log);
     }
 
-    function start() {
-        /* Prepare Logging. Just in case it's used. later */
-        if ($this->isLogging) {
-            $this->tStart = gettimeofday();
-            $this->tLast  = $this->tStart;
-            $this->log    = "<h1>Log: " . $this->name . "</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $this->tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
-            $this->logLine("Start");
-        }
-    }
-
     function dumpInstalledModules() {
         if ($this->isLogging) {
-            $isCurlInstalled               = extension_loaded('curl') && function_exists('curl_version');
-            $isGdInstalled                 = extension_loaded('gd') && function_exists('gd_info');
-            $isExifInstalled               = extension_loaded('exif') && function_exists('exif_imagetype');
-            $isFileGetContentsInstalled    = function_exists('file_get_contents');
+            $isCurlInstalled = extension_loaded('curl') && function_exists('curl_version');
+            $isGdInstalled = extension_loaded('gd') && function_exists('gd_info');
+            $isExifInstalled = extension_loaded('exif') && function_exists('exif_imagetype');
+            $isFileGetContentsInstalled = function_exists('file_get_contents');
             $isFileGetContentsExtInstalled = $isFileGetContentsInstalled && ini_get('allow_url_fopen');
 
             $this->logLine("isCurlInstalled...............: " . ($isCurlInstalled ? "Yes" : "No"));
@@ -65,23 +82,6 @@ class Logger {
             $this->logLine("isExifInstalled...............: " . ($isExifInstalled ? "Yes" : "No"));
             $this->logLine("isFileGetContentsInstalled....: " . ($isFileGetContentsInstalled ? "Yes" : "No"));
             $this->logLine("isFileGetContentsExtInstalled.: " . ($isFileGetContentsExtInstalled ? "Yes" : "No"));
-        }
-    }
-
-    function logLine($line) {
-        if ($this->isLogging) {
-            $tTemp = gettimeofday();
-            $tS    = $this->tStart['sec'] + (((int)($this->tStart['usec'] / 100)) / 10000);
-            $tL    = $this->tLast['sec'] + (((int)($this->tLast['usec'] / 100)) / 10000);
-            $tT    = $tTemp['sec'] + (((int)($tTemp['usec'] / 100)) / 10000);
-
-            $logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT - $tS), ($tT - $tL)) . $this->name . $line;
-            $this->log .= $logline;
-            $this->tLast = $tTemp;
-
-            if ($this->isDebugging) {
-                echo "<pre>" . $logline . "\n</pre>\n";
-            }
         }
     }
 

@@ -53,7 +53,7 @@ class Metadata {
         }
         if (isset($content)) {
             $this->meta[] = array(
-                    $name => $content
+                $name => $content
             );
         }
     }

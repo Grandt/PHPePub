@@ -50,7 +50,7 @@ class Ncx {
      * @param string $writingDirection
      */
     function __construct($uid = null, $docTitle = null, $docAuthor = null, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
-        $this->navMap       = new NavMap($writingDirection);
+        $this->navMap = new NavMap($writingDirection);
         $this->currentLevel = $this->navMap;
         $this->setUid($uid);
         $this->setDocTitle($docTitle);
@@ -174,6 +174,7 @@ class Ncx {
         if ($this->lastLevel !== null) {
             $this->currentLevel = $this->lastLevel;
         }
+
         return $navPoint;
     }
 
@@ -183,7 +184,7 @@ class Ncx {
      * Subsequent chapters will be added to this chapters parent level.
      */
     function backLevel() {
-        $this->lastLevel    = $this->currentLevel;
+        $this->lastLevel = $this->currentLevel;
         $this->currentLevel = $this->currentLevel->getParent();
     }
 
@@ -193,7 +194,7 @@ class Ncx {
      * Subsequent chapters will be added to the rooot NavMap.
      */
     function rootLevel() {
-        $this->lastLevel    = $this->currentLevel;
+        $this->lastLevel = $this->currentLevel;
         $this->currentLevel = $this->navMap;
     }
 
@@ -251,12 +252,12 @@ class Ncx {
      * @param string $content
      */
     function addMetaEntry($name, $content) {
-        $name    = is_string($name) ? trim($name) : null;
+        $name = is_string($name) ? trim($name) : null;
         $content = is_string($content) ? trim($content) : null;
 
         if ($name != null && $content != null) {
             $this->meta[] = array(
-                    $name => $content
+                $name => $content
             );
         }
     }
@@ -273,14 +274,14 @@ class Ncx {
         $ncx = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         if ($this->isEPubVersion2()) {
             $ncx .= "<!DOCTYPE ncx PUBLIC \"-//NISO//DTD ncx 2005-1//EN\"\n"
-                    . "  \"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd\">\n";
+                . "  \"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd\">\n";
         }
         $ncx .= "<ncx xmlns=\"http://www.daisy.org/z3986/2005/ncx/\" version=\"2005-1\" xml:lang=\"" . $this->languageCode . "\" dir=\"" . $this->writingDirection . "\">\n"
-                . "\t<head>\n"
-                . "\t\t<meta name=\"dtb:uid\" content=\"" . $this->uid . "\" />\n"
-                . "\t\t<meta name=\"dtb:depth\" content=\"" . $this->navMap->getNavLevels() . "\" />\n"
-                . "\t\t<meta name=\"dtb:totalPageCount\" content=\"0\" />\n"
-                . "\t\t<meta name=\"dtb:maxPageNumber\" content=\"0\" />\n";
+            . "\t<head>\n"
+            . "\t\t<meta name=\"dtb:uid\" content=\"" . $this->uid . "\" />\n"
+            . "\t\t<meta name=\"dtb:depth\" content=\"" . $this->navMap->getNavLevels() . "\" />\n"
+            . "\t\t<meta name=\"dtb:totalPageCount\" content=\"0\" />\n"
+            . "\t\t<meta name=\"dtb:maxPageNumber\" content=\"0\" />\n";
 
         if (sizeof($this->meta)) {
             foreach ($this->meta as $metaEntry) {
@@ -290,11 +291,11 @@ class Ncx {
         }
 
         $ncx .= "\t</head>\n\n\t<docTitle>\n\t\t<text>"
-                . $this->docTitle
-                . "</text>\n\t</docTitle>\n\n\t<docAuthor>\n\t\t<text>"
-                . $this->docAuthor
-                . "</text>\n\t</docAuthor>\n\n"
-                . $nav;
+            . $this->docTitle
+            . "</text>\n\t</docTitle>\n\n\t<docAuthor>\n\t\t<text>"
+            . $this->docAuthor
+            . "</text>\n\t</docAuthor>\n\n"
+            . $nav;
 
         return $ncx . "</ncx>\n";
     }
@@ -308,24 +309,24 @@ class Ncx {
      */
     function finalizeEPub3($title = "Table of Contents", $cssFileName = null) {
         $end = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                . "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n"
-                . "      xmlns:epub=\"http://www.idpf.org/2007/ops\"\n"
-                . "      xml:lang=\"" . $this->languageCode . "\" lang=\"" . $this->languageCode . "\" dir=\"" . $this->writingDirection . "\">\n"
-                . "\t<head>\n"
-                . "\t\t<title>" . $this->docTitle . "</title>\n"
-                . "\t\t<meta http-equiv=\"default-style\" content=\"text/html; charset=utf-8\"/>\n";
+            . "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n"
+            . "      xmlns:epub=\"http://www.idpf.org/2007/ops\"\n"
+            . "      xml:lang=\"" . $this->languageCode . "\" lang=\"" . $this->languageCode . "\" dir=\"" . $this->writingDirection . "\">\n"
+            . "\t<head>\n"
+            . "\t\t<title>" . $this->docTitle . "</title>\n"
+            . "\t\t<meta http-equiv=\"default-style\" content=\"text/html; charset=utf-8\"/>\n";
         if ($cssFileName !== null) {
             $end .= "\t\t<link rel=\"stylesheet\" href=\"" . $cssFileName . "\" type=\"text/css\"/>\n";
         }
         $end .= "\t</head>\n"
-                . "\t<body epub:type=\"frontmatter toc\">\n"
-                . "\t\t<header>\n"
-                . "\t\t\t<h1>" . $title . "</h1>\n"
-                . "\t\t</header>\n"
-                . $this->navMap->finalizeEPub3()
-                . $this->finalizeEPub3Landmarks()
-                . "\t</body>\n"
-                . "</html>\n";
+            . "\t<body epub:type=\"frontmatter toc\">\n"
+            . "\t\t<header>\n"
+            . "\t\t\t<h1>" . $title . "</h1>\n"
+            . "\t\t</header>\n"
+            . $this->navMap->finalizeEPub3()
+            . $this->finalizeEPub3Landmarks()
+            . "\t</body>\n"
+            . "</html>\n";
 
         return $end;
     }
@@ -343,7 +344,7 @@ class Ncx {
             $refId = 1;
             while (list($item, $descriptive) = each($this->referencesOrder)) {
                 if (array_key_exists($item, $this->referencesList)) {
-                    $name     = (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item]);
+                    $name = (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item]);
                     $navPoint = new NavPoint($name, $this->referencesList[$item], "ref-" . $refId++);
                     $this->addNavPoint($navPoint);
                 }
@@ -360,19 +361,19 @@ class Ncx {
         $lm = "";
         if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
             $lm = "\t\t\t<nav epub:type=\"landmarks\">\n"
-                    . "\t\t\t\t<h2"
-                    . ($this->writingDirection === EPub::DIRECTION_RIGHT_TO_LEFT ? " dir=\"rtl\"" : "") . ">"
-                    . $this->referencesTitle . "</h2>\n"
-                    . "\t\t\t\t<ol>\n";
+                . "\t\t\t\t<h2"
+                . ($this->writingDirection === EPub::DIRECTION_RIGHT_TO_LEFT ? " dir=\"rtl\"" : "") . ">"
+                . $this->referencesTitle . "</h2>\n"
+                . "\t\t\t\t<ol>\n";
 
             $li = "";
             while (list($item, $descriptive) = each($this->referencesOrder)) {
                 if (array_key_exists($item, $this->referencesList)) {
                     $li .= "\t\t\t\t\t<li><a epub:type=\""
-                            . $item
-                            . "\" href=\"" . $this->referencesList[$item] . "\">"
-                            . (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item])
-                            . "</a></li>\n";
+                        . $item
+                        . "\" href=\"" . $this->referencesList[$item] . "\">"
+                        . (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item])
+                        . "</a></li>\n";
                 }
             }
             if (empty($li)) {
@@ -380,9 +381,10 @@ class Ncx {
             }
 
             $lm .= $li
-                    . "\t\t\t\t</ol>\n"
-                    . "\t\t\t</nav>\n";
+                . "\t\t\t\t</ol>\n"
+                . "\t\t\t</nav>\n";
         }
+
         return $lm;
     }
 }

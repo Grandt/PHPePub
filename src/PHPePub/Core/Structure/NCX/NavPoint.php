@@ -42,85 +42,6 @@ class NavPoint extends AbstractNavEntry {
     }
 
     /**
-     * Class destructor
-     *
-     * @return void
-     */
-    function __destruct() {
-        unset($this->label, $this->contentSrc, $this->id, $this->navClass);
-        unset($this->isNavHidden, $this->navPoints, $this->parent);
-    }
-
-    /**
-     * Set the Text label for the NavPoint.
-     *
-     * The label is mandatory.
-     *
-     * @param string $label
-     */
-    function setLabel($label) {
-        $this->label = is_string($label) ? trim($label) : null;
-    }
-
-    /**
-     * Get the Text label for the NavPoint.
-     *
-     * @return string Label
-     */
-    function getLabel() {
-        return $this->label;
-    }
-
-    /**
-     * Set the src reference for the NavPoint.
-     *
-     * The src is mandatory for ePub 2.
-     *
-     * @param string $contentSrc
-     */
-    function setContentSrc($contentSrc) {
-        $this->contentSrc = isset($contentSrc) && is_string($contentSrc) ? trim($contentSrc) : null;
-    }
-
-    /**
-     * Get the src reference for the NavPoint.
-     *
-     * @return string content src url.
-     */
-    function getContentSrc() {
-        return $this->contentSrc;
-    }
-
-    /**
-     * Set the parent for this NavPoint.
-     *
-     * @param NavPoint|NavMap $parent
-     */
-    function setParent($parent) {
-        if ($parent != null && is_object($parent) && $parent instanceof AbstractNavEntry) {
-            $this->parent = $parent;
-        }
-    }
-
-    /**
-     * Get the parent to this NavPoint.
-     *
-     * @return AbstractNavEntry if the parent is the root.
-     */
-    function getParent() {
-        return $this->parent;
-    }
-
-    /**
-     * Get the current level. 1 = document root.
-     *
-     * @return int level
-     */
-    function getLevel() {
-        return $this->parent === null ? 1 : $this->parent->getLevel() + 1;
-    }
-
-    /**
      * Set the id for the NavPoint.
      *
      * The id must be unique, and is mandatory.
@@ -150,16 +71,82 @@ class NavPoint extends AbstractNavEntry {
     }
 
     /**
-     * Set the writing direction to be used for this NavPoint.
+     * Class destructor
      *
-     * @param string $writingDirection
+     * @return void
      */
-    function setWritingDirection($writingDirection) {
-        $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : null;
+    function __destruct() {
+        unset($this->label, $this->contentSrc, $this->id, $this->navClass);
+        unset($this->isNavHidden, $this->navPoints, $this->parent);
     }
 
-    function getWritingDirection() {
-        return $this->writingDirection;
+    /**
+     * Get the Text label for the NavPoint.
+     *
+     * @return string Label
+     */
+    function getLabel() {
+        return $this->label;
+    }
+
+    /**
+     * Set the Text label for the NavPoint.
+     *
+     * The label is mandatory.
+     *
+     * @param string $label
+     */
+    function setLabel($label) {
+        $this->label = is_string($label) ? trim($label) : null;
+    }
+
+    /**
+     * Get the src reference for the NavPoint.
+     *
+     * @return string content src url.
+     */
+    function getContentSrc() {
+        return $this->contentSrc;
+    }
+
+    /**
+     * Set the src reference for the NavPoint.
+     *
+     * The src is mandatory for ePub 2.
+     *
+     * @param string $contentSrc
+     */
+    function setContentSrc($contentSrc) {
+        $this->contentSrc = isset($contentSrc) && is_string($contentSrc) ? trim($contentSrc) : null;
+    }
+
+    /**
+     * Get the parent to this NavPoint.
+     *
+     * @return AbstractNavEntry if the parent is the root.
+     */
+    function getParent() {
+        return $this->parent;
+    }
+
+    /**
+     * Set the parent for this NavPoint.
+     *
+     * @param NavPoint|NavMap $parent
+     */
+    function setParent($parent) {
+        if ($parent != null && is_object($parent) && $parent instanceof AbstractNavEntry) {
+            $this->parent = $parent;
+        }
+    }
+
+    /**
+     * Get the current level. 1 = document root.
+     *
+     * @return int level
+     */
+    function getLevel() {
+        return $this->parent === null ? 1 : $this->parent->getLevel() + 1;
     }
 
     /**
@@ -177,9 +164,24 @@ class NavPoint extends AbstractNavEntry {
                 $navPoint->setWritingDirection($this->writingDirection);
             }
             $this->navPoints[] = $navPoint;
+
             return $navPoint;
         }
+
         return $this;
+    }
+
+    function getWritingDirection() {
+        return $this->writingDirection;
+    }
+
+    /**
+     * Set the writing direction to be used for this NavPoint.
+     *
+     * @param string $writingDirection
+     */
+    function setWritingDirection($writingDirection) {
+        $this->writingDirection = isset($writingDirection) && is_string($writingDirection) ? trim($writingDirection) : null;
     }
 
     /**
@@ -193,7 +195,7 @@ class NavPoint extends AbstractNavEntry {
      * @return int
      */
     function finalize(&$nav = "", &$playOrder = 0, $level = 0) {
-        $maxLevel    = $level;
+        $maxLevel = $level;
         $levelAdjust = 0;
 
         if ($this->isNavHidden) {
@@ -207,10 +209,10 @@ class NavPoint extends AbstractNavEntry {
                 $this->id = "navpoint-" . $playOrder;
             }
             $nav .= str_repeat("\t", $level) . "\t\t<navPoint id=\"" . $this->id . "\" playOrder=\"" . $playOrder . "\">\n"
-                    . str_repeat("\t", $level) . "\t\t\t<navLabel>\n"
-                    . str_repeat("\t", $level) . "\t\t\t\t<text>" . $this->label . "</text>\n"
-                    . str_repeat("\t", $level) . "\t\t\t</navLabel>\n"
-                    . str_repeat("\t", $level) . "\t\t\t<content src=\"" . $this->contentSrc . "\" />\n";
+                . str_repeat("\t", $level) . "\t\t\t<navLabel>\n"
+                . str_repeat("\t", $level) . "\t\t\t\t<text>" . $this->label . "</text>\n"
+                . str_repeat("\t", $level) . "\t\t\t</navLabel>\n"
+                . str_repeat("\t", $level) . "\t\t\t<content src=\"" . $this->contentSrc . "\" />\n";
         } else {
             $levelAdjust++;
         }

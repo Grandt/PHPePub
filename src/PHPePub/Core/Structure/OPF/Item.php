@@ -34,16 +34,6 @@ class Item {
     }
 
     /**
-     * Class destructor
-     *
-     * @return void
-     */
-    function __destruct() {
-        unset($this->id, $this->href, $this->mediaType);
-        unset($this->properties, $this->requiredNamespace, $this->requiredModules, $this->fallback, $this->fallbackStyle);
-    }
-
-    /**
      *
      * Enter description here ...
      *
@@ -81,6 +71,16 @@ class Item {
      */
     function setProperties($properties) {
         $this->properties = is_string($properties) ? trim($properties) : null;
+    }
+
+    /**
+     * Class destructor
+     *
+     * @return void
+     */
+    function __destruct() {
+        unset($this->id, $this->href, $this->mediaType);
+        unset($this->properties, $this->requiredNamespace, $this->requiredModules, $this->fallback, $this->fallbackStyle);
     }
 
     /**
@@ -146,6 +146,7 @@ class Item {
         if (isset($this->fallbackStyle)) {
             $item .= "\n\t\t\tfallback-style=\"" . $this->fallbackStyle . "\" ";
         }
+
         return $item . "/>\n";
     }
 }

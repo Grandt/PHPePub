@@ -10,20 +10,20 @@ class DublinCore {
     const _VERSION = 3.30;
 
     const CONTRIBUTOR = "contributor";
-    const COVERAGE    = "coverage";
-    const CREATOR     = "creator";
-    const DATE        = "date";
+    const COVERAGE = "coverage";
+    const CREATOR = "creator";
+    const DATE = "date";
     const DESCRIPTION = "description";
-    const FORMAT      = "format";
-    const IDENTIFIER  = "identifier";
-    const LANGUAGE    = "language";
-    const PUBLISHER   = "publisher";
-    const RELATION    = "relation";
-    const RIGHTS      = "rights";
-    const SOURCE      = "source";
-    const SUBJECT     = "subject";
-    const TITLE       = "title";
-    const TYPE        = "type";
+    const FORMAT = "format";
+    const IDENTIFIER = "identifier";
+    const LANGUAGE = "language";
+    const PUBLISHER = "publisher";
+    const RELATION = "relation";
+    const RIGHTS = "rights";
+    const SOURCE = "source";
+    const SUBJECT = "subject";
+    const TITLE = "title";
+    const TYPE = "type";
 
     private $dcName = null;
     private $dcValue = null;
@@ -35,15 +35,6 @@ class DublinCore {
      */
     function __construct($name, $value) {
         $this->setDc($name, $value);
-    }
-
-    /**
-     * Class destructor
-     *
-     * @return void
-     */
-    function __destruct() {
-        unset($this->dcName, $this->dcValue, $this->attr, $this->opfAttr);
     }
 
     /**
@@ -61,6 +52,15 @@ class DublinCore {
         if (!isset($this->dcValue)) {
             $this->dcName = null;
         }
+    }
+
+    /**
+     * Class destructor
+     *
+     * @return void
+     */
+    function __destruct() {
+        unset($this->dcName, $this->dcValue, $this->attr, $this->opfAttr);
     }
 
     /**

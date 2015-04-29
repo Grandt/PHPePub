@@ -61,6 +61,7 @@ class Guide {
             }
             $ref .= "\t</guide>\n";
         }
+
         return $ref;
     }
 }

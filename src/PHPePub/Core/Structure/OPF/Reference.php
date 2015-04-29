@@ -93,15 +93,6 @@ class Reference {
     }
 
     /**
-     * Class destructor
-     *
-     * @return void
-     */
-    function __destruct() {
-        unset($this->type, $this->title, $this->href);
-    }
-
-    /**
      *
      * Enter description here ...
      *
@@ -129,6 +120,15 @@ class Reference {
      */
     function setHref($href) {
         $this->href = is_string($href) ? trim($href) : null;
+    }
+
+    /**
+     * Class destructor
+     *
+     * @return void
+     */
+    function __destruct() {
+        unset($this->type, $this->title, $this->href);
     }
 
     /**

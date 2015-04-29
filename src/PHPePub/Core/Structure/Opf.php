@@ -25,14 +25,14 @@ class Opf {
      * These types are the only guaranteed mime types any ePub reader must understand.
      * Any other type muse define a fall back whose fallback chain will end in one of these.
      */
-    const TYPE_GIF      = "image/gif";
-    const TYPE_JPEG     = "image/jpeg";
-    const TYPE_PNG      = "image/png";
-    const TYPE_SVG      = "image/svg+xml";
-    const TYPE_XHTML    = "application/xhtml+xml";
-    const TYPE_DTBOOK   = "application/x-dtbook+xml";
-    const TYPE_CSS      = "text/css";
-    const TYPE_XML      = "application/xml";
+    const TYPE_GIF = "image/gif";
+    const TYPE_JPEG = "image/jpeg";
+    const TYPE_PNG = "image/png";
+    const TYPE_SVG = "image/svg+xml";
+    const TYPE_XHTML = "application/xhtml+xml";
+    const TYPE_DTBOOK = "application/x-dtbook+xml";
+    const TYPE_CSS = "text/css";
+    const TYPE_XML = "application/xml";
     const TYPE_OEB1_DOC = "text/x-oeb1-document"; // Deprecated
     const TYPE_OEB1_CSS = "text/x-oeb1-css"; // Deprecated
     const TYPE_NCX = "application/x-dtbncx+xml";
@@ -57,8 +57,8 @@ class Opf {
         $this->setVersion($bookVersion);
         $this->metadata = new Metadata();
         $this->manifest = new Manifest();
-        $this->spine    = new Spine();
-        $this->guide    = new Guide();
+        $this->spine = new Spine();
+        $this->guide = new Guide();
     }
 
     /**
@@ -102,7 +102,7 @@ class Opf {
      */
     function finalize() {
         $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-                . "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
+            . "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
 
         $opf .= $this->metadata->finalize($this->bookVersion, $this->date);
         $opf .= $this->manifest->finalize($this->bookVersion);
@@ -290,7 +290,7 @@ class Metadata {
         }
         if (isset($content)) {
             $this->meta[] = array(
-                    $name => $content
+                $name => $content
             );
         }
     }

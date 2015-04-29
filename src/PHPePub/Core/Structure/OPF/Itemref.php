@@ -19,22 +19,22 @@ class Itemref {
     }
 
     /**
+     *
+     * Enter description here ...
+     *
+     * @param bool $linear
+     */
+    function setLinear($linear = true) {
+        $this->linear = $linear === true;
+    }
+
+    /**
      * Class destructor
      *
      * @return void
      */
     function __destruct() {
         unset($this->idref, $this->linear);
-    }
-
-    /**
-     *
-     * Enter description here ...
-     *
-     * @param string $idref
-     */
-    function setIdref($idref) {
-        $this->idref = is_string($idref) ? trim($idref) : null;
     }
 
     /**
@@ -51,10 +51,10 @@ class Itemref {
      *
      * Enter description here ...
      *
-     * @param bool $linear
+     * @param string $idref
      */
-    function setLinear($linear = true) {
-        $this->linear = $linear === true;
+    function setIdref($idref) {
+        $this->idref = is_string($idref) ? trim($idref) : null;
     }
 
     /**
@@ -65,6 +65,7 @@ class Itemref {
      */
     function finalize() {
         $itemref = "\t\t<itemref idref=\"" . $this->idref . "\"";
+
         return $itemref . ($this->linear == false ? ' linear="no"' : '') . " />\n";
     }
 }
