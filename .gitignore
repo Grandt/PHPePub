@@ -6,6 +6,26 @@
 .jsdtscope
 org.eclipse.*
 
+# PHPStorm files #
+#################
+.idea
+.idea/*
+
+# NetBeans files #
+##################
+nbproject
+nbproject/*
+nbproject/private/
+nbproject/private/*
+
+# Composer files #
+#################
+vendor
+vendor/*
+*.lock
+/tests/*.lock
+/*.phar
+
 # Compiled source #
 ###################
 *.com
@@ -34,19 +54,27 @@ org.eclipse.*
 *.sql
 *.sqlite
 
-# OS generated files #
-######################
-.DS_Store?
+# Windows and OS generated files #
+##################################
+.DS_Store
 ehthumbs.db
 Icon?
 Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-.DS_Store
-nbproject/private/
-nbproject
-demo/georgia-pls-ssml/
-.idea
-vendor
-/*.phar
-/composer.lock
-/tests/*.lock
+# Test generated files #
+########################
+tests/screenshots/*
+tests/*.lock
+tests/*.phar
+tests/vendor
+tests/vendor/*
+demo
+demo/*
+legacy/*.lock
+legacy/vendor
+legacy/vendor/*
+
+testData
+testData/*

@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------
+Rev. 4.0.1 - 2015-04-29
+* Added: Support for resizing animated gifs for use in ePub3 books.
+
+---------------------------------------------------------------------
 Rev. 3.20 - 2014-01-01
 * Fixed: Issue #15, where name space declarations were erroneously stripped off the html tag of added chapters.
 * Fixed: An issue, where PNG images exceeding the maximum specified sizes were broken during resizing.
