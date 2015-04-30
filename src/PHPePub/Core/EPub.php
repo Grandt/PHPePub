@@ -102,6 +102,7 @@ class EPub {
     private $buildTOC = false; // ISO 8601 long
     private $tocTitle = null; // short date format to placate ePubChecker.
     private $tocFileName = null;
+    private $tocNavAdded = false;
     private $tocCSSClass = null;
     private $tocAddReferences = false;
     private $tocCssFileName = null;
@@ -297,6 +298,7 @@ class EPub {
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
             $this->ncx->addNavPoint($navPoint);
             $this->ncx->chapterList[$chapterName] = $navPoint;
+            $this->tocNavAdded = true;
         }
 
         return $navPoint;
@@ -1489,7 +1491,7 @@ class EPub {
             $image = $this->getImage($fileName);
             $imageData = $image['image'];
             $mimetype = $image['mime'];
-            $fileName = preg_replace("#\.[^\.]+$#", "." . $image['ext'], $fileName);
+            $fileName = preg_replace('#\.[^\.]+$#', "." . $image['ext'], $fileName);
         }
 
         $path = pathinfo($fileName);
@@ -2171,17 +2173,18 @@ class EPub {
         $this->tocCSSClass = $tocCSSClass;
         $this->tocAddReferences = $addReferences;
 
-        $this->opf->addItemRef("ref_" . Reference::TABLE_OF_CONTENTS, false);
         $this->opf->addReference(Reference::TABLE_OF_CONTENTS, $title, $this->tocFileName);
+        if (!$this->tocNavAdded = true) {
+            $this->opf->addItemRef("ref_" . Reference::TABLE_OF_CONTENTS, false);
 
-        if ($addToIndex) {
-            $navPoint = new NavPoint($this->decodeHtmlEntities($title), $this->tocFileName, "ref_" . Reference::TABLE_OF_CONTENTS);
-            $this->ncx->addNavPoint($navPoint);
-        } else {
-            $this->ncx->referencesList[Reference::TABLE_OF_CONTENTS] = $this->tocFileName;
-            $this->ncx->referencesName[Reference::TABLE_OF_CONTENTS] = $title;
+            if ($addToIndex) {
+                $navPoint = new NavPoint($this->decodeHtmlEntities($title), $this->tocFileName, "ref_" . Reference::TABLE_OF_CONTENTS);
+                $this->ncx->addNavPoint($navPoint);
+            } else {
+                $this->ncx->referencesList[Reference::TABLE_OF_CONTENTS] = $this->tocFileName;
+                $this->ncx->referencesName[Reference::TABLE_OF_CONTENTS] = $title;
+            }
         }
-
         return true;
     }
 

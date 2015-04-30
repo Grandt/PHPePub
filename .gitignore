@@ -68,10 +68,14 @@ $RECYCLE.BIN/
 tests/screenshots/*
 tests/*.lock
 tests/*.phar
+tests/*.bat
+tests/*.epub
 tests/vendor
 tests/vendor/*
-demo
-demo/*
+tests/demo/georgia-pls-ssml
+tests/georgia-pls-ssml/*
+tests/tools
+tests/tools/*
 legacy/*.lock
 legacy/vendor
 legacy/vendor/*

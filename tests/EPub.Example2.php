@@ -37,9 +37,8 @@ $fileDir = './PHPePub';
 
 $book = new EPub(); // Default is EPub::BOOK_VERSION_EPUB2
 $log->logLine("new EPub()");
-$log->logLine("EPub class version: " . EPub::VERSION);
-$log->logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
-$log->logLine("Zip version: " . Zip::VERSION);
+$log->logLine("EPub class version.: " . EPub::VERSION);
+$log->logLine("Zip version........: " . Zip::VERSION);
 $log->logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
 $log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
 

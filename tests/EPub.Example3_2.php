@@ -36,9 +36,8 @@ $fileDir = './PHPePub';
 // ePub 3 uses HTML5, formatted strictly as if it was XHTML but still using just the HTML5 doctype (aka XHTML5)
 $book = new EPub(EPub::BOOK_VERSION_EPUB3, "en", EPub::DIRECTION_LEFT_TO_RIGHT); // Default is ePub 2
 $log->logLine("new EPub()");
-$log->logLine("EPub class version: " . EPub::VERSION);
-$log->logLine("EPub Req. Zip version: " . EPub::REQ_ZIP_VERSION);
-$log->logLine("Zip version: " . Zip::VERSION);
+$log->logLine("EPub class version.: " . EPub::VERSION);
+$log->logLine("Zip version........: " . Zip::VERSION);
 $log->logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
 $log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
 

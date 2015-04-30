@@ -21,6 +21,9 @@ class Logger {
 
     /**
      * Class constructor.
+     *
+     * @param string $name
+     * @param bool $isLogging
      */
     function __construct($name = null, $isLogging = false) {
         if ($name === null) {
