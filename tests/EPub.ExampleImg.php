@@ -41,7 +41,8 @@ $content_start =
 . "<body>\n";
 
 $bookEnd = "</body>\n</html>\n";
-$fileDir = './PHPePub';
+//$fileDir = './PHPePub/tests/';
+$fileDir = '.';
 // setting timezone for time functions used for logging to work properly
 date_default_timezone_set('Europe/Berlin');
 
