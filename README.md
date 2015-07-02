@@ -20,7 +20,7 @@ See the examples for example usage. The php files have "some" doumentation in th
 ### Import
 Add this requirement to your `composer.json` file:
 ```json
-    "grandt/phpepub": ">=4.0.0"
+    "grandt/phpepub": ">=4.0.1"
 ```
 
 ### Composer
@@ -42,7 +42,7 @@ Once composer is installed you can create the `composer.json` file to import thi
 ```json
 {
     "require": {
-        "grandt/phpepub": ">=4.0.0"
+        "grandt/phpepub": ">=4.0.1",
         "php": ">=5.3.0"
     }
 }

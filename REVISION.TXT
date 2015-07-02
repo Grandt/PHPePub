@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------
+Rev. 4.0.1 - 2015-06-29
+* Changed: Included J. King's DrUUID library rather than using composer. The only available package remained in "dev" stability.
+*          http://jkingweb.ca/code/php/lib.uuid/
+---------------------------------------------------------------------
 Rev. 4.0.0 - 2015-04-29
 * Added: Support for resizing animated gifs for use in ePub3 books.
 * Added: Function to remove HTML comments.

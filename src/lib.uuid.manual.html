@@ -1,0 +1,704 @@
+﻿<!DOCTYPE HTML>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width; initial-scale=1.0;">
+ <title>DrUUID RFC 4122 library manual</title>
+ <meta name="author" content="J. King">
+ <link rel="stylesheet" type="text/css" href="http://jkingweb.ca/code/documentation.css">
+ <link rel="author" href="http://jkingweb.ca/">
+ <link rel="up" href="http://jkingweb.ca/code/">
+</head>
+<body>
+<h1>DrUUID RFC 4122 library manual</h1>
+
+
+<div id="preface"> 
+ <h2>Preface</h2>
+ <p>"DrUUID" is an implementation for PHP5 of---and associated API for---the data format described in <a href="http://tools.ietf.org/html/rfc4122">RFC 4122</a>, <i>A Universally Unique IDentifier (UUID) URN Namespace</i>.  It is able to mint new UUIDs, import existing UUIDs, extract information from UUIDs, and compare two UUIDs for bit-exact equality.
+ <p>The API is designed to be as simple as possible, with an implementation as accurate as practical given the limits of PHP.  All other concerns, including PHP compatibility, efficiency and extensibility are secondary.
+ <p>Questions and comments are very welcome, and should be directed to the author via <a href="http://jkingweb.ca/">his Web site</a>.
+ <p><a href="http://jkingweb.ca/code/php/lib.uuid/download">Download current version</a> (<a href="http://jkingweb.ca/code/php/lib.uuid/archives">archives</a>)
+</div>
+
+<div id="contents">
+ <h2>Table of contents</h2>
+ <h3>Prefaces</h3>
+ <ol>
+  <li><a href="#preface">Preface</a>
+  <li><a href="#contents">Table of contents</a>
+  <li><a href="#features">Features</a>
+  <li><a href="#requirements">Requirements</a>
+  <li><a href="#conformance">Conformance exceptions</a>
+ </ol>
+ <h3>Body</h3>
+ <ol>
+  <li><a href="#note">Documentation note</a>
+  <li><a href="#api">The API</a>
+   <ol>
+    <li><a href="#api-mint">UUID::mint()</a>
+     <ol>
+      <li><a href="#api-mint-v1">Version 1</a>
+      <li><a href="#api-mint-v3">Version 3</a>
+      <li><a href="#api-mint-v4">Version 4</a>
+      <li><a href="#api-mint-v5">Version 5</a>
+     </ol>
+    <li><a href="#api-import">UUID::import()</a>
+    <li><a href="#api-compare">UUID::compare()</a>
+    <li><a href="#api-mintstr">UUID::mintStr()</a>
+   </ol>
+  <li><a href="#the-object">The UUID object</a>
+   <ol>
+    <li><a href="#the-object-properties">Public properties</a>
+   </ol>
+  <li><a href="#config">Runtime configuration</a>
+   <ol>
+    <li><a href="#config-initrandom">UUID::initRandom()</a>
+    <li><a href="#config-initbignum">UUID::initBignum()</a>
+    <li><a href="#config-initstorage">UUID::initStorage()</a>
+    <li><a href="#config-initaccurate">UUID::initAccurate()</a>
+   </ol>
+  <li><a href="#storage">Using custom stable storage implementations</a>
+   <ol>
+    <li><a href="#storage-register">UUID::registerStorage()</a>
+    <li><a href="#storage-interface">The UUIDStorage interface</a>
+   </ol> 
+ </ol>
+ <h3>Appendices</h3>
+ <ol>
+  <li><a href="#append-const">Defined constants</a>
+  <li><a href="#append-exceptions">Exception codes</a>
+  <li><a href="#append-chart">Flow chart for storage interface</a>
+  <li><a href="#append-credits">Credits and licensing</a>
+  <li><a href="#append-history">Revision history</a>
+ </ol>
+</div>
+<div id="features">
+ <h2>Features</h2>
+ <ul>
+  <li>Conforms to <a href="http://tools.ietf.org/html/rfc4122">RFC 4122</a> (with <a href="#conformance">exceptions</a>)
+  <li>Able to generate new UUIDs, import existing UUIDs, extract data from UUIDs and compare two UUIDs for equality
+  <li>Simple API and simple installation
+  <li>Optionally draws random numbers from a system-dependent randomness source
+  <li>Optionally stores timing information to stable storage, with API for custom needs
+ </ul>
+</div>
+<div id="requirements">
+ <h2>Requirements</h2>
+ <ul>
+  <li>PHP 5.0.5 is required for basic operation
+  <li>PHP 5.2.0 is required for custom storage implementations
+  <li>PHP 5.3.0 or later is recommended
+  <li>GMP or BC Math on 32-bit systems is strongly recommended for accuracy
+ </ul>
+ <p>Behaviour may be erratic with PHP versions earlier than 5.1 due to bugs in string casting for objects.
+</div>
+<div id="conformance">
+ <h2>Conformance exceptions</h2>
+ <ul>
+  <li>PHP does not provide the server MAC address for use in Version 1 UUIDs, so a random one is used unless supplied by the user
+  <li>Random numbers are not guaranteed to be generated from a cryptographically secure source
+  <li>Version 1 UUIDs will not be accurate on 32-bit systems unless Bignum facilities are used
+  <li>Stable storage for Version 1 UUIDs is not enabled by default
+ </ul>
+ <p>The last three points only apply if DrUUID is used in its default configuration; the first point is not a conformance violation, but is sub-optimal.  See <a href="#config">Section 4</a> for further details on configuring for optimal accuracy.
+</div>
+
+<div id="note">
+ <h2>Documentation note</h2>
+ <p>This manual often makes references to <dfn>binary and hexdecimal strings</dfn> for input and output.  For the sake of simplicity please assume that such strings are always in network order (big-endian).
+ <p id="note-uuid">For methods accepting <dfn>a UUID</dfn> as a argument, the UUID may be: 
+ <ul>
+  <li>in canonical form, with or without curly braces
+  <li>a 16-byte binary string (fastest)
+  <li>a 32-character hexadecimal string
+  <li>an RFC 4122 URN
+  <li>a <a href="#the-object"><code>UUID</code> object</a>
+ </ul>
+ <p>This manual often makes reference to <dfn>invalid UUIDs</dfn>.  For simplicity this is merely any string more or less than 16 bytes long.  DrUUID performs no other validation on UUIDs.
+</div>
+
+<div id="api">
+ <h2>The API</h2>
+  <p>The core DrUUID API consists of four static methods: <code>UUID::mint()</code>, <code>UUID::import()</code>, <code>UUID::compare()</code> as well as <code>UUID::mintStr()</code>.  Of these <code>UUID::mint()</code> and <code>UUID::import()</code> return an instance of the <code>UUID</code> class.
+  <h3 id="api-mint">UUID::mint()</h3>
+  <div>  
+   <p class="samp"><samp><var>UUID</var> UUID::mint( [<var>int version</var> [, ... ]] )</samp>
+   <p>The <code>UUID::mint()</code> method generates ("mints", like coinage) a new UUID.  It is capable of producing Version 1 (time-based), Version 3 (MD5 hash-based), Version 4 (random) and Version 5 (SHA-1 hash-based) UUIDs.  Its argument list is generic: required and optional argument depend upon the specified version to produce.
+   <h4 id="api-mint-v1">Version 1</h4>
+    <p class="samp">
+     <samp><var>UUID</var> UUID::mint( <var>void</var> )</samp>
+    <br>
+     <samp><var>UUID</var> UUID::mint( 1 [, <var>string node</var> [, <var>string sequence</var> [, <var>string time</var> ]]] )</samp>
+    <p>Version 1 UUIDs (the default type) are generated based on the current time and a MAC address (called a <i>node</i>).  
+    <p>If specified, <var>node</var> should be either an 6-byte binary string or a 12-character hexadecimal string (with or without separators) representing a MAC address.  DrUUID does not attempt to detect the host's MAC address.  Invalid nodes will throw an exception.
+    <p>The <var>sequence</var> argument specifies a clock sequence and should be a two-byte binary string.  This should only be used for debugging.  Invalid sequences will throw an exception.
+    <p>Finally, the <var>time</var> argument may be specified to employ a past or future time (as a Unix timestamp with microseconds like that returned by <code>microtime()</code> for example) instead of the curent time.  This should only be used for debugging and never used to generate UUIDs for any purpose but testing.  Input which cannot be parsed as a timestamp will throw an exception.
+   <h4 id="api-mint-v3">Version 3</h4>
+    <p class="samp"><samp><var>UUID</var> UUID::mint( 3, <var>string name</var>, <var>mixed namespace</var> )</samp>
+    <p>Version 3 UUIDs are generated based upon a an MD5 hash of an arbitrary name and its associated name-space.  For example the name "www.example.com" is within the DNS namespace, much as "Canada" is within a name-space of the world's countries.  A name/namespace pair will predictably generate the same UUID.
+    <p>The <var>name</var> argument is an arbitrary name and should be in a binary form appropriate for <var>namespace</var>.  It is the responsibility of the user to assure the proper conversion to binary form.  For many namespaces (like the DNS) the appropriate representation is plain text and therefore no conversion is required.
+    <p>The <var>namespace</var> argument is itself <a href="#note-uuid">a UUID</a>; invalid UUIDs will throw an exception.
+    <p>Note that the continued use of Version 3 UUIDs is discouraged: Version 5 UUIDs should be used instead whenever possible.
+   <h4 id="api-mint-v4">Version 4</h4>
+    <p class="samp"><samp><var>UUID</var> UUID::mint( 4 )</samp>
+    <p>Version 4 UUIDs are generated from random numbers.  Save for embedded version information they are completely random.
+   <h4 id="api-mint-v5">Version 5</h4>
+    <p class="samp"><samp><var>UUID</var> UUID::mint( 5, <var>string name</var>, <var>mixed namespace</var> )</samp>
+    <p>Version 5 UUIDs are generated based upon a an SHA-1 hash of an arbitrary name and its associated name-space.  For example the name "www.example.com" is within the DNS namespace, much as "Canada" is within a name-space of the world's countries.  A name/namespace pair will predictably generate the same UUID.
+    <p>The <var>name</var> argument is an arbitrary name and should be in a binary form appropriate for <var>namespace</var>.  It is the responsibility of the user to assure the proper conversion to binary form.  For many namespaces (like the DNS) the appropriate representation is plain text and therefore no conversion is required.
+    <p>The <var>namespace</var> argument is itself <a href="#note-uuid">a UUID</a>; invalid UUIDs will throw an exception.
+    <p>Version 5 UUIDs are preferred over Version 3 UUIDs.
+  </div>
+  <h3 id="api-import">UUID::import()</h3>
+  <div>
+   <p class="samp"><samp><var>UUID</var> UUID::import( <var>string uuid</var> )</samp>
+   <p>The <code>UUID::import()</code> method imports <a href="#note-uuid">a UUID</a> string as a <code>UUID</code> object.  Invalid UUIDs will throw an exception.  
+  </div>
+  <h3 id="api-compare">UUID::compare()</h3>
+  <div>
+   <p class="samp"><samp><var>bool</var> UUID::compare( <var>mixed uuid1</var>, <var>mixed uuid2</var> )</samp>
+   <p>The <code>UUID::compare()</code> method compares <a href="#note-uuid">two UUIDs</a> for equivalency.  If both UUIDs, as binary numbers, are equal, the method returns <samp>TRUE</samp>.  The method will also return <samp>TRUE</samp> if neither arguments is a valid UUID.
+   <p>This method is useful for determining if two different UUID representations (eg. canonical string, lowercase hex string, uppercase hex string, binary, URN) are in fact the same UUID.
+  </div>
+  <h3 id="api-mintstr">UUID::mintStr()</h3>
+  <div>
+   <p class="samp"><samp><var>string</var> UUID::mintStr( [<var>int version</var> [, ... ] )</samp>
+   <p>The <code>UUID::mintStr()</code> method performs the same functions as the <code>UUID::mint()</code> method, but returns the UUID directly as a string in canonical form.
+  </div>
+</div>
+<div id="the-object">
+ <h2>The UUID object</h2>
+ <p><code>UUID</code> objects cannot be instantiated manually; they must be created via <code>UUID::mint()</code> or <code>UUID::import()</code>.  When cast to a string a <code>UUID</code> object will be rendered in the canonical string form (eg. <samp>550e8400-e29b-41d4-a716-446655440000</samp>).  They have no public methods, but do have a number of public properties:
+ <h3 id="the-object-properties">Public properties</h3>
+ <div>
+  <dl>
+   <dt>bytes
+    <dd>A 16-byte binary string representation of the UUID.
+   <dt>hex
+    <dd>A 32-character hexadecimal representation of the UUID.  Neither octets nor fields are ever padded and high digits are always lowercased.
+   <dt>string
+    <dd>The canonical string representation of the UUID, with high hexadecimal digits always lowercased.
+   <dt>urn
+    <dd>The UUID formatted as an URN.
+   <dt>version
+    <dd>The UUID's version (eg. 1, 3, 4, 5).
+   <dt>variant
+    <dd>The UUID's variant.  For RFC 4122 UUIDs this is always <samp>1</samp>.
+   <dt>node
+    <dd>The MAC address associated with the UUID.  Only applicable to Version 1 identifiers.
+   <dt>time
+    <dd>The time at which the UUID was generated, as a fixed-point Unix timestamp string with seven-digit sub-second precision.  Only applicable to Version 1 identifiers.
+  </dl>
+ </div> 
+</div>
+<div>
+ <h2 id="config">Runtime configuration</h2>
+ <h3 id="config-initrandom"><span id="randomness-initrandom"><span id="randomness">UUID::initRandom()</span></span></h3>
+ <div>
+  <p>PHP has a number of good sources for random numbers available to it, but most are either system-dependent, incur considerable overhead, or both.  Consequently DrUUID uses the <code>mt_rand()</code> function to generate random numbers unless instructed to seek an alternative, usually cryptographically secure source.  In order to use an alternative source the <code>UUID::initRandom()</code> static method must be invoked.
+  <p class="samp"><samp><var>int</var> UUID::initRandom( [<var>int source</var>] )</samp>
+  <p>If envoked without arguments, the <code>UUID::initRandom()</code> method will attempt to make use of the best available randomness source; this may nevertheless be <code>mt_rand()</code>.
+  <p>An integer constant, <var>source</var>, may be passed to explicitly choose a source.  Passing an unknown value will throw an exception; an exception will also be thrown if an explicitly selected source is not available.
+  <p>A list of valid <var>source</var> constants is available <a href="#append-const-random">in Appendix A</a>.
+  <p>Note that since the characteristics of any given system can be unpredictably different from those of another, users are encouraged to run their own benchmarks to ascertain whether the performance of both <code>UUID::initRandom()</code> and calls thereafter to <code>UUID::randomBytes()</code> warrant an alternative source's use.
+ </div>
+ <h3 id="config-initbignum">UUID::initBignum()</h3>
+ <div>
+  <p>For Version 1 UUIDs, a 60-bit timestamp must be generated.  On 32-bit systems, this causes PHP to use floating-point arithmetic, which yields inaccurate results, with precision only reliable to the millisecond rather than the microsecond.  If either the GMP or BC Math extension is available, DrUUID can make use of it to produce accurate results:
+  <p class="samp"><samp><var>int</var> UUID::initBignum( [<var>int means</var>] )</samp>
+  <p>If envoked without arguments, the <code>UUID::initBignum()</code> method will try to use the fastest means of producing accurate timestamps.
+  <p>An integer constant, <var>means</var>, may be passed to explicitly choose a method.  Passing an unknown value will throw an exception; an exception will also be thrown if an explicitly selected method is not available.
+  <p>A list of valid <var>means</var> constants is available <a href="#append-const-bignum">in Appendix A</a>.
+  <p>On 64-bit systems DrUUID will use accurate arithmetic without having to call <code>UUID::initBignum()</code>.
+ </div>
+ <h3 id="config-initstorage">UUID::initStorage()</h3>
+ <div>
+  <p>In order to ensure uniqueness of Version 1 UUIDs, the value of the clock sequence, node ID and last timestamp used should be kept in stable storage for reference.  By default DrUUID only keeps these values in memory, but they can also be written to a file:
+  <p class="samp"><samp><var>void</var> UUID::initStorage( <var>string path</var> )</samp>
+  <p>DrUUID will read state from and write state to the file specified by <var>path</var>.  If the file specified is not accessible, an exception will be thrown.  The default implementation will create a file which does not exist, but will not create folders.
+  <p>If access to a file is either impossible or impractical, an API for implementing a custom storage is described in <a href="#storage">Section 5</a>.  If using custom storage, required arguments may be different.
+ </div>
+ <h3 id="config-initaccurate">UUID::initAccurate()</h3>
+ <div>
+  <p class="samp"><samp><var>void</var> UUID::initAccurate( <var>string path</var> )</samp>
+  <p>The <code>UUID::initAccurate()</code> method is a shortcut to achieving optimal accuracy.  It successively calls <code>UUID::initBignum()</code>, <code>UUID::initRandom()</code>, and <code>UUID::initStorage()</code>.  Unlike calling the three methods by themselves, however, <code>UUID::initAccurate()</code> will reject results which will yield inaccurate UUIDs, and will throw an exception accordingly.
+ </div>
+</div>
+
+<div id="storage">
+ <h2>Using custom stable storage implementations</h2>
+ <p>DrUUID includes a basic implementation of stable storage for Version 1 UUIDs which is consistent with <a href="http://tools.ietf.org/html/rfc4122#section-4.2.1">Section 4.2.1 of RFC 4122</a>.  This implementation, however, is not especially efficient if UUIDs are expected to be created in bulk in a single session, nor can it write to a back-end other than a file.  For more complex requirements, an API is available to allow DrUUID to communicate with alternative storage backends or otherwise tailor the implementation to individual needs.
+ <h3 id="storage-register">UUID::registerStorage()</h3>
+ <div>
+  <p class="samp"><samp><var>void</var> UUID::registerStorage( <var>string class_name</var> [, <var>mixed arg</var> ... ] )</samp>
+  <p>The <var>class_name</var> argument must be the name of a defined class which imprements the <code>UUIDStorage</code> interface, described below.  Any further arguments will be passed to <code>UUID::initStorage()</code>.
+  <p>If no supplementary arguments are passed, <code>UUID::initStorage()</code> must be called before the custom storage may be used.
+ </div>
+ <h3 id="storage-interface">The UUIDStorage interface</h3>
+ <div>
+  <pre><code>interface UUIDStorage {
+ public function getNode();
+ public function getSequence(<var>$timestamp</var>, <var>$node</var>);
+ public function setSequence(<var>$sequence</var>);
+ public function setTimestamp(<var>$timestamp, $sequence, $node</var>);
+ const maxSequence = 16383; // 00111111 11111111
+}</code></pre>
+  <p>The <code>UUIDStorage</code> interface defines a set of methods which DrUUID will call during the generation of Version 1 UUIDs in a predictable order to query storage and write data.  A visualization of the process is available in <a href="#append-chart">Appendix C</a> for reference. The order of the method calls is as follows:
+  <ol>
+   <li>If a node ID is already available from the user, skip to Step 4
+   <li>Rretrieve the last known node ID (MAC address) by calling <code>getNode()</code>
+    <ul>
+     <li>The storage may attempt to retrieve the actual MAC address; otherwise it returns the stored one, or <var>NULL</var> 
+    </ul> 
+   <li>If the node ID is <var>NULL</var> because an existing value is not available, generate a new random node ID
+   <li>If the user has supplied a clock sequence for debugging, call <code>setSequence()</code> and skip to Step 7
+   <li>Retrieve the clock sequence by calling <code>getSequence()</code>, passing the timestamp and node ID
+    <ul>
+     <li>The storage invalidates any stored clock sequence if the node ID provided does not match that stored
+     <li>The storage increments the stored clock sequence before returning it if the timestamp provided is older than that stored
+    </ul>
+   <li>If the clock sequence is <var>NULL</var> because an existing value was not available or was invalidated, generate a new random clock sequence and call <code>setSequence()</code>
+   <li>Call <code>setTimestamp()</code> to update the stored timestamp, signalling the end of communication
+  </ol>
+  <p>The following subsections serve as implementation notes for the interface's methods.
+  <h4 id="storage-interface-getnode">getNode()</h4>
+  <p>As DrUUID is unable to retrieve the system's MAC address, it calls the <code>getNode()</code> method, which might implement a means of doing so or retrieve one from storage.  If it does return a value, it should be formatted as six bytes, in big-endian order (the reverse of conventional hexdecimal pair representation).
+  <h4 id="storage-interface-getsequence">getSequence()</h4>
+  <p>The <code>getSequence()</code> method is the heart of the interface, taking as input the target timestamp (as a number of 100ns ticks since the Unix epoch) and the node ID (as a six-byte string).  Output should be a two-byte string, with the two most significant bits set to zero.
+  <p>Per <a href="http://tools.ietf.org/html/rfc4122#section-4.1.5">Section 4.1.5 of RFC 4122</a>, the clock sequence should be randomized if the node ID changes, and should be incremented if the target timestamp is lower than that in storage.  Due to the limits of 32-bit systems and the difficulties inherent in comparing floating-point numbers, the input timestamp is always a string with integer precision.
+  <h4 id="storage-interface-setsequence">setSequence()</h4>
+  <p>This method simply alerts the storage of a new clock sequence, if either the user has supplied a sequence or the storage failed to return a result.  Input is a two-byte string; no return value is required.
+  <h4 id="storage-interface-settimestamp">setTimestamp()</h4>
+  <p>The method serves as a marker that communication with the storage is complete and any buffered data may be written to stable storage if appropriate.  Input is a string representation of the number of 100ns ticks since the Unix epoch.
+ </div>
+</div>
+
+
+
+<div id="append-const">
+ <h2>Predefined constants</h2>
+ <p>For convenience DrUUID includes a number of class constants, with three distinct groups:
+ <ul>
+  <li>Randomness source constants, for use with <code>UUID::initRandom()</code>
+  <li>Bignum method constants, for use with <code>UUID::initBignum()</code>
+  <li>Namespace constants from <a href="http://tools.ietf.org/html/rfc4122#appendix-C">Appendix C of RFC 4122</a> for use in Version 3 or 5 UUIDs
+ </ul>
+ <p>These groups are documented in this appendix.
+ <table id="append-const-random">
+  <caption>Randomness source constants</caption>
+  <thead>
+   <tr>
+    <th>Constant
+    <th>Description
+    <th>Value
+  <tbody>
+   <tr>
+    <td><code>UUID::randChoose</code>
+    <td>For auto-detection.  The best available randomness source will be used.
+    <td><samp>-1</samp>
+   <tr>
+    <td><code>UUID::randPoor</code>
+    <td>PHP's <code>mt_rand()</code> function, the lowest common denominator.
+    <td><samp>0</samp>
+   <tr>
+    <td><code>UUID::randDev</code>
+    <td>The <code>/dev/urandom</code> pseudo-device file, available on most Unix-like systems.
+    <td><samp>1</samp>
+   <tr>
+    <td><code>UUID::randCAPICOM</code>
+    <td>COM calls to <a href="http://msdn.microsoft.com/en-us/library/aa388182(VS.85).aspx">CAPICOM's GetRandom method</a>, available on Windows prior to Windows 7.
+    <td><samp>2</samp>
+   <tr>
+    <td><code>UUID::randOpenSSL</code>
+    <td>The <code>openssl_random_pseudo_bytes()</code> function, available since PHP 5.3.0.
+    <td><samp>3</samp>
+   <tr>
+    <td><code>UUID::randMcrypt</code>
+    <td>The <code>mcrypt_create_iv()</code> function.
+    <td><samp>4</samp>
+ </table>
+ <table id="append-const-bignum">
+  <caption>Bignum method constants</caption>
+  <thead>
+   <tr>
+    <th>Constant
+    <th>Description
+    <th>Value
+  <tbody>
+   <tr>
+    <td><code>UUID::bigChoose</code>
+    <td>For auto-detection.  Native 64-bit will trump GMP, which will trump BC Math
+    <td><samp>-1</samp>
+   <tr>
+    <td><code>UUID::bigNot</code>
+    <td>No 64-bit integer/bignum support.  This will produce inaccurate results.
+    <td><samp>0</samp>
+   <tr>
+    <td><code>UUID::bigNative</code>
+    <td>Native 64-bit integer support.  This is fastest.
+    <td><samp>1</samp>
+   <tr>
+    <td><code>UUID::bigGMP</code>
+    <td><a href="http://php.net/manual/en/book.gmp.php">GNU Multiple Precision</a> library.
+    <td><samp>2</samp>
+   <tr>
+    <td><code>UUID::bigBC</code>
+    <td><a href="http://php.net/manual/en/book.bc.php">BC Math</a> library.
+    <td><samp>3</samp>
+ </table>
+ <table id="append-const-namespaces">
+  <caption id="append-namespaces">Namespace constants</caption>
+  <thead>
+   <tr>
+    <th>Constant
+    <th>Namespace description
+    <th>UUID
+  <tbody>
+   <tr>
+    <td><code>UUID::nsDNS</code>
+    <td>DNS hostnames (eg. "www.example.com")
+    <td><samp>6ba7b810-9dad-11d1-80b4-00c04fd430c8</samp>
+   <tr>
+    <td><code>UUID::nsURL</code>
+    <td>Any valid URL (eg. "http://www.example.com/example.html")
+    <td><samp>6ba7b811-9dad-11d1-80b4-00c04fd430c8</samp>
+   <tr>
+    <td><code>UUID::nsOID</code>
+    <td>An ISO Object Identifier
+    <td><samp>6ba7b812-9dad-11d1-80b4-00c04fd430c8</samp>
+   <tr>
+    <td><code>UUID::nsX500</code>
+    <td>An X.500 Distinguished Name
+    <td><samp>6ba7b814-9dad-11d1-80b4-00c04fd430c8</samp>
+ </table>
+</div>
+
+<div id="append-exceptions">
+ <h2>Exception codes</h2>
+ <p>DrUUID will throw either <code>UUIDException</code> or <code>UUIDStorageException</code> exceptions under various circumstances.  Details on these exceptions are below.
+ <table>
+  <caption>Exception details</caption>
+  <thead>
+   <tr>
+    <th>Code
+    <th>Type
+    <th>Description
+    <th>Public methods [1]
+  <tfoot>
+   <tr><td colspan="4">Notes:
+    <ol>
+     <li>References to <code>UUID::mint()</code> should be understood to include <code>UUID::mintStr()</code>.
+     <li>As a chained exception.
+    </ol>
+  <tbody>
+   <tr><td><samp>0001</samp><td><code>UUIDException</code><td>Selected version is invalid or unsupported.
+    <td>UUID::mint()
+   <tr><td><samp>0002</samp><td><code>UUIDException</code><td>Version 2 is unsupported.
+    <td>UUID::mint()
+   <tr><td><samp>0003</samp><td><code>UUIDException</code><td>Input must be a valid UUID.
+    <td>UUID::import()
+   <tr><td><samp>0101</samp><td><code>UUIDException</code><td>Node must be a valid MAC address.
+    <td>UUID::mint(1)
+   <tr><td><samp>0102</samp><td><code>UUIDException</code><td>Clock sequence must be a two-byte binary string.
+    <td>UUID::mint(1)
+   <tr><td><samp>0103</samp><td><code>UUIDException</code><td>Time input was of an unexpected format.
+    <td>UUID::mint(1)
+   <tr><td><samp>0201</samp><td><code>UUIDException</code><td>A name-string is required for Version 3 or 5 UUIDs.
+    <td>UUID::mint(3)
+     <br>UUID::mint(5)
+   <tr><td><samp>0202</samp><td><code>UUIDException</code><td>A valid UUID namespace is required for Version 3 or 5 UUIDs.
+    <td>UUID::mint(3)
+     <br>UUID::mint(5)
+   <tr><td><samp>0801</samp><td><code>UUIDException</code><td>Bignum method is not available.
+    <td>UUID::initBignum()
+   <tr><td><samp>0802</samp><td><code>UUIDException</code><td>Randomness strategy is not available.
+    <td>UUID::initRandom()
+   <tr><td><samp>0901</samp><td><code>UUIDException</code><td>Bignum method not implemented.
+    <td>UUID::initBignum()
+   <tr><td><samp>0902</samp><td><code>UUIDException</code><td>Randomness strategy not implemented.
+    <td>UUID::initRandom()
+   <tr><td><samp>1001</samp><td><code>UUIDStorageException</code><td>Storage class does not exist.
+    <td>UUID::registerStorage()
+   <tr><td><samp>1002</samp><td><code>UUIDStorageException</code><td>Storage class does not implement the UUIDStorage interface.
+    <td>UUID::registerStorage()
+   <tr><td><samp>1003</samp><td><code>UUIDStorageException</code><td>Storage class could not be instantiated with supplied arguments.
+    <td>UUID::initStorage()
+     <br>UUID::registerStorage()
+     <br>UUID::initAccurate() [2]
+   <tr><td><samp>1101</samp><td><code>UUIDStorageException</code><td>Stable storage is not readable.
+    <td>UUID::initStorage()
+     <br>UUID::initAccurate() [2]
+   <tr><td><samp>1102</samp><td><code>UUIDStorageException</code><td>Stable storage is not writable.
+    <td>UUID::initStorage()
+     <br>UUID::initAccurate() [2]
+   <tr><td><samp>1201</samp><td><code>UUIDStorageException</code><td>Stable storage could not be read.
+    <td>UUID::mint(1)
+   <tr><td><samp>1202</samp><td><code>UUIDStorageException</code><td>Stable storage could not be written.
+    <td>UUID::mint(1)
+   <tr><td><samp>1203</samp><td><code>UUIDStorageException</code><td>Stable storage data is invalid or corrupted.
+    <td>UUID::mint(1)
+   <tr><td><samp>2001</samp><td><code>UUIDException</code><td>64-bit integer arithmetic is not available.
+    <td>UUID::initAccurate()
+   <tr><td><samp>2002</samp><td><code>UUIDException</code><td>Secure random number generator is not available.
+    <td>UUID::initAccurate()
+   <tr><td><samp>2003</samp><td><code>UUIDStorageException</code><td>Stable storage not available.
+    <td>UUID::initAccurate()
+   <tr><td><samp>2004</samp><td><code>UUIDStorageException</code><td>Storage is invalid. 
+    <td>UUID::initAccurate()
+ </table>
+</div>
+
+<div id="append-chart">
+ <h2>Flow chart for storage interface</h2>
+<svg height="813.226" version="1.1" width="1282.5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!--
+begin=>start: Begin
+end=>end: Done
+haveNode=>condition: Have 
+Node
+userSeq=>condition: User 
+Seq
+isNullNode=>condition: Null
+isNullSeq=>condition: Null
+getNode=>operation: getNode()
+getSeq=>operation: getSequence()
+setSeq=>operation: setSequence()
+setTime=>operation: setTimestamp()
+makeNode=>subroutine: Generate
+Node ID
+makeSeq=>subroutine: Generate
+Sequence
+
+begin->haveNode
+haveNode(yes)->userSeq
+haveNode(no)->getNode(right)->isNullNode
+userSeq(yes, right)->setSeq
+userSeq(no)->getSeq->isNullSeq
+isNullNode(yes,right)->makeNode->userSeq
+isNullNode(no)->userSeq
+isNullSeq(yes, right)->makeSeq(right)->setSeq
+isNullSeq(no)->setTime->end
+setSeq->setTime->end
+-->
+  <style>
+  text {
+   text-anchor: start;  
+   font-size: 16px; 
+   font-family: 'Helvetica Neue', Helvetica, Arial;
+   fill: black;
+  }
+  rect {
+   stroke: black;
+   fill: white;
+   stroke-width: 1.5;
+  }
+  path {
+   stroke: black;
+   stroke-width: 1.5;
+   marker-end: url(#raphael-marker-endblock33);
+   fill: none;
+  }
+  path.cond {
+   fill: white;
+   marker-end: none;
+  }
+  </style>
+  <defs>
+    <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block"/>
+    <marker id="raphael-marker-endblock33" markerHeight="3" markerWidth="3" orient="auto" refX="1.5" refY="1.5">
+      <use xlink:href="#raphael-marker-block" transform="rotate(180 1.5 1.5) scale(0.6,0.6)" fill="black"/>
+    </marker>
+  </defs>
+  <rect width="61" height="38" r="20" rx="20" ry="20" transform="matrix(1,0,0,1,37,26.914)"/>
+  <text x="10" y="19" transform="matrix(1,0,0,1,37,26.914)">
+    <tspan dy="6">Begin</tspan>
+  </text>
+  <path class="cond" d="M26.25,21.457L0,42.914L52.5,85.828L105,42.914L52.5,0L0,42.914" transform="matrix(1,0,0,1,15,117.914)"/>
+  <text x="31.25" y="42.914" transform="matrix(1,0,0,1,15,117.914)">
+    <tspan dy="-3.601">Have </tspan>
+    <tspan dy="19.2" x="31.25">Node</tspan>
+  </text>
+  <path class="cond" d="M25.125,21.457L0,42.914L50.25,85.828L100.5,42.914L50.25,0L0,42.914" transform="matrix(1,0,0,1,17.25,256.742)"/>
+  <text x="30.125" y="42.914" transform="matrix(1,0,0,1,17.25,256.742)">
+    <tspan dy="-3.601">User </tspan>
+    <tspan dy="19.2" x="30.125">Seq</tspan>
+  </text>
+  <rect width="122" height="38" transform="matrix(1,0,0,1,338.25,534.398)"/>
+  <text x="10" y="19" transform="matrix(1,0,0,1,338.25,534.398)">
+    <tspan dy="6">setSequence()</tspan>
+  </text>
+  <rect width="129" height="38" transform="matrix(1,0,0,1,3,658.812)"/>
+  <text x="10" y="19" transform="matrix(1,0,0,1,3,658.812)">
+    <tspan dy="6">setTimestamp()</tspan>
+  </text>
+  <rect width="58" height="38" r="20" rx="20" ry="20" transform="matrix(1,0,0,1,38.5,773.726)"/>
+  <text x="10" y="19" transform="matrix(1,0,0,1,38.5,773.726)">
+    <tspan dy="6">Done</tspan>
+  </text>
+  <rect width="123" height="38" transform="matrix(1,0,0,1,6,419.484)"/>
+  <text x="10" y="19" transform="matrix(1,0,0,1,6,419.484)">
+    <tspan dy="6">getSequence()</tspan>
+  </text>
+  <path class="cond" d="M20.625,14.25L0,28.5L41.25,57L82.5,28.5L41.25,0L0,28.5" transform="matrix(1,0,0,1,26.25,524.898)"/>
+  <text x="25.625" y="28.5" transform="matrix(1,0,0,1,26.25,524.898)">
+    <tspan dy="6">Null</tspan>
+  </text>
+  <rect width="111" height="57.218" transform="matrix(1,0,0,1,170.75,524.789)"/>
+  <rect x="10" width="91" height="57.218" transform="matrix(1,0,0,1,170.75,524.789)"/>
+  <text x="20" y="28.609" transform="matrix(1,0,0,1,170.75,524.789)">
+    <tspan dy="-3.601">Generate</tspan>
+    <tspan dy="19.2" x="20">Sequence</tspan>
+  </text>
+  <rect width="90" height="38" transform="matrix(1,0,0,1,510.25,141.828)"/>
+  <text x="10" y="19" transform="matrix(1,0,0,1,510.25,141.828)">
+    <tspan dy="6">getNode()</tspan>
+  </text>
+  <path class="cond" d="M20.625,14.25L0,28.5L41.25,57L82.5,28.5L41.25,0L0,28.5" transform="matrix(1,0,0,1,676.5,132.328)"/>
+  <text x="25.625" y="28.5" transform="matrix(1,0,0,1,676.5,132.328)">
+    <tspan dy="6">Null</tspan>
+  </text>
+  <rect width="105" height="57.218" transform="matrix(1,0,0,1,824,132.218)"/>
+  <rect x="10" width="85" height="57.218" transform="matrix(1,0,0,1,824,132.218)"/>
+  <text x="20" y="28.609" transform="matrix(1,0,0,1,824,132.218)">
+    <tspan dy="-3.601">Generate</tspan>
+    <tspan dy="19.2" x="20">Node ID</tspan>
+  </text>
+  <path d="M67.5,64.914C67.5,64.914,67.5,105.582,67.5,115.670"/>
+  <path d="M67.5,203.742C67.5,203.742,67.5,244.410,67.5,254.498"/>
+  <text x="72.5" y="213.742">
+    <tspan dy="6">yes</tspan>
+  </text>
+  <path d="M120,160.828C120,160.828,476.340,160.828,508.007,160.828"/>
+  <text x="125" y="150.828">
+    <tspan dy="6">no</tspan>
+  </text>
+  <path d="M117.75,299.656C117.75,299.656,399.25,299.656,399.25,299.656C399.25,299.656,399.25,508.127,399.25,532.150"/>
+  <text x="122.75" y="289.656">
+    <tspan dy="6">yes</tspan>
+  </text>
+  <path d="M67.5,342.570C67.5,342.570,67.5,404.553,67.5,417.234"/>
+  <text x="72.5" y="352.570">
+    <tspan dy="6">no</tspan>
+  </text>
+  <path d="M399.25,572.398C399.25,572.398,399.25,633.812,399.25,633.812C399.25,633.812,67.5,633.812,67.5,633.812C67.5,633.812,67.5,650.435,67.5,656.571"/>
+  <path d="M67.5,696.812C67.5,696.812,67.5,758.795,67.5,771.476"/>
+  <path d="M67.5,457.484C67.5,457.484,67.5,510.958,67.5,522.655"/>
+  <path d="M108.75,553.398C108.75,553.398,157.391,553.398,168.506,553.398"/>
+  <text x="113.75" y="543.398">
+    <tspan dy="6">yes</tspan>
+  </text>
+  <path d="M67.5,581.898C67.5,581.898,67.5,643.881,67.5,656.562"/>
+  <text x="72.5" y="591.898">
+    <tspan dy="6">no</tspan>
+  </text>
+  <path d="M281.75,553.398C281.75,553.398,325.491,553.398,336.000,553.398"/>
+  <path d="M600.25,160.828C600.25,160.828,661.664,160.828,674.259,160.828"/>
+  <path d="M759,160.828C759,160.828,810.276,160.828,821.743,160.828"/>
+  <text x="764" y="150.828">
+    <tspan dy="6">yes</tspan>
+  </text>
+  <path d="M717.75,189.328C717.75,189.328,717.75,231.742,717.75,231.742C717.75,231.742,67.5,231.742,67.5,231.742C67.5,231.742,67.5,248.365,67.5,254.501"/>
+  <text x="722.75" y="199.328">
+    <tspan dy="6">no</tspan>
+  </text>
+  <path d="M876.5,189.437C876.5,189.437,876.5,231.742,876.5,231.742C876.5,231.742,67.5,231.742,67.5,231.742C67.5,231.742,67.5,248.365,67.5,254.501"/>
+</svg>
+</div>
+
+<div id="append-credits">
+ <h2>Credits and licensing</h2>
+ <p>DrUUID and its manual (i.e. this document) were written by <a href="http://jkingweb.ca/">J. King</a>.  They are both governed by the following license:
+ <pre>Copyright (c) 2009 J. King
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.</pre>
+ <p>This manual's stylesheet was written by <a href="http://dustinwilson.com/">Dustin Wilson</a>.  It is licensed under the <a href="http://creativecommons.org/licenses/by/2.5/">Creative Commons Attribution</a> license (v2.5).
+ <p>This software is dedicated to <a href="http://www.insani.org/">Seung Park</a>.  HLN <em>forever</em>!
+</div>
+
+<h2 id="append-history">Revision history</h2>
+<dl>
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20140906">2014-09-06</a>
+  <dd>Major enhancements:
+   <ul>
+    <li>Improved handling of 60-bit timestamps
+     <ul>
+      <li>Improved performance on 64-bit systems
+      <li>Added support for bignums on 32-bit systems via either GMP or BC Math
+      <li>Added <code>UUID::initBignum()</code> method to trigger bignum support
+      <li><code>UUID::initBignum()</code> may be passed a constant to explicitly choose a strategy
+      <li>All deliberate floating-point arithmetic has been removed
+     </ul>
+    <li>Implemented storage for Version 1 UUIDs
+     <ul>
+      <li>Volatile (memory) storage is used by default
+      <li>Stable storage (a file) may be used for greater conformance
+      <li>Custom storage arrangements (e.g. a database) are also possible via an extensibility interface
+      <li><code>UUID::seq()</code> is no longer required.  It remains a public method, but is now undocumented
+     </ul>
+    <li>Improved secure random number generation
+     <ul>
+      <li>Added OpenSSL randomness source (PHP 5.3 or later)
+      <li>Added mcrypt randomness source
+      <li>Multiple calls to <code>UUID::initRandom()</code> are now no-ops
+      <li><code>UUID::initRandom()</code> may now be passed a constant to explicitly choose a randomness source; it now returns an integer constant representing a source rather than a string
+     </ul>
+    <li>Added <code>UUID::mintStr()</code> method to return canonical strings rather than objects
+    <li>Added <code>UUID::initAccurate()</code> method as a shortcut to optimal accuracy.
+    <li>Exceptions are now more numerous and include numeric codes
+    <li>Merged bugfixes from downstream
+     <ul>
+      <li>Missing 'new' keyword when throwing exception in <code>UUID::mintTime()</code> [Dave Gardner]
+      <li>Typo in <code>UUID::seq()</code> [David Ward]
+     </ul>
+    <li><code>UUID->time</code> now returns a string with a fixed precision
+    <li>MAC addresses are now correctly converted to and from canonical form
+    <li>Passing a UUID object to <code>UUID::import()</code> is now a no-op
+    <li>Raised required PHP version
+     <ul> 
+      <li>PHP 5.0.5 is now required
+      <li>PHP 5.2.0 is required for custom storage
+      <li>PHP 5.3.0 is recommended, for chained exceptions
+     </ul>
+    <li>Major expansion of manual to document new and changed features
+   </ul> 
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20110320">2011-03-20</a>
+  <dd>Refined the generation of Version 1 UUIDs.  This sees the addition of the <var>sequence</var> and <var>time</var> parameters to <code>UUID::mint(<var>1</var>)</code>, as well as the addition of <code>UUID::seq()</code>.
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20100215">2010-02-15</a>
+  <dd>Fixed bug in <code>UUID::import</code> as reported by Sander van Lambalgen.
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20091126">2009-11-26</a>
+  <dd>Fixed previously non-functional <code>UUID::compare()</code> method.  Also allowed input UUIDs to be RFC 4122 URNs.
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20091111">2009-11-11</a>
+  <dd>Various changes:
+   <ul>
+    <li>Implemented the <code>UUID::initRandom()</code> method.  See <a href="#randomness">Section 4</a> for details.  As a consequence generating random numbers is now much faster.  Acknowledgement to Rubén Marrero for the impulse to implement this.
+    <li>Implemented system-level randomness source for Windows.
+    <li>Fixed a minor unnecessary processing branch when attempting to retrieve node value from non-version 1 UUIDs.
+    <li>Various documentation corrections and clarifications; numerous fixed typos.
+   </ul>       
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20090928">2009-09-28</a>
+  <dd>Fixed a minor bug preventing <code>/dev/urandom</code> from being used.  Reported by Rubén Marrero.
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20090413">2009-04-13</a>
+  <dd>Fixed two serious bugs in Version 5 generation and string casting.
+ <dt><a href="http://jkingweb.ca/code/php/lib.uuid/archives?rev=20090411">2009-04-11</a>
+  <dd>First release.
+</dl>

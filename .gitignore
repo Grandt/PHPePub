@@ -72,6 +72,8 @@ tests/*.bat
 tests/*.epub
 tests/vendor
 tests/vendor/*
+tests/output
+tests/output/*
 tests/demo/georgia-pls-ssml
 tests/georgia-pls-ssml/*
 tests/tools
