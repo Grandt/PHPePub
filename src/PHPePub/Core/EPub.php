@@ -2199,7 +2199,7 @@ class EPub {
     function saveBook($fileName, $baseDir = '.') {
 
         // Make fileName safe
-        $fileName = $this->sanitizeFileName($fileName);
+        // $fileName = $this->sanitizeFileName($fileName); // It is up to the user to ensure valid file names.
 
         // Finalize book, if it's not done already
         if (!$this->isFinalized) {
