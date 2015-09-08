@@ -73,7 +73,7 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 
 // This test requires you have an image, change "demo/cover-image.jpg" to match your location.
 $log->logLine("Add Cover Image");
-$book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
+// $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
 
 // A better way is to let EPub handle the image itself, as it may need resizing. Most e-books are only about 600x800
 //  pixels, adding mega-pixel images is a waste of place and spends bandwidth. setCoverImage can resize the image.
@@ -101,7 +101,6 @@ $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
 
 $chapter2 =
       "<h2>Vivamus bibendum massa</h2>\n"
-    . "<p><img src=\"demo/DemoInlineImage.jpg\" alt=\"Demo Inline Image!\" /></p>\n"
     . "<p>Vivamus bibendum massa ac magna congue gravida. Curabitur nulla ante, accumsan sit amet luctus a, fermentum ut diam. Maecenas porttitor faucibus mattis. Ut auctor aliquet ligula nec posuere. Nullam arcu turpis, dapibus sit amet tempor nec, cursus at augue. Aliquam sed sem velit, id sagittis mauris. Donec sed ipsum nisi, id scelerisque felis. Cras lacus est, fermentum in ultricies eu, congue in elit. Nulla tincidunt posuere eros, eget suscipit tellus porta vel. Aliquam ut sollicitudin libero. Suspendisse potenti. Sed cursus dignissim nulla in elementum. Aliquam id quam justo, sit amet laoreet ligula. Etiam pellentesque tellus a nisi commodo eu sodales ante commodo. Vestibulum ultricies sapien arcu. Proin nunc mauris, ultrices id imperdiet ac, malesuada ac nunc. Nunc a mi quis nunc ultricies rhoncus. Mauris pellentesque eros eu augue congue ac tincidunt est gravida.</p>\n"
     . "<p>Integer lobortis facilisis magna, non tristique sem facilisis ut. Sed id nisi diam. Nulla viverra lectus ut purus tempus sagittis. Quisque dictum enim tempus ipsum mollis blandit. Cras in mi non nulla imperdiet fringilla at blandit urna. Donec vel dui quis sem congue ullamcorper nec a massa. Vivamus in dui nunc. Donec sit amet augue odio, at imperdiet lacus. Mauris sit amet magna justo. Maecenas ultrices orci ultrices sapien ornare eget consequat nisl tristique. Integer non mi ac eros vehicula pharetra. Curabitur risus augue, sollicitudin vitae pharetra interdum, sollicitudin sit amet magna. Nunc sit amet est lacus, vel sodales elit. Duis dolor lorem, convallis eu dignissim quis, vulputate at nibh.</p>\n"
     . "<p>Praesent gravida, sapien aliquet interdum elementum, magna mauris hendrerit eros, blandit posuere lectus neque sed massa. Cras ultricies rhoncus mi, vitae posuere ligula scelerisque sit amet. Cras porttitor congue odio, sit amet tristique magna euismod id. Cras enim dolor, scelerisque eget egestas vel, consectetur vel purus. Aenean et convallis felis. Mauris in arcu sollicitudin ipsum lobortis fringilla. Suspendisse felis mauris, convallis ac blandit interdum, imperdiet eget massa. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque velit quis augue commodo tristique. Maecenas dictum dui congue enim tristique vel mattis neque luctus. Fusce neque dui, laoreet suscipit varius sed, mattis sit amet diam. Nullam elementum, ante non cursus imperdiet, eros dui placerat elit, sit amet elementum erat risus eget nunc.</p>\n"
@@ -181,11 +180,6 @@ $book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1, true, 
 
 $log->logLine("Add Chapter 2");
 $book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $content_start . "<h1>Chapter 2</h1>\n" . $chapter2);
-
-// Chapter 2 contains an image reference "demo/DemoInlineImage.jpg" which we didn't get it to import
-// automatically. So we will do that manually.
-$log->logLine("Add referenced image from Chapter 2");
-$book->addLargeFile("demo/DemoInlineImage.jpg", "DemoInlineImage", "demo/DemoInlineImage.jpg", "image/jpeg");
 
 $log->logLine("Add Chapter 3");
 $book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
@@ -354,7 +348,7 @@ if (ob_get_contents() !== false && ob_get_contents() != '') {
 //$book->saveBook('epub-filename', '.');
 
 // Send the book to the client. ".epub" will be appended if missing.
-$zipData = $book->sendBook("ExampleBook1");
+$zipData = $book->saveBook("ExampleBook1");
 
 // After this point your script should call exit. If anything is written to the output,
 // it'll be appended to the end of the book, causing the epub file to become corrupt.
