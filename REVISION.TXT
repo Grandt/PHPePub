@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------
+Rev. 4.0.3 - 2015-09-15
+* Changed: Added functions addCustomNamespace, addCustomPrefix, addCustomMetaValue and addCustomMetaProperty
+*          to enable users to add needed namespaces or prefixes (prefixes are only supported in ePub3)
+*          as well as meta properties and entries specified by those namespaces.
+*          See tests/EPub.Example1.php (line 95+) and tests/EPub.Example3.php (line 66+) for how they are used.
+---------------------------------------------------------------------
 Rev. 4.0.2 - 2015-09-15
 * Changed: Added function addFileToMETAINF to enable users to add the apple ibooks metadata.
 *   $book->addFileToMETAINF("com.apple.ibooks.display-options.xml", $xmldata);
