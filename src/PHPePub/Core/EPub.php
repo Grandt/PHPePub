@@ -28,12 +28,12 @@ use RelativePath;
  * @author    A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license   GNU LGPL 2.1
- * @version   4.0.3
+ * @version   4.0.4
  * @link      http://www.phpclasses.org/package/6115
  * @link      https://github.com/Grandt/PHPePub
  */
 class EPub {
-    const VERSION = '4.0.3';
+    const VERSION = '4.0.4';
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI = 'URI';
@@ -120,6 +120,8 @@ class EPub {
     private $log = null;
     private $htmlContentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title></title>\n</head>\n<body>\n";
     private $htmlContentFooter = "</body>\n</html>\n";
+
+    private $dangermode = false;
 
     /**
      * Class constructor.
@@ -2738,5 +2740,48 @@ class EPub {
      */
     function getLog() {
         return $this->log->getLog();
+    }
+
+    /**
+     * Set or clear "Dangermode"
+     *
+     * Dangermode allows the user to access the structure of the ePub directly,
+     * potentially leading to defective files.
+     *
+     * @param bool $dangermode
+     */
+    function setDangermode($dangermode) {
+        $this->dangermode = $dangermode === true;
+    }
+
+    /**
+     * The Opf data isn't generated before the ePub is finalized.
+     *
+     * @return null|Opf the Opf structure class.
+     */
+    function DANGER_getOpf() {
+        return $this->dangermode ? $this->opf : null;
+    }
+
+    /**
+     * The Ncx data isn't generated before the ePub is finalized.
+     *
+     * @return null|Ncx The Ncx Navigation class
+     */
+    function DANGER_getNcx() {
+        return $this->dangermode ? $this->ncx : null;
+    }
+
+    /**
+     * The Zip file isn't completed before the ePub is finalized,
+     *  however files added ARE packed and written to it immediately,
+     * and their contents can't be altered.
+     *
+     * See the phpzip/phpzip composer package for usage.
+     *
+     * @return null|Zip The actual zip file.
+     */
+    function DANGER_getZip() {
+        return $this->dangermode ? $this->zip : null;
     }
 }

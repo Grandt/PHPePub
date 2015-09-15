@@ -16,13 +16,10 @@ use PHPePub\Core\Structure\OPF\Spine;
  * ePub OPF file structure
  *
  * @author    A. Grandt <php@grandt.com>
- * @copyright 2009-2014 A. Grandt
+ * @copyright 2009-2015 A. Grandt
  * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version   3.30
  */
 class Opf {
-    const _VERSION = 3.30;
-
     /* Core Media types.
      * These types are the only guaranteed mime types any ePub reader must understand.
      * Any other type muse define a fall back whose fallback chain will end in one of these.

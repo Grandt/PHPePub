@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------
+Rev. 4.0.4 - 2015-09-15
+* Added: "DANGERMODE" to allow the user to get and manipulate the internal structure should they need it.
+* Note, IF you really need to do any of this, let me know, in case it is really something the package itself should do.
+---------------------------------------------------------------------
 Rev. 4.0.3 - 2015-09-15
 * Changed: Added functions addCustomNamespace, addCustomPrefix, addCustomMetaValue and addCustomMetaProperty
 *          to enable users to add needed namespaces or prefixes (prefixes are only supported in ePub3)

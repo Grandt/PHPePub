@@ -9,13 +9,10 @@ use PHPePub\Core\Structure\NCX\NavPoint;
  * ePub NCX file structure
  *
  * @author    A. Grandt <php@grandt.com>
- * @copyright 2009-2014 A. Grandt
+ * @copyright 2009-2015 A. Grandt
  * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version   3.30
  */
 class Ncx {
-    const _VERSION = 3.30;
-
     const MIMETYPE = "application/x-dtbncx+xml";
 
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;
