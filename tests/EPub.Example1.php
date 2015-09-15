@@ -89,6 +89,7 @@ $book->addChapter("Notices", "Cover.html", $cover);
 $book->buildTOC(NULL, "toc", "Table of Contents", TRUE, TRUE);
 //    function buildTOC($cssFileName = NULL, $tocCSSClass = "toc", $title = "Table of Contents", $addReferences = TRUE, $addToIndex = FALSE, $tocFileName = "TOC.xhtml") {
 
+$book->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . "<h2>Lorem ipsum</h2>\n"

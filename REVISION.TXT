@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------
+Rev. 4.0.2 - 2015-09-15
+* Changed: Added function addFileToMETAINF to enable users to add the apple ibooks metadata.
+*   $book->addFileToMETAINF("com.apple.ibooks.display-options.xml", $xmldata);
+---------------------------------------------------------------------
 Rev. 4.0.1 - 2015-06-29
 * Changed: Included J. King's DrUUID library rather than using composer. The only available package remained in "dev" stability.
 *          http://jkingweb.ca/code/php/lib.uuid/

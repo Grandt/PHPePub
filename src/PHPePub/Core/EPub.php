@@ -869,6 +869,29 @@ class EPub {
     }
 
     /**
+     * Add a file to the META-INF directory.
+     * Bloody Apple and their bloody proprietary ways of doing things.
+     *
+     * @param string $fileName Filename to use for the file, must be unique for the book.
+     * @param string $fileData File data
+     *
+     * @return bool $success
+     */
+    function addFileToMETAINF($fileName, $fileData) {
+        if ($this->isFinalized) {
+            return false;
+        }
+        if (!$this->isInitialized) {
+            $this->initialize();
+        }
+        $fileName = $this->normalizeFileName($fileName);
+
+        $this->zip->addFile($fileData, "META-INF/" . $fileName);
+
+        return true;
+    }
+
+    /**
      * Add dynamically generated data as a file to the book.
      *
      * @param string $fileName Filename to use for the file, must be unique for the book.
