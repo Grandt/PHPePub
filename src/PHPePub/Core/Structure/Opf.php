@@ -7,6 +7,8 @@ use PHPePub\Core\Structure\OPF\Guide;
 use PHPePub\Core\Structure\OPF\Item;
 use PHPePub\Core\Structure\OPF\Itemref;
 use PHPePub\Core\Structure\OPF\Manifest;
+use PHPePub\Core\Structure\OPF\Metadata;
+use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPePub\Core\Structure\OPF\Reference;
 use PHPePub\Core\Structure\OPF\Spine;
 
@@ -41,10 +43,18 @@ class Opf {
     private $ident = "BookId";
 
     public $date = null;
+
+    /** @var $metadata Metadata */
     public $metadata = null;
+    /** @var $manifest Manifest */
     public $manifest = null;
+    /** @var $spine Spine */
     public $spine = null;
+    /** @var $guide Guide */
     public $guide = null;
+
+    public $namespaces = array("xsi"=>"http://www.w3.org/2001/XMLSchema-instance");
+    public $prefixes = array();
 
     /**
      * Class constructor.
@@ -101,10 +111,35 @@ class Opf {
      * @return string
      */
     function finalize() {
-        $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-            . "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
+        $metadata = $this->metadata->finalize($this->bookVersion, $this->date);
 
-        $opf .= $this->metadata->finalize($this->bookVersion, $this->date);
+        foreach($this->metadata->namespaces as $ns => $nsuri) {
+            $this->addNamespace($ns, $nsuri);
+        }
+
+        $opf = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+            . "<package xmlns=\"http://www.idpf.org/2007/opf\"\n";
+
+        foreach($this->namespaces as $ns => $uri) {
+            $opf .= "\txmlns:$ns=\"$uri\"\n";
+        }
+
+        if ($this->bookVersion === EPub::BOOK_VERSION_EPUB3 && sizeof($this->prefixes) > 0) {
+            $opf .= "\tprefix=\"";
+            $addSpace = false;
+            foreach ($this->prefixes as $name => $uri) {
+                if ($addSpace) {
+                    $opf .= " ";
+                } else {
+                    $addSpace = true;
+                }
+                $opf .= "$name: $uri";
+            }
+            $opf .= "\"\n";
+        }
+
+        $opf .= "\tunique-identifier=\"" . $this->ident . "\" version=\"" . $this->bookVersion . "\">\n";
+        $opf .= $metadata;
         $opf .= $this->manifest->finalize($this->bookVersion);
         $opf .= $this->spine->finalize();
 
@@ -134,6 +169,26 @@ class Opf {
         $dc->addAttr("id", $this->ident);
         $dc->addOpfAttr("scheme", $identifierScheme);
         $this->metadata->addDublinCore($dc);
+    }
+
+    /**
+     * @param string $nsName
+     * @param string $nsURI
+     */
+    function addNamespace($nsName, $nsURI) {
+        if (!array_key_exists($nsName, $this->namespaces)) {
+            $this->namespaces[$nsName] = $nsURI;
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param string $URI
+     */
+    function addPrefix($name, $URI) {
+        if (!array_key_exists($name, $this->prefixes)) {
+            $this->prefixes[$name] = $URI;
+        }
     }
 
     /**
@@ -180,18 +235,43 @@ class Opf {
      * @param string $value
      */
     function addDCMeta($name, $value) {
-        $this->metadata->addDublinCore(new DublinCore($name, $value));
+        $this->addMetaValue(new DublinCore($name, $value));
     }
 
     /**
      *
-     * Enter description here ...
+     * @param MetaValue $value
+     */
+    function addMetaValue($value) {
+        $this->metadata->addDublinCore($value);
+    }
+
+    /**
+     * Add a meta value to the metadata.
+     *
+     * Meta values in the metadata looks like:
+     * <meta name="name" content="value" />
      *
      * @param string $name
      * @param string $content
      */
     function addMeta($name, $content) {
         $this->metadata->addMeta($name, $content);
+    }
+
+    /**
+     * Add a Meta property value to the metadata
+     *
+     * Properties in the metadata looks like:
+     *   <meta property="namespace:name">value</meta>
+     *
+     * Remember to add the namespace as well.
+     *
+     * @param string $name  property name, including the namespace declaration, ie. "dcterms:modified"
+     * @param string $content
+     */
+    function addMetaProperty($name, $content) {
+        $this->metadata->addMetaProperty($name, $content);
     }
 
     /**
@@ -236,94 +316,5 @@ class Opf {
         }
 
         $this->metadata->addDublinCore($dc);
-    }
-}
-
-/**
- * ePub OPF Metadata structures
- */
-class Metadata {
-    const _VERSION = 3.30;
-
-    private $dc = array();
-    private $meta = array();
-
-    /**
-     * Class constructor.
-     *
-     */
-    function __construct() {
-    }
-
-    /**
-     * Class destructor
-     *
-     * @return void
-     */
-    function __destruct() {
-        unset($this->dc, $this->meta);
-    }
-
-    /**
-     *
-     * Enter description here ...
-     *
-     * @param DublinCore $dc
-     */
-    function addDublinCore($dc) {
-        if ($dc != null && is_object($dc) && $dc instanceof DublinCore) {
-            $this->dc[] = $dc;
-        }
-    }
-
-    /**
-     *
-     * Enter description here ...
-     *
-     * @param string $name
-     * @param string $content
-     */
-    function addMeta($name, $content) {
-        $name = is_string($name) ? trim($name) : null;
-        if (isset($name)) {
-            $content = is_string($content) ? trim($content) : null;
-        }
-        if (isset($content)) {
-            $this->meta[] = array(
-                $name => $content
-            );
-        }
-    }
-
-    /**
-     *
-     * @param string $bookVersion
-     * @param int    $date
-     *
-     * @return string
-     */
-    function finalize($bookVersion = EPub::BOOK_VERSION_EPUB2, $date = null) {
-        $metadata = "\t<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n";
-        if ($bookVersion === EPub::BOOK_VERSION_EPUB2) {
-            $metadata .= "\t\txmlns:opf=\"http://www.idpf.org/2007/opf\"\n\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-        } else {
-            $metadata .= "\t\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-            if (!isset($date)) {
-                $date = time();
-            }
-            $metadata .= "\t\t<meta property=\"dcterms:modified\">" . gmdate("Y-m-d\TH:i:s\Z", $date) . "</meta>\n";
-        }
-
-        /** @var $dc DublinCore */
-        foreach ($this->dc as $dc) {
-            $metadata .= $dc->finalize($bookVersion);
-        }
-
-        foreach ($this->meta as $data) {
-            list($name, $content) = each($data);
-            $metadata .= "\t\t<meta name=\"" . $name . "\" content=\"" . $content . "\" />\n";
-        }
-
-        return $metadata . "\t</metadata>\n";
     }
 }

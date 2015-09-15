@@ -5,6 +5,7 @@ use PHPePub\Core\EPub;
 use PHPePub\Core\EPubChapterSplitter;
 use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Logger;
+use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
@@ -90,6 +91,16 @@ $book->buildTOC(NULL, "toc", "Table of Contents", TRUE, TRUE);
 //    function buildTOC($cssFileName = NULL, $tocCSSClass = "toc", $title = "Table of Contents", $addReferences = TRUE, $addToIndex = FALSE, $tocFileName = "TOC.xhtml") {
 
 $book->addFileToMETAINF("com.apple.ibooks.display-options.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<display_options>\n    <platform name=\"*\">\n        <option name=\"fixed-layout\">true</option>\n        <option name=\"interactive\">true</option>\n        <option name=\"specified-fonts\">true</option>\n    </platform>\n</display_options>");
+
+// add a custom metadata to use on the MetaValue entries.
+// Using DublinCore as an example, even if it is automatically included.
+$book->addCustomNamespace("dc", "http://purl.org/dc/elements/1.1/"); // StaticData::$namespaces["dc"]);
+// This is to show how to use meta data, normally you'd use the $book->setAuthor
+$metaValue = new MetaValue("dc:creator", "Jane Doe Johnson");
+$metaValue->addOpfAttr("file-as", "Johnson, Jane Doe");
+$metaValue->addOpfAttr("role", "aut");
+
+$book->addCustomMetaValue($metaValue);
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . "<h2>Lorem ipsum</h2>\n"

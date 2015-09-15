@@ -280,4 +280,13 @@ class StaticData {
     public static $opsContentTypes = array("application/xhtml+xml", "application/x-dtbook+xml", "application/xml", "application/x-dtbncx+xml", "text/x-oeb1-document");
 
     public static $forbiddenCharacters = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%");
+
+    public static $namespaces = array("xsi" => "http://www.w3.org/2001/XMLSchema-instance",
+                                      "opf" => "http://www.idpf.org/2007/opf",
+                                      "dcterms" => "http://purl.org/dc/terms/",
+                                      "dc" => "http://purl.org/dc/elements/1.1/");
+
+    public static $prefixNamespaces = array("rendition" => "http://www.idpf.org/vocab/rendition/#",
+                                            "ibooks" => "http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0");
+
 }

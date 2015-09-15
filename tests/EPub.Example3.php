@@ -2,6 +2,7 @@
 include 'vendor/autoload.php';
 
 use PHPePub\Core\EPub;
+use PHPePub\Core\StaticData;
 use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Logger;
 use PHPZip\Zip\File\Zip;
@@ -62,6 +63,17 @@ $book->setSubject("Chapter levels");
 $book->addCustomMetadata("calibre:series", "PHPePub Test books");
 $book->addCustomMetadata("calibre:series_index", "3");
 
+// FIXED-LAYOUT METADATA (ONLY AVAILABLE IN EPUB3)
+$book->addCustomPrefix("rendition", StaticData::$prefixNamespaces["rendition"]);
+$book->addCustomPrefix("ibooks", StaticData::$prefixNamespaces["ibooks"]);
+
+$book->addCustomMetaProperty("rendition:layout", "pre-paginated");
+$book->addCustomMetaProperty("rendition:orientation", "auto");
+$book->addCustomMetaProperty("rendition:spread", "auto");
+$book->addCustomMetaProperty("ibooks:iphone-orientation-lock", "portrait-only");
+$book->addCustomMetaProperty("ibooks:specified-fonts", "true");
+$book->addCustomMetaProperty("ibooks:fixed-layout", "true");
+
 $log->logLine("Set up parameters");
 
 $cssData = "body {\n  margin-left: .5em;\n  margin-right: .5em;\n  text-align: justify;\n}\n\np {\n  font-family: serif;\n  font-size: 10pt;\n  text-align: justify;\n  text-indent: 1em;\n  margin-top: 0px;\n  margin-bottom: 1ex;\n}\n\nh1, h2 {\n  font-family: sans-serif;\n  font-style: italic;\n  text-align: center;\n  background-color: #6b879c;\n  color: white;\n  width: 100%;\n}\n\nh1 {\n    margin-bottom: 2px;\n}\n\nh2 {\n    margin-top: -2px;\n    margin-bottom: 2px;\n}\n";
@@ -72,6 +84,8 @@ $book->addCSSFile("styles.css", "css1", $cssData);
 // This test requires you have an image, change "demo/cover-image.jpg" to match your location.
 $log->logLine("Add Cover Image");
 $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "image/jpeg");
+
+
 
 // A better way is to let EPub handle the image itself, as it may need resizing. Most e-books are only about 600x800
 //  pixels, adding mega-pixel images is a waste of place and spends bandwidth. setCoverImage can resize the image.

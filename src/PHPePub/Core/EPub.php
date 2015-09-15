@@ -10,6 +10,7 @@ use PHPePub\Core\Structure\NCX\NavPoint;
 use PHPePub\Core\Structure\Opf;
 use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Structure\OPF\MarcCode;
+use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPePub\Core\Structure\OPF\Reference;
 use PHPZip\Zip\File\Zip;
 use RelativePath;
@@ -27,12 +28,12 @@ use RelativePath;
  * @author    A. Grandt <php@grandt.com>
  * @copyright 2009-2014 A. Grandt
  * @license   GNU LGPL 2.1
- * @version   4.0.0
+ * @version   4.0.3
  * @link      http://www.phpclasses.org/package/6115
  * @link      https://github.com/Grandt/PHPePub
  */
 class EPub {
-    const VERSION = '4.0.0';
+    const VERSION = '4.0.3';
 
     const IDENTIFIER_UUID = 'UUID';
     const IDENTIFIER_URI = 'URI';
@@ -1456,6 +1457,70 @@ class EPub {
     }
 
     /**
+     * @param string $nsName
+     * @param string $nsURI
+     */
+    function addCustomNamespace($nsName, $nsURI) {
+        if ($this->isFinalized) {
+            return;
+        }
+
+        $this->opf->addNamespace($nsName, $nsURI);
+    }
+
+    /**
+     * Add a prefix declaration to the OPF file.
+     *
+     * Only supported on EPUB3 books.
+     *
+     * @param string $name
+     * @param string $URI
+     */
+    function addCustomPrefix($name, $URI) {
+        if ($this->isFinalized) {
+            return;
+        }
+
+        $this->opf->addPrefix($name, $URI);
+    }
+
+    /**
+     * Add a custom meta data value to the OPF metadata.
+     *
+     * Remember to add the namespace as well.
+     *
+     * Metadata comes in the form:
+     *   <namespace:tag attr="attrvalue">value</namespace:tag>
+     *
+     * @param MetaValue $value
+     */
+    function addCustomMetaValue($value) {
+        if ($this->isFinalized) {
+            return;
+        }
+
+        $this->opf->addMetaValue($value);
+    }
+
+    /**
+     * Add a Meta property value to the metadata
+     *
+     * Properties in the metadata looks like:
+     *   <meta property="namespace:name">value</meta>
+     *
+     * Remember to add the namespace as well.
+     *
+     * @param string $name  property name, including the namespace declaration, ie. "dcterms:modified"
+     * @param string $content
+     */
+    function addCustomMetaProperty($name, $content) {
+        if ($this->isFinalized) {
+            return;
+        }
+
+        $this->opf->addMetaProperty($name, $content);
+    }
+    /**
      * Add custom metadata to the book.
      *
      * It is up to the builder to make sure there are no collisions. Metadata are just key value pairs.
@@ -1464,6 +1529,10 @@ class EPub {
      * @param string $content
      */
     function addCustomMetadata($name, $content) {
+        if ($this->isFinalized) {
+            return;
+        }
+
         $this->opf->addMeta($name, $content);
     }
 
