@@ -590,7 +590,7 @@ class Zip {
                 if ($inline) {
                     $cd .= "inline";
                 } else {
-                    $cd .= "attached";
+                    $cd .= "attachment";
                 }
                 if ($fileName) {
                     $cd .= '; filename="' . $fileName . '"';
