@@ -2806,6 +2806,7 @@ class EPub {
      * @return float
      */
     public function getImageScale($width, $height) {
+        $ratio = 1;
         if ($width > $this->maxImageWidth) {
             $ratio = $this->maxImageWidth / $width;
         }
