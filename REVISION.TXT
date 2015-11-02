@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------
+Rev. 4.0.5 - 2015-11-02
+* Added: Support for SVG images. (experimental)
+* Cleaned up source headers
+* Added preliminary work for supporting Apple iBooks idiosyncrasies. If I could, I'd tell Apple to take a flying f*** off of a tall building for their tireless efforts to break established standards.
+---------------------------------------------------------------------
 Rev. 4.0.4 - 2015-09-15
 * Added: "DANGERMODE" to allow the user to get and manipulate the internal structure should they need it.
 * Note, IF you really need to do any of this, let me know, in case it is really something the package itself should do.
@@ -37,7 +42,7 @@ Rev. 3.10 - 2013-12-01
 ---------------------------------------------------------------------
 Rev. 3.00 - 2013-11-03
 ---------------------------------------------------------------------
-* Added: ePub 3 support. The ePub 3 still contains the NCX for backwards combatability to ePub 2 readers, though there is no gurantee that it'll work on all readers.
+* Added: ePub 3 support. The ePub 3 still contains the NCX for backwards compatibility to ePub 2 readers, though there is no gurantee that it'll work on all readers.
 *  The EPub class constructor now takes arguments for epub version, EPub::BOOK_VERSION_EPUB2 or EPub::BOOK_VERSION_EPUB3
 *  The other new parameters on the EPub constructor are for default language and writing direction, used on the generated ePub 3 TOC.
 * Added: Ability to reference sub chapter id's
