@@ -1,10 +1,12 @@
 <?php
 namespace PHPePub\Core\Structure\OPF;
 
-use PHPePub\Core\EPub;
-
 /**
  * ePub OPF Dublin Core (dc:) Metadata structures
+ *
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class DublinCore extends MetaValue {
     const CONTRIBUTOR = "contributor";

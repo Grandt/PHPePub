@@ -5,13 +5,10 @@ namespace PHPePub\Core;
  * Simple log line aggregator.
  *
  * @author    A. Grandt <php@grandt.com>
- * @copyright 2012-2014 A. Grandt
- * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
- * @version   1.00
+ * @copyright 2012- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class Logger {
-    const VERSION = 1.00;
-
     private $log = "";
     private $tStart;
     private $tLast;

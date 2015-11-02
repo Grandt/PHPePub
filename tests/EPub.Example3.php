@@ -65,7 +65,7 @@ $book->addCustomMetadata("calibre:series_index", "3");
 
 // FIXED-LAYOUT METADATA (ONLY AVAILABLE IN EPUB3)
 $book->addCustomPrefix("rendition", StaticData::$prefixNamespaces["rendition"]);
-$book->addCustomPrefix("ibooks", StaticData::$prefixNamespaces["ibooks"]);
+$book->addCustomPrefix(iBooks::EPUB3_IBOOK_PREFIX_NAME, iBooks::EPUB3_IBOOK_PREFIX_URI);
 
 $book->addCustomMetaProperty("rendition:layout", "pre-paginated");
 $book->addCustomMetaProperty("rendition:orientation", "auto");

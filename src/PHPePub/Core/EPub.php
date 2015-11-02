@@ -26,7 +26,7 @@ use RelativePath;
  * Thanks to: Adam Schmalhofer and Kirstyn Fox for invaluable input and for "nudging" me in the right direction :)
  *
  * @author    A. Grandt <php@grandt.com>
- * @copyright 2009-2014 A. Grandt
+ * @copyright 2009- A. Grandt
  * @license   GNU LGPL 2.1
  * @version   4.0.4
  * @link      http://www.phpclasses.org/package/6115
@@ -612,22 +612,41 @@ class EPub {
         $ext = "";
 
         $image = $this->getFileContents($source);
+        $ratio = 1;
 
         if ($image !== false && strlen($image) > 0) {
-            $imageFile = imagecreatefromstring($image);
-            if ($imageFile !== false) {
-                $width = ImageSX($imageFile);
-                $height = ImageSY($imageFile);
-            }
-            if ($this->isExifInstalled) {
-                @$type = exif_imagetype($source);
-                $mime = image_type_to_mime_type($type);
-            }
-            if ($mime === "application/octet-stream") {
-                $mime = $this->image_file_type_from_binary($image);
-            }
-            if ($mime === "application/octet-stream") {
-                $mime = $this->getMimeTypeFromUrl($source);
+            if (BinStringStatic::startsWith(trim($image), '<svg') || (BinStringStatic::startsWith(trim($image), '<?xml') || strpos($image, '<svg') > 0)) {
+                // SVG image.
+                $xml = simplexml_load_string($image);
+                $attr = $xml->attributes();
+                $width = $attr->width;
+                $height = $attr->height;
+
+                $mime = "image/svg+xml";
+                $ext = "svg";
+
+                $ratio = $this->getImageScale($width, $height);
+                if ($ratio < 1) {
+                    $attr->width = $width * $ratio;
+                    $attr->height = $height * $ratio;
+                }
+                $image = $xml->asXML();
+            } else {
+                $imageFile = imagecreatefromstring($image);
+                if ($imageFile !== false) {
+                    $width = ImageSX($imageFile);
+                    $height = ImageSY($imageFile);
+                }
+                if ($this->isExifInstalled) {
+                    @$type = exif_imagetype($source);
+                    $mime = image_type_to_mime_type($type);
+                }
+                if ($mime === "application/octet-stream") {
+                    $mime = $this->image_file_type_from_binary($image);
+                }
+                if ($mime === "application/octet-stream") {
+                    $mime = $this->getMimeTypeFromUrl($source);
+                }
             }
         } else {
             return false;
@@ -637,15 +656,9 @@ class EPub {
             return false;
         }
 
-        $ratio = 1;
+        if ($mime !== "image/svg+xml" && $this->isGdInstalled) {
+            $ratio = $this->getImageScale($width, $height);
 
-        if ($this->isGdInstalled) {
-            if ($width > $this->maxImageWidth) {
-                $ratio = $this->maxImageWidth / $width;
-            }
-            if ($height * $ratio > $this->maxImageHeight) {
-                $ratio = $this->maxImageHeight / $height;
-            }
             //echo "<pre>\$source: $source\n\$ratio.: $ratio\n\$mime..: $mime\n\$width.: $width\n\$height: $height</pre>\n";
             if ($ratio < 1 || empty($mime)) {
                 if ($mime == "image/png" || ($this->isGifImagesEnabled === false && $mime == "image/gif")) {
@@ -715,9 +728,10 @@ class EPub {
 
         if ($ext === "") {
             static $mimeToExt = array(
-                'image/jpeg' => 'jpg',
-                'image/gif'  => 'gif',
-                'image/png'  => 'png'
+                'image/jpeg'    => 'jpg',
+                'image/gif'     => 'gif',
+                'image/png'     => 'png',
+                'image/svg+xml' => "svg"
             );
 
             if (isset($mimeToExt[$mime])) {
@@ -2783,5 +2797,24 @@ class EPub {
      */
     function DANGER_getZip() {
         return $this->dangermode ? $this->zip : null;
+    }
+
+    /**
+     * @param $width
+     * @param $height
+     *
+     * @return float
+     */
+    public function getImageScale($width, $height) {
+        if ($width > $this->maxImageWidth) {
+            $ratio = $this->maxImageWidth / $width;
+        }
+        if ($height * $ratio > $this->maxImageHeight) {
+            $ratio = $this->maxImageHeight / $height;
+
+            return $ratio;
+        }
+
+        return $ratio;
     }
 }

@@ -16,7 +16,7 @@ use PHPePub\Core\Structure\OPF\Spine;
  * ePub OPF file structure
  *
  * @author    A. Grandt <php@grandt.com>
- * @copyright 2009-2015 A. Grandt
+ * @copyright 2009- A. Grandt
  * @license   GNU LGPL, Attribution required for commercial implementations, requested for everything else.
  */
 class Opf {

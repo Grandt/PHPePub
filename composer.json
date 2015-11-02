@@ -5,7 +5,7 @@
     "keywords": ["epub", "e-book"],
     "homepage": "https://github.com/Grandt/PHPZip",
     "license": "LGPL-2.1",
-    "version": "4.0.4",
+    "version": "4.0.5",
     "minimum-stability": "stable",
     "authors": [
         {

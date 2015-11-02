@@ -5,9 +5,12 @@ use PHPePub\Core\EPub;
 
 /**
  * ePub OPF Metadata value structures
+ *
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class MetaValue {
-
     private $tagName = null;
     private $tagValue = null;
     private $attr = array();

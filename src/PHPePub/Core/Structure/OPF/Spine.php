@@ -3,15 +3,19 @@ namespace PHPePub\Core\Structure\OPF;
 
 /**
  * ePub OPF Spine structure
+ *
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class Spine {
-    const _VERSION = 3.30;
-
     private $itemrefs = array();
     private $toc = null;
 
     /**
      * Class constructor.
+     *
+     * @param string $toc
      */
     function __construct($toc = "ncx") {
         $this->setToc($toc);

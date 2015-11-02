@@ -4,6 +4,10 @@ namespace PHPePub\Core\Structure\NCX;
 
 /**
  * ePub NavMap class
+ *
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class NavMap extends AbstractNavEntry {
     const _VERSION = 3.30;

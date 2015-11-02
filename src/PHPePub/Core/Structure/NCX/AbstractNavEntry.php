@@ -1,9 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Grandt
- * Date: 03-08-14
- * Time: 17:28
+/**
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 
 namespace PHPePub\Core\Structure\NCX;

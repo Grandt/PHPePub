@@ -7,10 +7,12 @@ use PHPePub\Core\StaticData;
 
 /**
  * ePub OPF Metadata structures
+ *
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class Metadata {
-    const _VERSION = 3.30;
-
     private $dc = array();
     private $meta = array();
     private $metaProperties = array();

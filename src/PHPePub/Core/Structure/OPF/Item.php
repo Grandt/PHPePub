@@ -5,10 +5,12 @@ use PHPePub\Core\EPub;
 
 /**
  * ePub OPF Item structure
+ *
+ * @author    A. Grandt <php@grandt.com>
+ * @copyright 2014- A. Grandt
+ * @license   GNU LGPL 2.1
  */
 class Item {
-    const _VERSION = 3.30;
-
     private $id = null;
     private $href = null;
     private $mediaType = null;
