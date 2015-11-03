@@ -619,11 +619,12 @@ class EPub {
                 // SVG image.
                 $xml = simplexml_load_string($image);
                 $attr = $xml->attributes();
-                $width = $attr->width;
-                $height = $attr->height;
 
                 $mime = "image/svg+xml";
                 $ext = "svg";
+                /*
+                $width = $attr->width;
+                $height = $attr->height;
 
                 $ratio = $this->getImageScale($width, $height);
                 if ($ratio < 1) {
@@ -631,6 +632,7 @@ class EPub {
                     $attr->height = $height * $ratio;
                 }
                 $image = $xml->asXML();
+                */
             } else {
                 $imageFile = imagecreatefromstring($image);
                 if ($imageFile !== false) {
