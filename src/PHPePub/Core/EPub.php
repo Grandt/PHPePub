@@ -14,6 +14,7 @@ use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPePub\Core\Structure\OPF\Reference;
 use PHPZip\Zip\File\Zip;
 use RelativePath;
+use SimpleXMLElement;
 
 
 /**
@@ -620,11 +621,13 @@ class EPub {
                 $xml = simplexml_load_string($image);
                 $attr = $xml->attributes();
 
+                $meta = $this->handleSVGAttribs($xml);
+
                 $mime = "image/svg+xml";
                 $ext = "svg";
-                /*
-                $width = $attr->width;
-                $height = $attr->height;
+
+                $width = $meta['width'];
+                $height = $meta['height'];
 
                 $ratio = $this->getImageScale($width, $height);
                 if ($ratio < 1) {
@@ -632,7 +635,6 @@ class EPub {
                     $attr->height = $height * $ratio;
                 }
                 $image = $xml->asXML();
-                */
             } else {
                 $imageFile = imagecreatefromstring($image);
                 if ($imageFile !== false) {
@@ -2819,5 +2821,130 @@ class EPub {
         }
 
         return $ratio;
+    }
+
+    /**
+     * @param        $attr
+     * @param string $sep
+     *
+     * @return array
+     */
+    function splitCSV($attr, $sep=',') {
+
+        if (strpos($attr, $sep) > 0) {
+            return preg_split('/\s*' . $sep . '\s*/', $attr);
+        } elseif ($sep !== ',' && strpos($attr, ',') > 0) {
+            return preg_split('/\s*,\s*/', $attr);
+        } elseif (strpos($attr, ';') > 0) {
+            return preg_split('/\s*;\s*/', $attr);
+        } else {
+            return preg_split('/\s+/', $attr);
+        }
+    }
+
+    /**
+     * Copyright WikiMedia:
+     * https://doc.wikimedia.org/mediawiki-core/master/php/SVGMetadataExtractor_8php_source.html
+     *
+     * @param     $length
+     * @param int $portSize
+     *
+     * @return float
+     */
+    public function scaleSVGUnit( $length, $portSize = 512 ) {
+        static $unitLength = array(
+            'px' => 1.0,
+            'pt' => 1.25,
+            'pc' => 15.0,
+            'mm' => 3.543307,
+            'cm' => 35.43307,
+            'in' => 90.0,
+            'em' => 16.0, // fake it?
+            'ex' => 12.0, // fake it?
+            '' => 1.0, // "User units" pixels by default
+        );
+        $matches = array();
+        if ( preg_match( '/^\s*(\d+(?:\.\d+)?)(em|ex|px|pt|pc|cm|mm|in|%|)\s*$/', $length, $matches ) ) {
+            $length = floatval( $matches[1] );
+            $unit = $matches[2];
+            if ( $unit == '%' ) {
+                return $length * 0.01 * $portSize;
+            } else {
+                return $length * $unitLength[$unit];
+            }
+        } else {
+            // Assume pixels
+            return floatval( $length );
+        }
+    }
+
+    /**
+     * @param SimpleXMLElement $svg
+     *
+     * @return array
+     */
+    public function handleSVGAttribs($svg) {
+        $metadata = array();
+        $attr = $svg->attributes();
+        $viewWidth = 0;
+        $viewHeight = 0;
+        $aspect = 1.0;
+        $x = null;
+        $y = null;
+        $width = null;
+        $height = null;
+
+        if ( $attr->viewBox ) {
+            // min-x min-y width height
+            $viewBoxAttr = trim( $attr->viewBox );
+
+            $viewBox = $this->splitCSV($viewBoxAttr);
+            if ( count( $viewBox ) == 4 ) {
+                $viewWidth = $this->scaleSVGUnit( $viewBox[2] );
+                $viewHeight = $this->scaleSVGUnit( $viewBox[3] );
+                if ( $viewWidth > 0 && $viewHeight > 0 ) {
+                    $aspect = $viewWidth / $viewHeight;
+                }
+            }
+        }
+
+        if ( $attr->x) {
+            $x = $this->scaleSVGUnit( $attr->x, 0);
+            $metadata['originalX'] = "".$attr->x;
+        }
+        if ( $attr->y) {
+            $y = $this->scaleSVGUnit( $attr->y, 0);
+            $metadata['originalY'] = "".$attr->y;
+        }
+
+        if ( $attr->width ) {
+            $width = $this->scaleSVGUnit( $attr->width, $viewWidth );
+            $metadata['originalWidth'] = "".$attr->width;
+        }
+        if ( $attr->height ) {
+            $height = $this->scaleSVGUnit( $attr->height, $viewHeight );
+            $metadata['originalHeight'] = "".$attr->height;
+        }
+
+        if ( !isset( $width ) && !isset( $height ) ) {
+            $width = 512;
+            $height = $width / $aspect;
+        } elseif ( isset( $width ) && !isset( $height ) ) {
+            $height = $width / $aspect;
+        } elseif ( isset( $height ) && !isset( $width ) ) {
+            $width = $height * $aspect;
+        }
+
+        if ( $x > 0 && $y > 0 ) {
+            $metadata['x'] = intval( round( $x ) );
+            $metadata['y'] = intval( round( $y ) );
+        }
+        if ( $width > 0 && $height > 0 ) {
+            $metadata['width'] = intval( round( $width ) );
+            $metadata['height'] = intval( round( $height ) );
+            $metadata['aspect'] = $aspect;
+        }
+
+        return $metadata;
     }
 }

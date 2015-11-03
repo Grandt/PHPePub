@@ -50,6 +50,7 @@ $chapter = $content_start . "<p><img src='demo/512x700_g1.gif' alt='Image' /></p
         . "<p><img src='demo/rxhVVUP.gif' alt='Animated Gif' /></p>\n"
         . "<p><img src='demo/512x700_2.jpg' alt='none' /></p>\n"
         . "<p><img src='demo/512x700_3.jpg' alt='Demo 2' /></p>\n"
+        . "<p><img src='demo/test.svg' alt='Demo SVG 1' /></p>\n"
         . $bookEnd;
 
 $book->setCoverImage('demo/512x700_1.jpg');
