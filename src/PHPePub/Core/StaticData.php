@@ -284,8 +284,4 @@ class StaticData {
                                       "opf" => "http://www.idpf.org/2007/opf",
                                       "dcterms" => "http://purl.org/dc/terms/",
                                       "dc" => "http://purl.org/dc/elements/1.1/");
-
-    public static $prefixNamespaces = array("rendition" => "http://www.idpf.org/vocab/rendition/#",
-                                            "ibooks" => "http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0");
-
 }

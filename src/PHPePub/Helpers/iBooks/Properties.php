@@ -81,4 +81,10 @@ abstract class Properties extends Enum {
      */
     const EPUB3_BINDING = "ibooks:binding";
 
+    /**
+     * You can add a version number to your title in order to distinguish a new edition, with either major or minor changes. Readers who have purchased the book will be notified automatically that an updated file is available, and upon download the new version will replace their earlier one.
+     *
+     * The version number is in the typical 3 level major.minor.release format: ####.####.####
+     */
+    const EPUB3_VERSION = "ibooks:version";
 }

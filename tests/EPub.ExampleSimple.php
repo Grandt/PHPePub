@@ -2,6 +2,7 @@
 include 'vendor/autoload.php';
 
 use \PHPePub\Core\EPub;
+use PHPePub\Helpers\CalibreHelper;
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('error_reporting', E_ALL | E_STRICT);
@@ -44,6 +45,9 @@ $book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublica
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
 $book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookSimple.html");
+
+// Insert custom meta data to the book, in this case, Calibre series index information.
+CalibreHelper::setCalibreMetadata($book, "PHPePub Test books", "5");
 
 // A book need styling, in this case we use static text, but it could have been a file.
 $cssData = "body {\n  margin-left: .5em;\n  margin-right: .5em;\n  text-align: justify;\n}\n\np {\n  font-family: serif;\n  font-size: 10pt;\n  text-align: justify;\n  text-indent: 1em;\n  margin-top: 0px;\n  margin-bottom: 1ex;\n}\n\nh1, h2 {\n  font-family: sans-serif;\n  font-style: italic;\n  text-align: center;\n  background-color: #6b879c;\n  color: white;\n  width: 100%;\n}\n\nh1 {\n    margin-bottom: 2px;\n}\n\nh2 {\n    margin-top: -2px;\n    margin-bottom: 2px;\n}\n";

@@ -24,6 +24,14 @@ class DublinCore extends MetaValue {
     const SUBJECT = "subject";
     const TITLE = "title";
     const TYPE = "type";
+    /**
+     * @var string
+     */
+    private $name;
+    /**
+     * @var string
+     */
+    private $value;
 
     /**
      * Class constructor.

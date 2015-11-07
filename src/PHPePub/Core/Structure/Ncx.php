@@ -17,6 +17,9 @@ class Ncx {
 
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;
 
+    /** @var EPub $parentBook */
+    private $parentBook = null;
+
     private $navMap = null;
     private $uid = null;
     private $meta = array();
@@ -62,11 +65,18 @@ class Ncx {
      * @return void
      */
     function __destruct() {
-        unset($this->bookVersion, $this->navMap, $this->uid, $this->meta);
+        unset($this->parentBook, $this->bookVersion, $this->navMap, $this->uid, $this->meta);
         unset($this->docTitle, $this->docAuthor, $this->currentLevel, $this->lastLevel);
         unset($this->languageCode, $this->writingDirection, $this->chapterList, $this->referencesTitle);
         unset($this->referencesClass, $this->referencesId, $this->referencesList, $this->referencesName);
         unset($this->referencesOrder);
+    }
+
+    /**
+     * @param EPub $parentBook
+     */
+    public function setBook($parentBook) {
+        $this->parentBook = $parentBook;
     }
 
     /**
@@ -312,9 +322,15 @@ class Ncx {
             . "\t<head>\n"
             . "\t\t<title>" . $this->docTitle . "</title>\n"
             . "\t\t<meta http-equiv=\"default-style\" content=\"text/html; charset=utf-8\"/>\n";
+
+        if ($this->parentBook !== null) {
+            $end .= $this->parentBook->getViewportMetaLine();
+        }
+
         if ($cssFileName !== null) {
             $end .= "\t\t<link rel=\"stylesheet\" href=\"" . $cssFileName . "\" type=\"text/css\"/>\n";
         }
+
         $end .= "\t</head>\n"
             . "\t<body epub:type=\"frontmatter toc\">\n"
             . "\t\t<header>\n"

@@ -49,7 +49,7 @@ class UUID {
  const version3 = 48;  // 00110000
  const version4 = 64;  // 01000000
  const version5 = 80;  // 01010000
- const interval = "122192928000000000"; //  Time (in 100ns steps) between the start of the Gregorian and Unix epochs
+ const interval = 122192928000000000; //  Time (in 100ns steps) between the start of the Gregorian and Unix epochs
  const nsDNS  = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
  const nsURL  = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
  const nsOID  = '6ba7b812-9dad-11d1-80b4-00c04fd430c8';
@@ -329,8 +329,14 @@ class UUID {
    default:
     throw new UUIDException("Time input was of an unexpected format.",103);
   }
- }    
+ }
 
+ /**
+  * @param int $time
+  *
+  * @return string
+  * @throws UUIDException
+  */
  protected static function buildTime($time) {
   switch (self::$bignum) {
    case self::bigNative:
@@ -636,17 +642,17 @@ class UUIDStorageVolatile implements UUIDStorage {
 
  public function getNode() {
   if ($this->node === NULL) 
-   return;
+   return FALSE;
   return $this->node;
  }
 
  public function getSequence($timestamp, $node) {
   if ($node != $this->node) {
   	$this->node = $node;
-  	return;
+  	return FALSE;
   }
   if ($this->sequence === NULL) 
-   return;
+   return FALSE;
   if ($timestamp <= $this->timestamp)
    $this->sequence = pack("n", (unpack("n", $this->sequence) + 1) & self::maxSequence);
   $this->setTimestamp($timestamp);

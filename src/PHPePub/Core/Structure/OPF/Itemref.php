@@ -14,6 +14,9 @@ class Itemref {
 
     /**
      * Class constructor.
+     *
+     * @param      $idref
+     * @param bool $linear
      */
     function __construct($idref, $linear = true) {
         $this->setIdref($idref);

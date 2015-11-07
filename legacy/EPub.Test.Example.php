@@ -3,8 +3,9 @@ include 'vendor/autoload.php';
 
 use PHPePub\Core\EPub;
 use PHPePub\Core\EPubChapterSplitter;
-use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Logger;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
@@ -40,8 +41,8 @@ $book = new EPub();
 $log->logLine("new EPub()");
 $log->logLine("EPub class version.: " . EPub::VERSION);
 $log->logLine("Zip version........: " . Zip::VERSION);
-$log->logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
-$log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
+$log->logLine("getCurrentServerURL: " . URLHelper::getCurrentServerURL());
+$log->logLine("getCurrentPageURL..: " . URLHelper::getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("Test book");

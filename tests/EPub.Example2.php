@@ -3,8 +3,10 @@ include 'vendor/autoload.php';
 
 use PHPePub\Core\EPub;
 use PHPePub\Core\EPubChapterSplitter;
-use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Logger;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Helpers\CalibreHelper;
+use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
@@ -39,8 +41,8 @@ $book = new EPub(); // Default is EPub::BOOK_VERSION_EPUB2
 $log->logLine("new EPub()");
 $log->logLine("EPub class version.: " . EPub::VERSION);
 $log->logLine("Zip version........: " . Zip::VERSION);
-$log->logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
-$log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
+$log->logLine("getCurrentServerURL: " . URLHelper::getCurrentServerURL());
+$log->logLine("getCurrentPageURL..: " . URLHelper::getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("Test book");
@@ -60,8 +62,7 @@ $book->setSubject("keywords");
 $book->setSubject("Chapter levels");
 
 // Insert custom meta data to the book, in this case, Calibre series index information.
-$book->addCustomMetadata("calibre:series", "PHPePub Test books");
-$book->addCustomMetadata("calibre:series_index", "2");
+CalibreHelper::setCalibreMetadata($book, "PHPePub Test books", "2");
 
 $log->logLine("Set up parameters");
 

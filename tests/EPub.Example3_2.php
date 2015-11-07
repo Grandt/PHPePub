@@ -2,8 +2,10 @@
 include 'vendor/autoload.php';
 
 use PHPePub\Core\EPub;
-use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Logger;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Helpers\CalibreHelper;
+use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
@@ -38,19 +40,19 @@ $book = new EPub(EPub::BOOK_VERSION_EPUB3, "en", EPub::DIRECTION_LEFT_TO_RIGHT);
 $log->logLine("new EPub()");
 $log->logLine("EPub class version.: " . EPub::VERSION);
 $log->logLine("Zip version........: " . Zip::VERSION);
-$log->logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
-$log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
+$log->logLine("getCurrentServerURL: " . URLHelper::getCurrentServerURL());
+$log->logLine("getCurrentPageURL..: " . URLHelper::getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("ePub 3 Test book");
-$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
+$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.xhtml", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
 $book->setLanguage("en"); // Not needed, but included for the example, Language is mandatory, but EPub defaults to "en". Use RFC3066 Language codes, such as "en", "da", "fr" etc.
 $book->setDescription("This is a brief description\nA test ePub book as an example of building a book in PHP");
 $book->setAuthor("John Doe Johnson", "Johnson, John Doe");
 $book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existent address :)
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
-$book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookEPub3.html");
+$book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookEPub3.xhtml");
 
 $book->addDublinCoreMetadata(DublinCore::CONTRIBUTOR, "PHP");
 
@@ -58,9 +60,8 @@ $book->setSubject("Test book");
 $book->setSubject("keywords");
 $book->setSubject("Chapter levels");
 
-// Insert custom meta data to the book, in this cvase, Calibre series index information.
-$book->addCustomMetadata("calibre:series", "PHPePub Test books");
-$book->addCustomMetadata("calibre:series_index", "3");
+// Insert custom meta data to the book, in this case, Calibre series index information.
+CalibreHelper::setCalibreMetadata($book, "PHPePub Test books", "3.1");
 
 $log->logLine("Set up parameters");
 
@@ -75,16 +76,16 @@ $book->setCoverImage("Cover.jpg", file_get_contents("demo/cover-image.jpg"), "im
 
 $data = '<div class="img-container" id="em_1" style="left: 138px; top: 148px; height: 232px; width: 308px; position: absolute; z-index: 1;"><img src="http://www.grandt.com/test/sample2.gif" style="width:100%;height:100%;"/></div>';
 
-$book->addChapter("Page 1", "page_1.html", $content_start . $data . $bookEnd, FALSE, EPub::EXTERNAL_REF_ADD);
+$book->addChapter("Page 1", "page_1.xhtml", $content_start . $data . $bookEnd, FALSE, EPub::EXTERNAL_REF_ADD);
 
 $log->logLine("Add TOC");
 $book->buildTOC();
 
-$book->addChapter("Log", "Log.html", $content_start . $log->getLog() . "\n</pre>" . $bookEnd);
+$book->addChapter("Log", "Log.xhtml", $content_start . $log->getLog() . "\n</pre>" . $bookEnd);
 
 if ($book->isLogging) { // Only used in case we need to debug EPub.php.
     $epuplog = $book->getLog();
-    $book->addChapter("ePubLog", "ePubLog.html", $content_start . $epuplog . "\n</pre>" . $bookEnd);
+    $book->addChapter("ePubLog", "ePubLog.xhtml", $content_start . $epuplog . "\n</pre>" . $bookEnd);
 }
 
 $book->finalize(); // Finalize the book, and build the archive.

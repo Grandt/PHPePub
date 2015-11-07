@@ -2,8 +2,10 @@
 include 'vendor/autoload.php';
 
 use PHPePub\Core\EPub;
-use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Logger;
+use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Helpers\CalibreHelper;
+use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
 
 error_reporting(E_ALL | E_STRICT);
@@ -38,19 +40,19 @@ $book = new EPub(EPub::BOOK_VERSION_EPUB3, "en", EPub::DIRECTION_LEFT_TO_RIGHT);
 $log->logLine("new EPub()");
 $log->logLine("EPub class version.: " . EPub::VERSION);
 $log->logLine("Zip version........: " . Zip::VERSION);
-$log->logLine("getCurrentServerURL: " . $book->getCurrentServerURL());
-$log->logLine("getCurrentPageURL..: " . $book->getCurrentPageURL());
+$log->logLine("getCurrentServerURL: " . URLHelper::getCurrentServerURL());
+$log->logLine("getCurrentPageURL..: " . URLHelper::getCurrentPageURL());
 
 // Title and Identifier are mandatory!
 $book->setTitle("ePub 3 Test book");
-$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.html", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
+$book->setIdentifier("http://JohnJaneDoePublications.com/books/TestBookEPub3.xhtml", EPub::IDENTIFIER_URI); // Could also be the ISBN number, preferred for published books, or a UUID.
 $book->setLanguage("en"); // Not needed, but included for the example, Language is mandatory, but EPub defaults to "en". Use RFC3066 Language codes, such as "en", "da", "fr" etc.
 $book->setDescription("This is a brief description\nA test ePub book as an example of building a book in PHP");
 $book->setAuthor("John Doe Johnson", "Johnson, John Doe");
 $book->setPublisher("John and Jane Doe Publications", "http://JohnJaneDoePublications.com/"); // I hope this is a non existent address :)
 $book->setDate(time()); // Strictly not needed as the book date defaults to time().
 $book->setRights("Copyright and licence information specific for the book."); // As this is generated, this _could_ contain the name or licence information of the user who purchased the book, if needed. If this is used that way, the identifier must also be made unique for the book.
-$book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookEPub3.html");
+$book->setSourceURL("http://JohnJaneDoePublications.com/books/TestBookEPub3.xhtml");
 
 $book->addDublinCoreMetadata(DublinCore::CONTRIBUTOR, "PHP");
 
@@ -59,8 +61,7 @@ $book->setSubject("keywords");
 $book->setSubject("Chapter levels");
 
 // Insert custom meta data to the book, in this case, Calibre series index information.
-$book->addCustomMetadata("calibre:series", "PHPePub Test books");
-$book->addCustomMetadata("calibre:series_index", "3");
+CalibreHelper::setCalibreMetadata($book, "PHPePub Test books", "3.1");
 
 $log->logLine("Set up parameters");
 
@@ -84,7 +85,7 @@ $log->logLine("Set Cover Image");
 
 $cover = $content_start . "<h1>Test Book</h1>\n<h2>By: John Doe Johnson</h2>\n" . $bookEnd;
 $book->addChapter("Table of Contents", "TOC.xhtml", NULL, false, EPub::EXTERNAL_REF_IGNORE);
-$book->addChapter("Notices", "Cover.html", $cover);
+$book->addChapter("Notices", "Cover.xhtml", $cover);
 
 $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . "<h2>Lorem ipsum</h2>\n"
@@ -148,10 +149,10 @@ $chapter4 = $content_start . "<h1>Chapter 4</h1>\n"
 $log->logLine("Build Chapters");
 
 $log->logLine("Add Chapter 1");
-$book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.html", $chapter1, true, EPub::EXTERNAL_REF_ADD);
+$book->addChapter("Chapter 1: Lorem ipsum", "Chapter001.xhtml", $chapter1, true, EPub::EXTERNAL_REF_ADD);
 
 $log->logLine("Add Chapter 2");
-$book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.html", $content_start . "<h1>Chapter 2</h1>\n" . $chapter2);
+$book->addChapter("Chapter 2: Vivamus bibendum massa", "Chapter002.xhtml", $content_start . "<h1>Chapter 2</h1>\n" . $chapter2);
 
 // Chapter 2 contains an image reference "demo/DemoInlineImage.jpg" which we didn't get
 //  it to import automatically. So we will do that manually.
@@ -162,51 +163,51 @@ $log->logLine("Add Chapter 3");
 // Chapter 3 is an array of chapter fragments.
 // Just remember, that if you reference these parts with id's, the chapter file name
 //  is appended with _<part number> (starting from 1)
-// This example will produce Chapter003_1.html and Chapter003-2.html
-$book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.html", $chapter3);
+// This example will produce Chapter003_1.xhtml and Chapter003-2.xhtml
+$book->addChapter("Chapter 3: Vivamus bibendum massa again", "Chapter003.xhtml", $chapter3);
 
 $log->logLine("Add Chapter 4");
-$book->addChapter("Chapter 4: Vivamus bibendum massa split", "Chapter004.html", $chapter4, true);
+$book->addChapter("Chapter 4: Vivamus bibendum massa split", "Chapter004.xhtml", $chapter4, true);
 
 // Reference an id inside Chapter 4. Indenting the index is not necessary.
 $book->subLevel();
-$book->addChapter("Chapter 4.1: test inlined chapter", "Chapter004.html#sub01");
+$book->addChapter("Chapter 4.1: test inlined chapter", "Chapter004.xhtml#sub01");
 $book->backLevel();
 
 // Chapter 5 tests level indentation
 $chapter7Body = "<p>Vivamus bibendum massa ac magna congue gravida. Curabitur nulla ante, accumsan sit amet luctus a, fermentum ut diam. Maecenas porttitor faucibus mattis. Ut auctor aliquet ligula nec posuere. Nullam arcu turpis, dapibus sit amet tempor nec, cursus at augue. Aliquam sed sem velit, id sagittis mauris. Donec sed ipsum nisi, id scelerisque felis. Cras lacus est, fermentum in ultricies eu, congue in elit. Nulla tincidunt posuere eros, eget suscipit tellus porta vel. Aliquam ut sollicitudin libero. Suspendisse potenti. Sed cursus dignissim nulla in elementum. Aliquam id quam justo, sit amet laoreet ligula. Etiam pellentesque tellus a nisi commodo eu sodales ante commodo. Vestibulum ultricies sapien arcu. Proin nunc mauris, ultrices id imperdiet ac, malesuada ac nunc. Nunc a mi quis nunc ultricies rhoncus. Mauris pellentesque eros eu augue congue ac tincidunt est gravida.</p>\n" . $bookEnd;
 
 $log->logLine("Add Chapter 5.0.0.0");
-$book->addChapter("Chapter 5", "Chapter00500.html", $content_start . "<h2>Chapter 5.0.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5", "Chapter00500.xhtml", $content_start . "<h2>Chapter 5.0.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
 $log->logLine("Add Chapter 5.1.0.0");
 $book->subLevel();
-$book->addChapter("Chapter 5.1", "Chapter00510.html", $content_start . "<h2>Chapter 5.1.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1", "Chapter00510.xhtml", $content_start . "<h2>Chapter 5.1.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
 $log->logLine("Add Chapter 5.1.1.0");
 $book->subLevel("test", "toc");
-$book->addChapter("Chapter 5.1.1", "Chapter00511.html", $content_start . "<h2>Chapter 5.1.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.1", "Chapter00511.xhtml", $content_start . "<h2>Chapter 5.1.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 $log->logLine("Add Chapter 5.1.1.1");
 $book->subLevel();
-$book->addChapter("Chapter 5.1.1.1", "Chapter005111.html", $content_start . "<h2>Chapter 5.1.1.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
-$book->addChapter("Chapter 5.1.1.2", "Chapter005112.html", $content_start . "<h2>Chapter 5.1.1.2</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.1.1", "Chapter005111.xhtml", $content_start . "<h2>Chapter 5.1.1.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.1.2", "Chapter005112.xhtml", $content_start . "<h2>Chapter 5.1.1.2</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 $log->logLine("Add Chapter 5.1.2.0");
 $book->backLevel();
-$book->addChapter("Chapter 5.1.2", "Chapter005120.html", $content_start . "<h2>Chapter 5.1.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.2", "Chapter005120.xhtml", $content_start . "<h2>Chapter 5.1.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 $log->logLine("Add Chapter 5.1.3.0");
-$book->addChapter("Chapter 5.1.3", "Chapter005130.html", $content_start . "<h2>Chapter 5.1.3.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.3", "Chapter005130.xhtml", $content_start . "<h2>Chapter 5.1.3.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 $log->logLine("Add Chapter 5.1.3.x");
 $book->subLevel();
-$book->addChapter("Chapter 5.1.3.1", "Chapter005131.html", $content_start . "<h2>Chapter 5.1.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
-$book->addChapter("Chapter 5.1.3.2", "Chapter005132.html", $content_start . "<h2>Chapter 5.1.3.2</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
-$book->addChapter("Chapter 5.1.3.3", "Chapter005133.html", $content_start . "<h2>Chapter 5.1.3.3</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
-$book->addChapter("Chapter 5.1.3.4", "Chapter005134.html", $content_start . "<h2>Chapter 5.1.3.4</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.3.1", "Chapter005131.xhtml", $content_start . "<h2>Chapter 5.1.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.3.2", "Chapter005132.xhtml", $content_start . "<h2>Chapter 5.1.3.2</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.3.3", "Chapter005133.xhtml", $content_start . "<h2>Chapter 5.1.3.3</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.1.3.4", "Chapter005134.xhtml", $content_start . "<h2>Chapter 5.1.3.4</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
 $log->logLine("Add Chapter 5.2.0.0");
@@ -214,16 +215,16 @@ $log->logLine("Add Chapter 5.2.0.0");
 //  so instead of relying on multiple ->backLevel() calls, you can set the target level directly.
 // This only works for going back in the hierarchy. ->setCurrentLevel(1) (or less) equals ->rootLevel();
 $book->setCurrentLevel(2);
-$book->addChapter("Chapter 5.2", "Chapter00520.html", $content_start . "<h2>Chapter 5.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.2", "Chapter00520.xhtml", $content_start . "<h2>Chapter 5.2.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
 $log->logLine("Add Chapter 5.3.0.0");
-$book->addChapter("Chapter 5.3", "Chapter00530.html", $content_start . "<h2>Chapter 5.3.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.3", "Chapter00530.xhtml", $content_start . "<h2>Chapter 5.3.0</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 
 $log->logLine("Add Chapter 5.3.1.0");
 $book->subLevel();
-$book->addChapter("Chapter 5.3.1", "Chapter00531.html", $content_start . "<h2>Chapter 5.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
+$book->addChapter("Chapter 5.3.1", "Chapter00531.xhtml", $content_start . "<h2>Chapter 5.3.1</h2>\n" . $chapter7Body, false, EPub::EXTERNAL_REF_ADD, $fileDir);
 
 // If you have nested chapters, you can call ->rootLevel() to return your hierarchy to the root of the navMap.
 $book->rootLevel();
@@ -231,11 +232,11 @@ $book->rootLevel();
 $log->logLine("Add TOC");
 $book->buildTOC();
 
-$book->addChapter("Log", "Log.html", $content_start . $log->getLog() . "\n</pre>" . $bookEnd);
+$book->addChapter("Log", "Log.xhtml", $content_start . $log->getLog() . "\n</pre>" . $bookEnd);
 
 if ($book->isLogging) { // Only used in case we need to debug EPub.php.
     $epuplog = $book->getLog();
-    $book->addChapter("ePubLog", "ePubLog.html", $content_start . $epuplog . "\n</pre>" . $bookEnd);
+    $book->addChapter("ePubLog", "ePubLog.xhtml", $content_start . $epuplog . "\n</pre>" . $bookEnd);
 }
 
 $book->finalize(); // Finalize the book, and build the archive.

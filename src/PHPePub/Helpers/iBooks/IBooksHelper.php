@@ -2,7 +2,7 @@
 namespace PHPePub\Helpers\iBooks;
 
 use PHPePub\Core\EPub;
-use PHPePub\Helpers\enums\Bool;
+use PHPePub\Helpers\enums\Boolean;
 
 /**
  * Helper for iBooks 2 and 3 books.
@@ -11,7 +11,7 @@ use PHPePub\Helpers\enums\Bool;
  * @copyright 2009- A. Grandt
  * @license   GNU LGPL 2.1
  */
-class IBooks {
+class IBooksHelper {
     const EPUB2_IBOOK_FILE_NAME = "com.apple.ibooks.display-options.xml";
 
     /**
@@ -20,48 +20,62 @@ class IBooks {
     const EPUB3_IBOOK_PREFIX_NAME = "ibooks";
     const EPUB3_IBOOK_PREFIX_URI = "http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0";
 
+    const ORIENTATION_NONE = "none";
+    const ORIENTATION_PORTRAIT_ONLY = "portrait-only";
+    const ORIENTATION_LANDSCAPE_ONLY = "landscape-only";
+
+    const PLATFORM_ALL = "*";
+    const PLATFORM_IPHONE = "iphone";
+    const PLATFORM_IPAD = "ipad";
+
     /**
      * Add iBooks prefix to the ePub book
      *
      * @param EPub $book
      */
-    function addEPub3IBooksPrefix($book) {
-        $book->addCustomPrefix(self::EPUB3_IBOOK_PREFIX_NAME, self::EPUB3_IBOOK_PREFIX_URI);
+    public static function addPrefix($book) {
+        if (!$book->isEPubVersion2()) {
+            $book->addCustomPrefix(self::EPUB3_IBOOK_PREFIX_NAME, self::EPUB3_IBOOK_PREFIX_URI);
+        }
     }
 
     /**
-     * @param EPub $book
+     * @param EPub   $book
      * @param string $property
      * @param string $value
      */
-    function addEPub3IBooksProperty($book, $property, $value) {
-        $book->addCustomMetaProperty($property, $value);
+    public static function addProperty($book, $property, $value) {
+        if (!$book->isEPubVersion2()) {
+            $book->addCustomMetaProperty($property, $value);
+        }
     }
 
     /**
      * @param EPub $book
      * @param bool $value
      */
-    function setEPub3IBooksFixedLayout($book, $value) {
-        $book->addCustomMetaProperty(Properties::EPUB3_FIXED_LAYOUT, $this->getIBookBoolean($value));
+    public static function setFixedLayout($book, $value) {
+        if (!$book->isEPubVersion2()) {
+            $book->addCustomMetaProperty(Properties::EPUB3_FIXED_LAYOUT, Boolean::getBoolean($value));
+        }
     }
 
     /**
-     * @param EPub $book
+     * @param EPub   $book
      * @param string $value "portrait-only", "landscape-only"
      */
-    function setEPub3IBooksIPhoneOrientationLock($book, $value) {
-        if ($value === "portrait-only" || $value === "landscape-only") {
+    public static function setIPhoneOrientationLock($book, $value) {
+        if (!$book->isEPubVersion2() && $value === self::ORIENTATION_PORTRAIT_ONLY || $value === self::ORIENTATION_LANDSCAPE_ONLY) {
             $book->addCustomMetaProperty(Properties::EPUB3_IPHONE_ORIENTATION_LOCK, $value);
         }
     }
 
     /**
-     * @param EPub $book
+     * @param EPub   $book
      * @param string $value "portrait-only", "landscape-only"
      */
-    function setEPub3IBooksIPadOrientationLock($book, $value) {
-        if ($value === "portrait-only" || $value === "landscape-only") {
+    public static function setIPadOrientationLock($book, $value) {
+        if (!$book->isEPubVersion2() && $value === self::ORIENTATION_PORTRAIT_ONLY || $value === self::ORIENTATION_LANDSCAPE_ONLY) {
             $book->addCustomMetaProperty(Properties::EPUB3_IPAD_ORIENTATION_LOCK, $value);
         }
     }
@@ -70,26 +84,23 @@ class IBooks {
      * @param EPub $book
      * @param bool $value
      */
-    function setEPub3IBooksSpecifiedFonts($book, $value) {
-        $book->addCustomMetaProperty(Properties::EPUB3_SPECIFIED_FONTS, $this->getIBookBoolean($value));
+    public static function setSpecifiedFonts($book, $value) {
+        if (!$book->isEPubVersion2()) {
+            $book->addCustomMetaProperty(Properties::EPUB3_SPECIFIED_FONTS, Boolean::getBoolean($value));
+        }
     }
 
     /**
      * @param EPub $book
      * @param bool $value
      */
-    function setEPub3IBooksBinding($book, $value) {
-        $book->addCustomMetaProperty(Properties::EPUB3_BINDING, $this->getIBookBoolean($value));
+    public static function setBinding($book, $value) {
+        if (!$book->isEPubVersion2()) {
+            $book->addCustomMetaProperty(Properties::EPUB3_BINDING, Boolean::getBoolean($value));
+        }
     }
 
-    /**
-     * @param $value
-     *
-     * @return string
-     */
-    public function getIBookBoolean($value) {
-        return $value === true ? Bool::TRUE : Bool::FALSE;
-    }
+    // TODO Add ePub2 implementation is the iBooks xml file.
     /*
         <display_options>
              <platform name="*">
@@ -106,5 +117,4 @@ class IBooks {
         http://www.fantasycastlebooks.com/Tutorials/ibooks-tutorial-part2.html
         http://www.fantasycastlebooks.com/Tutorials/ibooks-tutorial-update.html
      */
-
 }
