@@ -21,7 +21,7 @@ class StringHelper {
     /**
      * Ensure the encoded string is a valid UTF-8 string.
      *
-     * Note, that a mb_detect_encoding on the returned string will still return ASCII if the entire string is comprized of characters in the 1-127 range.
+     * Note, that a mb_detect_encoding on the returned string will still return ASCII if the entire string is comprised of characters in the 1-127 range.
      *
      * @link: http://snippetdb.com/php/convert-string-to-utf-8-for-mysql
      *
@@ -53,7 +53,7 @@ class StringHelper {
      *
      * Default version (4) will generate a random UUID, version 3 will URL based UUID.
      *
-     * Added for convinience
+     * Added for convenience
      *
      * @param int    $bookVersion UUID version to retrieve, See lib.uuid.manual.html for details.
      * @param string $url
@@ -65,7 +65,7 @@ class StringHelper {
     }
 
     /**
-     * Encode html code to use html entities, safeguarding it from potential character encoding peoblems
+     * Encode html code to use html entities, safeguarding it from potential character encoding problems
      * This function is a bit different from the vanilla htmlentities function in that it does not encode html tags.
      *
      * The regexp is taken from the PHP Manual discussion, it was written by user "busbyjon".
