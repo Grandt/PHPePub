@@ -49,7 +49,7 @@ class UUID {
  const version3 = 48;  // 00110000
  const version4 = 64;  // 01000000
  const version5 = 80;  // 01010000
- const interval = 122192928000000000; //  Time (in 100ns steps) between the start of the Gregorian and Unix epochs
+ const interval = "122192928000000000"; //  Time (in 100ns steps) between the start of the Gregorian and Unix epochs
  const nsDNS  = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
  const nsURL  = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
  const nsOID  = '6ba7b812-9dad-11d1-80b4-00c04fd430c8';
@@ -59,18 +59,21 @@ class UUID {
  const bigNative = 1;
  const bigGMP    = 2;
  const bigBC     = 3;
+ const bigSecLib = 4;
  const randChoose  = -1;
  const randPoor    = 0;
  const randDev     = 1;
  const randCAPICOM = 2;
  const randOpenSSL = 3;
  const randMcrypt  = 4;
+ const randNative  = 5;
  //static properties
  protected static $randomFunc   = self::randChoose;
  protected static $randomSource = NULL;
  protected static $bignum       = self::bigChoose;
  protected static $storeClass   = "UUIDStorageStable";
  protected static $store        = NULL;
+ protected static $secLib       = NULL;
  //instance properties
  protected $bytes;
  protected $hex;
@@ -80,14 +83,14 @@ class UUID {
  protected $variant;
  protected $node;
  protected $time;
- 
+
  public static function mint($ver = 1, $node = NULL, $ns = NULL, $time = NULL) {
   /* Create a new UUID based on provided data. */
   switch((int) $ver) {
    case 1:
     return new self(self::mintTime($node, $ns, $time));
    case 2:
-    // Version 2 is not supported 
+    // Version 2 is not supported
     throw new UUIDException("Version 2 is unsupported.",2);
    case 3:
     return new self(self::mintName(self::MD5, $node, $ns));
@@ -109,7 +112,7 @@ class UUID {
     $uuid = self::mintTime($node, $ns, $time);
     break;
    case 2:
-    // Version 2 is not supported 
+    // Version 2 is not supported
     throw new UUIDException("Version 2 is unsupported.",2);
     break;
    case 3:
@@ -124,18 +127,18 @@ class UUID {
    default:
     throw new UUIDException("Selected version is invalid or unsupported.",1);
   }
-  return 
-   bin2hex(substr($uuid,0,4))."-".
-   bin2hex(substr($uuid,4,2))."-".
-   bin2hex(substr($uuid,6,2))."-".
-   bin2hex(substr($uuid,8,2))."-".
-   bin2hex(substr($uuid,10,6));
+  return
+      bin2hex(substr($uuid,0,4))."-".
+      bin2hex(substr($uuid,4,2))."-".
+      bin2hex(substr($uuid,6,2))."-".
+      bin2hex(substr($uuid,8,2))."-".
+      bin2hex(substr($uuid,10,6));
  }
 
  public static function import($uuid) {
   /* Import an existing UUID. */
   return ($uuid instanceof self) ? $uuid : new self(self::makeBin($uuid));
- }   
+ }
 
  public static function compare($a, $b) {
   /* Compares the binary representations of two UUIDs.
@@ -146,7 +149,7 @@ class UUID {
   else
    return FALSE;
  }
- 
+
  public static function seq() {
   /* Generate a random clock sequence; this is just two random bytes with the two most significant bits set to zero. */
   $seq = self::randomBytes(2);
@@ -184,13 +187,13 @@ class UUID {
     if (ord($this->bytes[6])>>4==1)
      return bin2hex(strrev(substr($this->bytes,10)));
     else
-     return NULL; 
+     return NULL;
    case "time":
     if (ord($this->bytes[6])>>4==1) {
      // Restore contiguous big-endian byte order
      $time = bin2hex($this->bytes[6].$this->bytes[7].$this->bytes[4].$this->bytes[5].$this->bytes[0].$this->bytes[1].$this->bytes[2].$this->bytes[3]);
      // Clear version flag
-     $time[0] = "0"; 
+     $time[0] = "0";
      // Decode the hex digits and return a fixed-precision string
      $time = self::decodeTimestamp($time);
      return $time;
@@ -207,22 +210,22 @@ class UUID {
    throw new UUIDException("Input must be a valid UUID.",3);
   $this->bytes  = $uuid;
   // Optimize the most common use
-  $this->string = 
-   bin2hex(substr($uuid,0,4))."-".
-   bin2hex(substr($uuid,4,2))."-".
-   bin2hex(substr($uuid,6,2))."-".
-   bin2hex(substr($uuid,8,2))."-".
-   bin2hex(substr($uuid,10,6));
+  $this->string =
+      bin2hex(substr($uuid,0,4))."-".
+      bin2hex(substr($uuid,4,2))."-".
+      bin2hex(substr($uuid,6,2))."-".
+      bin2hex(substr($uuid,8,2))."-".
+      bin2hex(substr($uuid,10,6));
  }
 
  protected static function mintTime($node = NULL, $seq = NULL, $time = NULL) {
-  /* Generates a Version 1 UUID.  
+  /* Generates a Version 1 UUID.
      These are derived from the time at which they were generated. */
   // Check for native 64-bit integer support
   if (self::$bignum == self::bigChoose)
    self::$bignum = (PHP_INT_SIZE >= 8) ? self::bigNative : self::bigNot;
   // ensure a store is available
-  if (self::$store === NULL) 
+  if (self::$store === NULL)
    self::$store = new UUIDStorageVolatile;
   // check any input for correctness and communicate with the store where appropriate
   list($node, $seq, $time) = self::checkTimeInput($node, $seq, $time);
@@ -242,7 +245,7 @@ class UUID {
  }
 
  protected static function mintRand() {
-  /* Generate a Version 4 UUID.  
+  /* Generate a Version 4 UUID.
      These are derived solely from random numbers. */
   // generate random fields
   $uuid = self::randomBytes(16);
@@ -257,14 +260,14 @@ class UUID {
   /* Generates a Version 3 or Version 5 UUID.
      These are derived from a hash of a name and its namespace, in binary form. */
   if ($ver == 3)
-  if (!$node)
-   throw new UUIDException("A name-string is required for Version 3 or 5 UUIDs.",201);
+   if (!$node)
+    throw new UUIDException("A name-string is required for Version 3 or 5 UUIDs.",201);
   // if the namespace UUID isn't binary, make it so
   $ns = self::makeBin($ns);
   if (!$ns)
    throw new UUIDException("A valid UUID namespace is required for Version 3 or 5 UUIDs.",202);
   switch($ver) {
-   case self::MD5: 
+   case self::MD5:
     $version = self::version3;
     $uuid = md5($ns.$node,1);
     break;
@@ -282,10 +285,10 @@ class UUID {
 
  protected static function CheckTimeInput($node, $seq, $time) {
   /* If no timestamp has been specified, generate one.
-     Note that this will never be more accurate than to 
+     Note that this will never be more accurate than to
      the microsecond, whereas UUID timestamps are measured in 100ns steps. */
   $time = ($time !== NULL) ? self::normalizeTime($time) : self::normalizeTime(microtime(),1);
-  /* If a node ID is supplied, use it and keep it in the store; if none is 
+  /* If a node ID is supplied, use it and keep it in the store; if none is
      supplied, get it from the store or generate it if none is stored. */
   if ($node === NULL) {
    $node = self::$store->getNode();
@@ -314,11 +317,14 @@ class UUID {
  }
 
  protected static function normalizeTime($time, $expected = FALSE) {
-  /* Returns a string representation of the 
+  /* Returns a string representation of the
      number of 100ns steps since the Unix epoch. */
+  if(is_a($time, "DateTimeInterface") || is_a($time, "DateTime"))
+   return $time->format("U").str_pad($time->format("u"), 7, "0", STR_PAD_RIGHT);
   switch(gettype($time)) {
    case "string":
     $time = explode(" ", $time);
+    if(sizeof($time) != 2) throw new UUIDException("Time input was of an unexpected format.",103);
     return $time[1].substr(str_pad($time[0], 9, "0", STR_PAD_RIGHT),2,7);
    case "integer": // assume a second-precision timestamp
     return $time."0000000";
@@ -331,12 +337,6 @@ class UUID {
   }
  }
 
- /**
-  * @param int $time
-  *
-  * @return string
-  * @throws UUIDException
-  */
  protected static function buildTime($time) {
   switch (self::$bignum) {
    case self::bigNative:
@@ -358,8 +358,8 @@ class UUID {
    case self::bigBC:
     $out = bcadd($time, self::interval, 0);
     $in = $out; $out = "";
-    /* BC Math does not have a native equivalent of base_convert(), 
-       so we have to fake it.  Chunking the number to as many 
+    /* BC Math does not have a native equivalent of base_convert(),
+       so we have to fake it.  Chunking the number to as many
        nybbles as PHP can handle in an integer speeds things up lots. */
     $base = (int) hexdec(str_repeat("f", (PHP_INT_SIZE * 2) -1)) + 1;
     do {
@@ -368,25 +368,33 @@ class UUID {
      $out = base_convert($mod, 10, 16).$out;
     } while($in > 0);
     break;
+   case self::bigSecLib:
+    $out = new self::$secLib($time);
+    $out = $out->add(new self::$secLib(self::interval));
+    $out = $out->toHex();
+    break;
    default:
     throw new UUIDException("Bignum method not implemented.",901);
   }
   // convert to binary, padding to 8 bytes
   return pack("H*", str_pad($out, 16, "0", STR_PAD_LEFT));
- }  
+ }
 
  protected static function decodeTimestamp($hex) {
-  /* Convrt a UUID timestamp (in hex notation) to 
+  /* Convrt a UUID timestamp (in hex notation) to
      a Unix timestamp with microseconds. */
+  // Check for native 64-bit integer support
+  if (self::$bignum == self::bigChoose)
+   self::$bignum = (PHP_INT_SIZE >= 8) ? self::bigNative : self::bigNot;
   switch(self::$bignum) {
    case self::bigNative:
-    $time = hexdec($hex) - self::interval; 
+    $time = hexdec($hex) - self::interval;
     break;
    case self::bigGMP:
-    $time = gmp_strval(gmp_sub("0x".$hex, self::interval)); 
+    $time = gmp_strval(gmp_sub("0x".$hex, self::interval));
     break;
    case self::bigBC:
-    /* BC Math does not natively handle hexadecimal input, 
+    /* BC Math does not natively handle hexadecimal input,
        so we must convert to decimal in safe-sized chunks. */
     $time = 0;
     $mul = 1;
@@ -400,6 +408,11 @@ class UUID {
     } while (sizeof($hex));
     // And finally subtract the magic number to get the correct timestamp
     $time = bcsub($time, self::interval);
+    break;
+   case self::bigSecLib:
+    $time = new self::$secLib($hex, 16);
+    $time = $time->subtract(new self::$secLib(self::interval));
+    $time = $time->toString();
     break;
    case self::bigNot:
     $time = sprintf("%F", hexdec($hex) - self::interval);
@@ -422,11 +435,11 @@ class UUID {
    return $str;
   else
    $str = preg_replace("/^urn:uuid:/is", "", $str); // strip URN scheme and namespace
-   $str = preg_replace("/[^a-f0-9]/is", "", $str);  // strip non-hex characters
-   if (strlen($str) != ($len * 2))
-    return FALSE;
-   else
-    return pack("H*", $str);
+  $str = preg_replace("/[^a-f0-9]/is", "", $str);  // strip non-hex characters
+  if (strlen($str) != ($len * 2))
+   return FALSE;
+  else
+   return pack("H*", $str);
  }
 
  protected static function makeNode($str) {
@@ -437,10 +450,10 @@ class UUID {
    return $str;
   else
    $str = preg_replace("/[^a-f0-9]/is", "", $str);  // strip non-hex characters
-   if (strlen($str) != ($len * 2))
-    return FALSE;
-   else // MAC addresses are little-endian and UUIDs are big-endian, so we reverse bytes
-    return strrev(pack("H*", $str));
+  if (strlen($str) != ($len * 2))
+   return FALSE;
+  else // MAC addresses are little-endian and UUIDs are big-endian, so we reverse bytes
+   return strrev(pack("H*", $str));
  }
 
  public static function randomBytes($bytes) {
@@ -451,10 +464,14 @@ class UUID {
     $rand = "";
     for ($a = 0; $a < $bytes; $a++) {
      $rand .= chr(mt_rand(0, 255));
-    } 
+    }
     return $rand;
+   case self::randNative:
+    /* Get the specified number of bytes from the PHP core.
+       This is available since PHP 7. */
+    return random_bytes($bytes);
    case self::randDev:
-    /* Get the specified number of random bytes using a file handle 
+    /* Get the specified number of random bytes using a file handle
        previously opened with UUID::initRandom(). */
     return fread(self::$randomSource, $bytes);
    case self::randOpenSSL:
@@ -472,7 +489,7 @@ class UUID {
    default:
     throw new UUIDException("Randomness source not implemented.",902);
   }
- } 
+ }
 
  public static function initAccurate() {
   $big = self::initBignum();
@@ -498,13 +515,15 @@ class UUID {
   if ($how === NULL) {
    if (self::$randomFunc != self::randChoose)
     return self::$randomFunc;
-   else if (is_readable('/dev/urandom')) 
-    $how = self::randDev;
+   else if (function_exists('random_bytes'))
+    $how = self::randNative;
    else if (function_exists('openssl_random_pseudo_bytes'))
     $how = self::randOpenSSL;
    else if (function_exists('mcrypt_create_iv'))
-   	$how = self::randMcrypt;
-   else 
+    $how = self::randMcrypt;
+   else if (is_readable('/dev/urandom'))
+    $how = self::randDev;
+   else
     $how = self::randCAPICOM;
    try {
     self::initRandom($how);
@@ -520,16 +539,20 @@ class UUID {
     case self::randPoor:
      self::$randomFunc = $how;
      break;
+    case self::randNative:
+     if (!function_exists('random_bytes'))
+      throw new UUIDException("Randomness source is not available.", 802);
+     break;
     case self::randDev:
      $source = @fopen('/dev/urandom', 'rb');
-     if (!$source) 
+     if (!$source)
       throw new UUIDException("Randomness source is not available.", 802);
      break;
     case self::randOpenSSL:
      if (!function_exists('openssl_random_pseudo_bytes'))
       throw new UUIDException("Randomness source is not available.", 802);
      break;
-    case self::randMcerypt:
+    case self::randMcrypt:
      if (!function_exists('mcrypt_create_iv'))
       throw new UUIDException("Randomness source is not available.", 802);
      break;
@@ -549,19 +572,26 @@ class UUID {
  }
 
  public static function initBignum($how = NULL) {
-  /* Check to see if PHP is running in a 32-bit environment and if so, 
+  /* Check to see if PHP is running in a 32-bit environment and if so,
      use GMP or BC Math if available. */
   if ($how === NULL) {
-   if (self::$bignum != self::bigChoose) // determination has already been made
+   if (self::$bignum != self::bigChoose) { // determination has already been made
     return self::$bignum;
-   else if (PHP_INT_SIZE >= 8) 
+   } else if (PHP_INT_SIZE >= 8) {
     self::$bignum = self::bigNative;
-   else if (function_exists("gmp_add")) 
+   } else if (function_exists("gmp_add")) {
     self::$bignum = self::bigGMP;
-   else if (function_exists("bcadd")) 
+   } else if (function_exists("bcadd")) {
     self::$bignum = self::bigBC;
-   else 
+   } else if (class_exists("\phpseclib\Math\BigInteger", 0)) { // phpseclib v2.x
+    self::$bignum = self::bigSecLib;
+    self::$secLib = "\phpseclib\Math\BigInteger";
+   } else if (class_exists("Math_BigInteger", 0)) { // phpseclib v1.x
+    self::$bignum = self::bigSecLib;
+    self::$secLib = "Math_BigInteger";
+   } else {
     self::$bignum = self::bigNot;
+   }
   } else {
    switch($how) {
     case self::bigChoose:
@@ -570,7 +600,7 @@ class UUID {
     case self::bigNot:
      break;
     case self::bigNative:
-     if (PHP_INT_SIZE < 8) 
+     if (PHP_INT_SIZE < 8)
       throw new UUIDException("Bignum method is not available.", 801);
      break;
     case self::bigGMP:
@@ -579,6 +609,14 @@ class UUID {
      break;
     case self::bigBC:
      if (!function_exists("bcadd"))
+      throw new UUIDException("Bignum method is not available.", 801);
+     break;
+    case self::bigSecLib:
+     if (class_exists("\phpseclib\Math\BigInteger", 0)) //v2.x
+      self::$secLib = "\phpseclib\Math\BigInteger";
+     else if (class_exists("Math_BigInteger", 0)) //v1.x
+      self::$secLib = "Math_BigInteger";
+     else
       throw new UUIDException("Bignum method is not available.", 801);
      break;
     default:
@@ -591,13 +629,13 @@ class UUID {
 
  public static function initStorage($file = NULL) {
   if (self::$storeClass == "UUIDStorageStable") {
-  	try {self::$store = new UUIDStorageStable($file);}
-  	catch(Exception $e) {throw new UUIDStorageException("Storage class could not be instantiated with supplied arguments.", 1003, $e);}
-  	return;
+   try {self::$store = new UUIDStorageStable($file);}
+   catch(Exception $e) {throw new UUIDStorageException("Storage class could not be instantiated with supplied arguments.", 1003, $e);}
+   return;
   }
   $store = new ReflectionClass(self::$storeClass);
   $args = func_get_args();
-  try {self::$store = $store->newInstanceArgs($args);} 
+  try {self::$store = $store->newInstanceArgs($args);}
   catch(Exception $e) {throw new UUIDStorageException("Storage class could not be instantiated with supplied arguments.", 1003, $e);}
  }
 
@@ -641,26 +679,26 @@ class UUIDStorageVolatile implements UUIDStorage {
  protected $sequence = NULL;
 
  public function getNode() {
-  if ($this->node === NULL) 
-   return FALSE;
+  if ($this->node === NULL)
+   return;
   return $this->node;
  }
 
  public function getSequence($timestamp, $node) {
   if ($node != $this->node) {
-  	$this->node = $node;
-  	return FALSE;
+   $this->node = $node;
+   return;
   }
-  if ($this->sequence === NULL) 
-   return FALSE;
+  if ($this->sequence === NULL)
+   return;
   if ($timestamp <= $this->timestamp)
-   $this->sequence = pack("n", (unpack("n", $this->sequence) + 1) & self::maxSequence);
+   $this->sequence = pack("n", (unpack("nseq", $this->sequence)['seq'] + 1) & self::maxSequence);
   $this->setTimestamp($timestamp);
   return $this->sequence;
  }
 
  public function setSequence($sequence) {
-  $this->sequence = pack("n", unpack("n", $sequence) & self::maxSequence);
+  $this->sequence = pack("n", unpack("nseq", $sequence)['seq'] & self::maxSequence);
  }
 
  public function setTimestamp($timestamp) {
@@ -675,15 +713,15 @@ class UUIDStorageStable extends UUIDStorageVolatile {
 
  public function __construct($path) {
   if (!file_exists($path)) {
-  	$dir = dirname($path);
-  	if (!is_writable($dir)) 
-  	 throw new UUIDStorageException("Stable storage is not writable.", 1102);
-  	if (!is_readable($dir)) 
-   	 throw new UUIDStorageException("Stable storage is not readable.", 1101);
+   $dir = dirname($path);
+   if (!is_writable($dir))
+    throw new UUIDStorageException("Stable storage is not writable.", 1102);
+   if (!is_readable($dir))
+    throw new UUIDStorageException("Stable storage is not readable.", 1101);
   }
-  else if (!is_writable($path)) 
+  else if (!is_writable($path))
    throw new UUIDStorageException("Stable storage is not writable.", 1102);
-  else if (!is_readable($path)) 
+  else if (!is_readable($path))
    throw new UUIDStorageException("Stable storage is not readable.", 1101);
   $this->file = $path;
  }
@@ -702,7 +740,7 @@ class UUIDStorageStable extends UUIDStorageVolatile {
    throw new UUIDStorageException("Stable storage data is invalid or corrupted.", 1203);
   list($this->node, $this->sequence, $this->timestamp) = $data;
  }
- 
+
  public function getNode() {
   $this->readState();
   return parent::getNode();
@@ -711,7 +749,7 @@ class UUIDStorageStable extends UUIDStorageVolatile {
  public function setSequence($sequence) {
   if (!$this->read) {
    $this->readState();
-  } 
+  }
   parent::setSequence($sequence);
   $this->write();
  }
@@ -722,16 +760,16 @@ class UUIDStorageStable extends UUIDStorageVolatile {
    return;
   $this->write();
  }
- 
+
  protected function write($check = 1) {
   $data = serialize(array($this->node, $this->sequence, $this->timestamp));
   $write = @file_put_contents($this->file,$data);
-  if ($check)	
+  if ($check)
    if ($write === FALSE) throw new UUIDStorageException("Stable storage could not be written.", 1202);
   $this->wrote = TRUE;
   $this->read = FALSE;
  }
- 
+
  public function __destruct() {
   $this->write(0);
  }
