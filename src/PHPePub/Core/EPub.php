@@ -195,6 +195,8 @@ class EPub {
         $this->ncx = new Ncx(null, null, null, $this->languageCode, $this->writingDirection);
         $this->opf = new Opf();
 
+        $this->chapterCount = 0;
+
         $this->ncx->setBook($this);
     }
 
@@ -959,7 +961,7 @@ class EPub {
         $this->ncx->setVersion($this->bookVersion);
         $this->opf->setVersion($this->bookVersion);
         $this->opf->addItem("ncx", "book.ncx", Ncx::MIMETYPE);
-        $this->chapterCount = 0;
+        // $this->chapterCount = 0;
 
         $this->ncx->setLanguageCode($this->languageCode);
         $this->ncx->setWritingDirection($this->writingDirection);
