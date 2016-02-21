@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------
+Rev. 4.0.6 - 2016-02-21
+* Added iBooksHelper
+* Added CalibreHelper
+* Added preliminary work for "Rendition" meta data
+* Updated J. King's DrUUID library
+---------------------------------------------------------------------
 Rev. 4.0.5 - 2015-11-02
 * Added: Support for SVG images. (experimental)
 * Cleaned up source headers
