@@ -2,17 +2,18 @@
 namespace PHPePub\Helpers\Rendition;
 
 use PHPePub\Core\EPub;
-use PHPePub\Core\StaticData;
 
 /**
  * Helper for Rendition ePub3 extensions.
+ *
+ *   http://www.idpf.org/epub/fxl/#property-defs
  *
  * @author    A. Grandt <php@grandt.com>
  * @copyright 2015- A. Grandt
  * @license   GNU LGPL 2.1
  */
 class RenditionHelper {
-    // http://www.idpf.org/epub/fxl/#property-defs
+
     const RENDITION_PREFIX_NAME = "rendition";
     const RENDITION_PREFIX_URI = "http://www.idpf.org/vocab/rendition/#";
 
