@@ -77,15 +77,24 @@ class Logger {
             $isFileGetContentsInstalled = function_exists('file_get_contents');
             $isFileGetContentsExtInstalled = $isFileGetContentsInstalled && ini_get('allow_url_fopen');
 
-            $this->logLine("isCurlInstalled...............: " . ($isCurlInstalled ? "Yes" : "No"));
-            $this->logLine("isGdInstalled.................: " . ($isGdInstalled ? "Yes" : "No"));
-            $this->logLine("isExifInstalled...............: " . ($isExifInstalled ? "Yes" : "No"));
-            $this->logLine("isFileGetContentsInstalled....: " . ($isFileGetContentsInstalled ? "Yes" : "No"));
-            $this->logLine("isFileGetContentsExtInstalled.: " . ($isFileGetContentsExtInstalled ? "Yes" : "No"));
+            $this->logLine("isCurlInstalled...............: " . $this->boolYN($isCurlInstalled));
+            $this->logLine("isGdInstalled.................: " . $this->boolYN($isGdInstalled));
+            $this->logLine("isExifInstalled...............: " . $this->boolYN($isExifInstalled));
+            $this->logLine("isFileGetContentsInstalled....: " . $this->boolYN($isFileGetContentsInstalled));
+            $this->logLine("isFileGetContentsExtInstalled.: " . $this->boolYN($isFileGetContentsExtInstalled));
         }
     }
 
     function getLog() {
         return $this->log;
+    }
+
+    /**
+     * @param $isCurlInstalled
+     *
+     * @return string
+     */
+    public function boolYN($isCurlInstalled) {
+        return ($isCurlInstalled ? "Yes" : "No");
     }
 }

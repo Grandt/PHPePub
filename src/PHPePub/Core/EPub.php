@@ -12,6 +12,7 @@ use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPePub\Core\Structure\OPF\Reference;
 use PHPePub\Helpers\FileHelper;
 use PHPePub\Helpers\ImageHelper;
+use PHPePub\Helpers\MimeHelper;
 use PHPePub\Helpers\StringHelper;
 use PHPePub\Helpers\URLHelper;
 use PHPZip\Zip\File\Zip;
@@ -55,13 +56,26 @@ class EPub {
     const BOOK_VERSION_EPUB2 = '2.0';
     const BOOK_VERSION_EPUB3 = '3.0';
 
+    public $viewportMap = array(
+        "small" => array('width' => 600, 'height' => 800),
+        "medium" => array('width' => 720, 'height' => 1280),
+        "720p" => array('width' => 720, 'height' => 1280),
+        "ipad" => array('width' => 768, 'height' => 1024),
+        "large" => array('width' => 1080, 'height' => 1920),
+        "2k" => array('width' => 1080, 'height' => 1920),
+        "1080p" => array('width' => 1080, 'height' => 1920),
+        "ipad3" => array('width' => 1536, 'height' => 2048),
+        "4k" => array('width' => 2160, 'height' => 3840)
+    );
+
     public $splitDefaultSize = 250000;
-    /** Gifs can crash some early ADE based readers, and are disabled by default.
-     * getImage will convert these if it can, unless this is set to TRUE.
-     */
 
     public $maxImageWidth = 768;
     public $maxImageHeight = 1024;
+    /**
+     * Gifs can crash some early ADE based readers, and are disabled by default.
+     * getImage will convert these if it can, unless this is set to TRUE.
+     */
     public $isGifImagesEnabled = false;
 
     public $isReferencesAddedToToc = true;
@@ -229,6 +243,7 @@ class EPub {
         $chapter = $chapterData;
         if ($autoSplit && is_string($chapterData) && mb_strlen($chapterData) > $this->splitDefaultSize) {
             $splitter = new EPubChapterSplitter();
+            $splitter->setSplitSize($this->splitDefaultSize);
 
             $chapterArray = $splitter->splitChapter($chapterData);
             if (count($chapterArray) > 1) {
@@ -255,12 +270,15 @@ class EPub {
             $this->ncx->addNavPoint($navPoint);
             $this->ncx->chapterList[$chapterName] = $navPoint;
         } elseif (is_array($chapter)) {
+            $this->log->logLine("addChapter: \$chapterName: $chapterName ; \$fileName: $fileName ; ");
             $fileNameParts = pathinfo($fileName);
             $extension = $fileNameParts['extension'];
             $name = $fileNameParts['filename'];
 
             $partCount = 0;
             $this->chapterCount++;
+
+            $this->log->logLine("addChapter: \$chapterCount: " . $this->chapterCount);
 
             $oneChapter = each($chapter);
             while ($oneChapter) {
@@ -865,7 +883,7 @@ class EPub {
         }
 
         if ($mediaPath !== false) {
-            $mime = $this->getMimeTypeFromExtension(pathinfo($source, PATHINFO_EXTENSION));
+            $mime = MimeHelper::getMimeTypeFromExtension(pathinfo($source, PATHINFO_EXTENSION));
             $internalPath = RelativePath::getRelativePath("media/" . $internalPath . "/" . $internalSrc);
 
             if (!array_key_exists($internalPath, $this->fileList) &&
@@ -1261,7 +1279,7 @@ class EPub {
             $this->addFile($fileName, "ref_" . $reference, $pageData, "application/xhtml+xml");
 
             if ($reference !== Reference::TABLE_OF_CONTENTS || !isset($this->ncx->referencesList[$reference])) {
-                $this->opf->addItemRef("ref_" . $reference, false);
+                $this->opf->addItemRef("ref_" . $reference); //, false);
                 $this->opf->addReference($reference, $pageName, $fileName);
 
                 $this->ncx->referencesList[$reference] = $fileName;
@@ -1842,7 +1860,7 @@ class EPub {
         $this->tocAddReferences = $addReferences;
 
         $this->opf->addReference(Reference::TABLE_OF_CONTENTS, $title, $this->tocFileName);
-        if (!$this->tocNavAdded = true) {
+        if (!$this->tocNavAdded) {
             $this->opf->addItemRef("ref_" . Reference::TABLE_OF_CONTENTS, false);
 
             if ($addToIndex) {
@@ -2229,12 +2247,19 @@ class EPub {
      * Viewport is used for fixed-layout books, specifically ePub 3 books using the Rendition metadata.
      * Calling this function without arguments clears the viewport.
      *
-     * @param int $width
+     * The predefined viewports can be accessed with $this->viewportMap
+     *
+     * @param int|string $width integer for the width, or a string referencing an entry in the $viewportMap.
      * @param int $height
      */
     public function setViewport($width = null, $height = null) {
         if ($width == null) {
             unset($this->viewport);
+        }
+        if (is_string($width) && in_array($width, $this->viewportMap)) {
+            $vp = $this->viewportMap[$width];
+            $width = $vp['width'];
+            $height = $vp['height'];
         }
         $this->viewport = array('width' => $width, 'height' => $height);
     }
