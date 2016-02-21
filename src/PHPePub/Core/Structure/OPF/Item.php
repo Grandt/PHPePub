@@ -20,6 +20,8 @@ class Item {
     private $fallback = null;
     private $fallbackStyle = null;
 
+    private $indexPoints = array();
+
     /**
      * Class constructor.
      *
@@ -150,5 +152,41 @@ class Item {
         }
 
         return $item . "/>\n";
+    }
+
+    /**
+     * @return array
+     */
+    public function getIndexPoints() {
+        return $this->indexPoints;
+    }
+
+    /**
+     * @param string $indexPoint
+     */
+    public function addIndexPoint($indexPoint) {
+        $this->indexPoints[] = $indexPoint;
+    }
+
+    /**
+     * @param string $indexPoint
+     * @return bool
+     */
+    public function hasIndexPoint($indexPoint) {
+        return in_array($indexPoint, $this->indexPoints);
+    }
+
+    /**
+     * @return null
+     */
+    public function getId() {
+        return $this->id;
+    }
+
+    /**
+     * @return null
+     */
+    public function getHref() {
+        return $this->href;
     }
 }

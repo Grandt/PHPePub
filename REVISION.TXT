@@ -1,9 +1,13 @@
 ---------------------------------------------------------------------
 Rev. 4.0.6 - 2016-02-21
-* Added iBooksHelper
-* Added CalibreHelper
-* Added preliminary work for "Rendition" meta data
-* Updated J. King's DrUUID library
+* Added: iBooksHelper
+* Added: CalibreHelper
+* Added: preliminary work for "Rendition" meta data
+* Fixed: referenced links (url#id) broke on split chapters.
+* Changed: Generated TOC file changed from using hardcoded spaces to indent nested chapters, to using the CSS, defaulting to 2em per level.
+*          the tocCss can override this by defining .level[1-n], though the default only defines indents for levels 1-7.
+*          reference links has their class as class=".level1 reference"
+* Updated: J. King's DrUUID library
 ---------------------------------------------------------------------
 Rev. 4.0.5 - 2015-11-02
 * Added: Support for SVG images. (experimental)

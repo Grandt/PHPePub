@@ -3,10 +3,12 @@ namespace PHPePub\Core;
 
 use com\grandt\BinStringStatic;
 use DOMDocument;
+use DOMXPath;
 use PHPePub\Core\Structure\Ncx;
 use PHPePub\Core\Structure\NCX\NavPoint;
 use PHPePub\Core\Structure\Opf;
 use PHPePub\Core\Structure\OPF\DublinCore;
+use PHPePub\Core\Structure\OPF\Item;
 use PHPePub\Core\Structure\OPF\MarcCode;
 use PHPePub\Core\Structure\OPF\MetaValue;
 use PHPePub\Core\Structure\OPF\Reference;
@@ -266,6 +268,8 @@ class EPub {
 
             $this->chapterCount++;
             $this->addFile($fileName, "chapter" . $this->chapterCount, $chapter, "application/xhtml+xml");
+            $this->extractIdAttributes("chapter" . $this->chapterCount, $chapter);
+
             $this->opf->addItemRef("chapter" . $this->chapterCount);
 
             $navPoint = new NavPoint(StringHelper::decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
@@ -279,8 +283,6 @@ class EPub {
 
             $partCount = 0;
             $this->chapterCount++;
-
-            $this->log->logLine("addChapter: \$chapterCount: " . $this->chapterCount);
 
             $oneChapter = each($chapter);
             while ($oneChapter) {
@@ -296,18 +298,42 @@ class EPub {
                 $partCount++;
                 $partName = $name . "_" . $partCount;
                 $this->addFile($partName . "." . $extension, $partName, $v, "application/xhtml+xml");
+                $this->extractIdAttributes($partName, $v);
+
                 $this->opf->addItemRef($partName);
 
                 $oneChapter = each($chapter);
             }
             $partName = $name . "_1." . $extension;
             $navPoint = new NavPoint(StringHelper::decodeHtmlEntities($chapterName), $partName, $partName);
+
             $this->ncx->addNavPoint($navPoint);
 
             $this->ncx->chapterList[$chapterName] = $navPoint;
         } elseif (!isset($chapterData) && strpos($fileName, "#") > 0) {
             $this->chapterCount++;
             //$this->opf->addItemRef("chapter" . $this->chapterCount);
+
+            $id = preg_split("/[#]/", $fileName);
+            if (sizeof($id) == 2 && $this->isLogging) {
+
+                $name = preg_split('/[\.]/', $id[0]);
+                if (sizeof($name) > 1) {
+                    $name = $name[0];
+                }
+
+                $rv = $this->opf->getItemByHref($name, true);
+
+                if ($rv != false) {
+                    /** @var Item $item */
+                    foreach($rv as $item) {
+                        if ($item->hasIndexPoint($id[1])) {
+                            $fileName = $item->getHref() . "#" . $id[1];
+                            break;
+                        }
+                    }
+                }
+            }
 
             $navPoint = new NavPoint(StringHelper::decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
             $this->ncx->addNavPoint($navPoint);
@@ -323,6 +349,39 @@ class EPub {
         }
 
         return $navPoint;
+    }
+
+    /**
+     * find all id attributes in the html document.
+     *
+     * @param string $chapterData
+     * @return array
+     */
+    function findIdAttributes($chapterData) {
+        $xmlDoc = new DOMDocument();
+        @$xmlDoc->loadHTML($chapterData);
+
+        $xpath = new DomXpath($xmlDoc);
+
+        $rv = array();
+        // traverse all results
+        foreach ($xpath->query('//@id') as $rowNode) {
+            $rv[] = $rowNode->nodeValue;
+        }
+
+        return $rv;
+    }
+
+    /**
+     * @param string $partName
+     * @param string $chapterData
+     */
+    public function extractIdAttributes($partName, $chapterData) {
+        $item = $this->opf->getItemById($partName);
+        $ids = $this->findIdAttributes($chapterData);
+        foreach ($ids as $id) {
+            $item->addIndexPoint($id);
+        }
     }
 
     /**
@@ -1279,6 +1338,7 @@ class EPub {
             }
 
             $this->addFile($fileName, "ref_" . $reference, $pageData, "application/xhtml+xml");
+            $this->extractIdAttributes("ref_" . $reference, $pageData);
 
             if ($reference !== Reference::TABLE_OF_CONTENTS || !isset($this->ncx->referencesList[$reference])) {
                 $this->opf->addItemRef("ref_" . $reference); //, false);
@@ -2054,6 +2114,11 @@ class EPub {
             $this->tocTitle = "Table of Contents";
         }
 
+        $tocCssCls = "";
+        if (!empty($this->tocCSSClass)) {
+            $tocCssCls = $this->tocCSSClass . " ";
+        }
+
         $tocData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
         if ($this->isEPubVersion2()) {
@@ -2066,7 +2131,16 @@ class EPub {
                 . "<head>\n<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n";
         }
         $tocData .= $this->getViewportMetaLine();
-
+        $tocData .= "<style type=\"text/css\">\n"
+            . $tocCssCls. ".level1 {text-indent:  0em;}\n"
+            . $tocCssCls. ".level2 {text-indent:  2em;}\n"
+            . $tocCssCls. ".level3 {text-indent:  4em;}\n"
+            . $tocCssCls. ".level4 {text-indent:  6em;}\n"
+            . $tocCssCls. ".level5 {text-indent:  8em;}\n"
+            . $tocCssCls. ".level6 {text-indent: 10em;}\n"
+            . $tocCssCls. ".level7 {text-indent: 12em;}\n"
+            . $tocCssCls. ".reference {}\n"
+            . "</style>\n";
         if (!empty($this->tocCssFileName)) {
             $tocData .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"" . $this->tocCssFileName . "\" />\n";
         }
@@ -2087,18 +2161,20 @@ class EPub {
                     /** @var $navPoint NavPoint */
                     $fileName = $navPoint->getContentSrc();
                     $level = $navPoint->getLevel() - 2;
-                    $tocData .= "\t<p>" . str_repeat(" &#160;  &#160;  &#160;", $level) . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
+                    $tocData .= "\t<p class='level" . ($level+1) . "'>"
+                        /* . str_repeat(" &#160;  &#160;  &#160;", $level) . */
+                        . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
                 }
             } else {
                 if ($this->tocAddReferences === true) {
                     if (array_key_exists($item, $this->ncx->referencesList)) {
-                        $tocData .= "\t<p><a href=\"" . $this->ncx->referencesList[$item] . "\">" . $descriptive . "</a></p>\n";
+                        $tocData .= "\t<p class='level1 reference'><a href=\"" . $this->ncx->referencesList[$item] . "\">" . $descriptive . "</a></p>\n";
                     } else {
                         if ($item === "toc") {
-                            $tocData .= "\t<p><a href=\"TOC.xhtml\">" . $this->tocTitle . "</a></p>\n";
+                            $tocData .= "\t<p class='level1 reference'><a href=\"TOC.xhtml\">" . $this->tocTitle . "</a></p>\n";
                         } else {
                             if ($item === "cover" && $this->isCoverImageSet) {
-                                $tocData .= "\t<p><a href=\"CoverPage.xhtml\">" . $descriptive . "</a></p>\n";
+                                $tocData .= "\t<p class='level1 reference'><a href=\"CoverPage.xhtml\">" . $descriptive . "</a></p>\n";
                             }
                         }
                     }

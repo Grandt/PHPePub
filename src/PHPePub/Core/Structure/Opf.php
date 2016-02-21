@@ -1,6 +1,7 @@
 <?php
 namespace PHPePub\Core\Structure;
 
+use com\grandt\BinStringStatic;
 use PHPePub\Core\EPub;
 use PHPePub\Core\Structure\OPF\DublinCore;
 use PHPePub\Core\Structure\OPF\Guide;
@@ -199,6 +200,44 @@ class Opf {
      */
     function addItem($id, $href, $mediaType, $properties = null) {
         $this->manifest->addItem(new Item($id, $href, $mediaType, $properties));
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return bool|Item Item if the id is found, else FALSE
+     */
+    function getItemById($id) {
+        /** @var Item $item */
+        foreach ($this->manifest->getItems() as $item) {
+            if ($item->getId() == $id) {
+                return $item;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param string $href
+     *
+     * @param bool $startsWith
+     * @return bool|array|Item Item if the href is found, else FALSE. If $startsWith is true, the returned object will be an array if any are found.
+     */
+    function getItemByHref($href, $startsWith = false) {
+        $rv = array();
+
+        /** @var Item $item */
+        foreach ($this->manifest->getItems() as $item) {
+            if (!$startsWith && $item->getHref() == $href) {
+                return $item;
+            } elseif($startsWith && BinStringStatic::startsWith($item->getHref(), $href)) {
+                $rv[] = $item;
+            }
+        }
+        if (sizeof($rv) > 0) {
+            return $rv;
+        }
+        return false;
     }
 
     /**

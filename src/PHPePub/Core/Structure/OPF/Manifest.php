@@ -55,4 +55,11 @@ class Manifest {
 
         return $manifest . "\t</manifest>\n";
     }
+
+    /**
+     * @return array
+     */
+    public function getItems() {
+        return $this->items;
+    }
 }
