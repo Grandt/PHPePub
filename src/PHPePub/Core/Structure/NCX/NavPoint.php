@@ -257,24 +257,25 @@ class NavPoint extends AbstractNavEntry {
         if ($this->id == null) {
             $this->id = "navpoint-" . $playOrder;
         }
+
+        $dir = "";
+        if (isset($this->writingDirection)) {
+            $dir .= " dir=\"" . $this->writingDirection . "\"";
+        }
         $indent = str_repeat("\t", $level) . "\t\t\t\t";
 
-        $nav .= $indent . "<li id=\"" . $this->id . "\"";
-        if (isset($this->writingDirection)) {
-            $nav .= " dir=\"" . $this->writingDirection . "\"";
-        }
-        $nav .= ">\n";
+        $nav .= $indent . "<li id=\"" . $this->id . "\"" . $dir . ">\n";
 
         if (isset($this->contentSrc)) {
-            $nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\">" . $this->label . "</a>\n";
+            $nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\"" . $dir . ">" . $this->label . "</a>\n";
         } else {
-            $nav .= $indent . "\t<span>" . $this->label . "</span>\n";
+            $nav .= $indent . "\t<span" . $dir . ">" . $this->label . "</span>\n";
         }
 
         if (sizeof($this->navPoints) > 0) {
             $maxLevel++;
 
-            $nav .= $indent . "\t<ol epub:type=\"list\"";
+            $nav .= $indent . "\t<ol epub:type=\"list\"" . $dir;
             if (isset($subLevelClass)) {
                 $nav .= " class=\"" . $subLevelClass . "\"";
             }
