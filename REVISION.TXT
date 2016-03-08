@@ -1,9 +1,11 @@
 ---------------------------------------------------------------------
-Rev. 4.0.6 - 2016-02-21
+Rev. 4.0.6 - 2016-03-08
 * Added: iBooksHelper
 * Added: CalibreHelper
 * Added: preliminary work for "Rendition" meta data
+* Added: dir attributes to the epub3toc (if writing direction is rtl)
 * Fixed: referenced links (url#id) broke on split chapters.
+* Fixed: Problem where chapter index name in the metadata could have the first chapter repeated.
 * Changed: Generated TOC file changed from using hardcoded spaces to indent nested chapters, to using the CSS, defaulting to 2em per level.
 *          the tocCss can override this by defining .level[1-n], though the default only defines indents for levels 1-7.
 *          reference links has their class as class=".level1 reference"
