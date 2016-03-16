@@ -253,7 +253,7 @@ class ImageHelper {
                     $width = ImageSX($imageFile);
                     $height = ImageSY($imageFile);
                 }
-                if (self::isGdInstalled()) {
+                if (self::isExifInstalled()) {
                     @$type = exif_imagetype($imageSource);
                     $mime = image_type_to_mime_type($type);
                 }
