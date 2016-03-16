@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------
+Rev. 4.0.7 - 2016-03-16
+* Fix: Error when image link has no extension in its file name.
+---------------------------------------------------------------------
 Rev. 4.0.6 - 2016-03-08
 * Added: iBooksHelper
 * Added: CalibreHelper
