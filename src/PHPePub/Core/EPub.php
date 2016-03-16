@@ -599,7 +599,8 @@ class EPub {
         }
         if ($imageData !== false) {
             $iSrcInfo = pathinfo($internalSrc);
-            if (!empty($imageData['ext']) && $imageData['ext'] != $iSrcInfo['extension']) {
+
+            if (!empty($imageData['ext']) && (!isset($iSrcInfo['extension']) || $imageData['ext'] != $iSrcInfo['extension'])) {
                 $internalSrc = $iSrcInfo['filename'] . "." . $imageData['ext'];
             }
             $internalPath = RelativePath::getRelativePath("images/" . $internalPath . "/" . $internalSrc);
