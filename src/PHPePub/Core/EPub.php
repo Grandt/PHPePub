@@ -241,6 +241,7 @@ class EPub {
             return false;
         }
         $fileName = RelativePath::getRelativePath($fileName);
+        $fileName = FileHelper::sanitizeFileName($fileName);
         $fileName = preg_replace('#^[/\.]+#i', "", $fileName);
         $navPoint = false;
 

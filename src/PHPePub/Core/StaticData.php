@@ -278,7 +278,7 @@ class StaticData {
 
     public static $opsContentTypes = array("application/xhtml+xml", "application/x-dtbook+xml", "application/xml", "application/x-dtbncx+xml", "text/x-oeb1-document");
 
-    public static $forbiddenCharacters = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%");
+    public static $forbiddenCharacters = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%", "+");
 
     public static $namespaces = array("xsi" => "http://www.w3.org/2001/XMLSchema-instance",
                                       "opf" => "http://www.idpf.org/2007/opf",
