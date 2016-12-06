@@ -73,12 +73,38 @@ class FileHelper {
      * @return bool|mixed|null|string
      */
     public static function getFileContents($source, $toTempFile = false) {
-        $isExternal = preg_match('#^(http|ftp)s?://#i', $source) == 1;
+        $isExternal = preg_match('#^(http|ftp)(s)?://#i', $source, $matches) == 1;
 
         if ($isExternal && FileHelper::getIsCurlInstalled()) {
             $ch = curl_init();
             $outFile = null;
             $fp = null;
+
+            $isSecured = isset($matches[2]); // Is the URL secured
+
+            // Get the proxy environment variable
+            if ($isSecured) {
+                $proxy = getenv('https_proxy');
+                if (false === $proxy) {
+                    $proxy = getenv('HTTPS_PROXY');
+                }
+            } else {
+                $proxy = getenv('http_proxy');
+                if (false === $proxy) {
+                    $proxy = getenv('HTTP_PROXY');
+                }
+            }
+
+            // If the proxy environment variable is correct, set option for curl
+            $regex = '#^https?://((?P<proxyuserpwd>[\w-]+:[\w%-]+)@)?(?P<hostname>(?:\d+(?:\.\d+)*)|(?:[\w-][\w\d-]*(?:\.[\w-][\w\d-]*)*)):(?P<port>\d+)$#';
+            if (false !== $proxy && 1 === preg_match($regex, $proxy, $matches)) {
+                if ('' !== $matches['proxyuserpwd']) {
+                    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+                    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $matches['proxyuserpwd']);
+                }
+                curl_setopt($ch, CURLOPT_PROXY, $matches['hostname']);
+                curl_setopt($ch, CURLOPT_PROXYPORT, $matches['port']);
+            }
 
             curl_setopt($ch, CURLOPT_HEADER, 0);
             curl_setopt($ch, CURLOPT_URL, str_replace(" ", "%20", $source));
