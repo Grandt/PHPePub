@@ -15,6 +15,7 @@ use com\grandt\BinStringStatic;
 use DOMDocument;
 use DOMNode;
 use PHPePub\Core\StaticData;
+use \JKingWeb\DrUUID\UID;
 
 class StringHelper {
 
@@ -61,7 +62,7 @@ class StringHelper {
      * @return string The formatted uuid
      */
     public static function createUUID($bookVersion = 4, $url = null) {
-        return \UUID::mint($bookVersion, $url, \UUID::nsURL);
+        return UUID::mint($bookVersion, $url, UUID::nsURL);
     }
 
     /**
