@@ -1,13 +1,13 @@
 # PHP ePub generator
 
-PHPePub allows a php script to generate ePub Electronic books on the fly, and send them to the user as downloads.
+PHPePub allows a PHP script to generate ePub Electronic books on the fly, and send them to the user as downloads.
 
 PHPePub support most of the ePub 2.01 specification, and enough of the new ePub3 specification to make valid ePub 3 books as well.
 
 The projects is also hosted on PHPClasses.org at the addresses:
 http://www.phpclasses.org/package/6115
 
-PHPePub is meant to be easy to use for small projects, and still allow for comples and complete e-books should the need arise.
+PHPePub is meant to be easy to use for small projects, and still allow for complex and complete e-books should the need arise.
 
 The Zip.php class in this project originates from http://www.phpclasses.org/package/6110
 
@@ -70,5 +70,5 @@ Finally, you include the `autoload.php` file in the new `vendor` directory.
 * Improve handling of media types and linked files.
 * A/V content is allowed, but definitely not recommended, and MUST have a fallback chain ending in a valid file. If no such chain is provided, the content should not be added.
 * Documentation, no one reads it, but everyone complains if it is missing.
-* Better examples to fully cover the capabilities of the EPub classes.
+* Better examples to fully cover the capabilities of the ePub classes.
 * more TODO's.
