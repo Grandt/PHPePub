@@ -97,7 +97,8 @@ class MetaValue {
         $dc = "\t\t<" . $this->tagName;
 
         if (sizeof($this->attr) > 0) {
-            while (list($name, $content) = each($this->attr)) {
+            // while (list($name, $content) = each($this->attr)) {
+            foreach ($this->attr as $name => $content) {
                 $dc .= " " . $name . "=\"" . $content . "\"";
             }
         }
