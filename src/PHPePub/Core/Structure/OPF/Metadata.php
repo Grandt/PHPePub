@@ -111,7 +111,7 @@ class Metadata {
             $this->addMetaProperty("dcterms:modified", gmdate('Y-m-d\TH:i:s\Z', $date));
         }
 
-        if (sizeof($this->dc) > 0) {
+        if (count($this->dc) > 0) {
             $this->addNamespace("dc", StaticData::$namespaces["dc"]);
         }
 

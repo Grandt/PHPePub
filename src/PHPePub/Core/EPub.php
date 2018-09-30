@@ -311,10 +311,10 @@ class EPub {
             //$this->opf->addItemRef("chapter" . $this->chapterCount);
 
             $id = preg_split("/[#]/", $fileName);
-            if (sizeof($id) == 2 && $this->isLogging) {
+            if (count($id) == 2 && $this->isLogging) {
 
                 $name = preg_split('/[\.]/', $id[0]);
-                if (sizeof($name) > 1) {
+                if (count($name) > 1) {
                     $name = $name[0];
                 }
 
