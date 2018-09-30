@@ -292,7 +292,8 @@ class Ncx {
 
         if (sizeof($this->meta)) {
             foreach ($this->meta as $metaEntry) {
-                list($name, $content) = each($metaEntry);
+                $content = reset($metaEntry);
+                $name = key($metaEntry);
                 $ncx .= "\t\t<meta name=\"" . $name . "\" content=\"" . $content . "\" />\n";
             }
         }
@@ -355,7 +356,6 @@ class Ncx {
             $this->rootLevel();
             $this->subLevel($this->referencesTitle, $this->referencesId, $this->referencesClass);
             $refId = 1;
-            // while (list($item, $descriptive) = each($this->referencesOrder)) {
             foreach ($this->referencesOrder as $item => $descriptive) {
                 if (array_key_exists($item, $this->referencesList)) {
                     $name = (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item]);
@@ -382,7 +382,6 @@ class Ncx {
 
             $li = "";
             foreach ($this->referencesOrder as $item => $descriptive) {
-            // while (list($item, $descriptive) = each($this->referencesOrder)) {
                 if (array_key_exists($item, $this->referencesList)) {
                     $li .= "\t\t\t\t\t<li><a epub:type=\""
                         . $item

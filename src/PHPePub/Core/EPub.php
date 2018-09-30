@@ -284,10 +284,8 @@ class EPub {
             $partCount = 0;
             $this->chapterCount++;
 
-            $oneChapter = each($chapter);
-            while ($oneChapter) {
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                list($k, $v) = $oneChapter;
+            foreach ($chapter as $oneChapter) {
+                $v = reset($oneChapter);
                 if ($this->encodeHTML === true) {
                     $v = StringHelper::encodeHtml($v);
                 }
@@ -301,8 +299,6 @@ class EPub {
                 $this->extractIdAttributes($partName, $v);
 
                 $this->opf->addItemRef($partName);
-
-                $oneChapter = each($chapter);
             }
             $partName = $name . "_1." . $extension;
             $navPoint = new NavPoint(StringHelper::decodeHtmlEntities($chapterName), $partName, $partName);
@@ -2057,14 +2053,8 @@ class EPub {
             $this->opf->addMeta("generator", "EPub (Version " . self::VERSION . ") by A. Grandt, http://www.phpclasses.org/package/6115 or https://github.com/Grandt/PHPePub/");
         }
 
-        reset($this->ncx->chapterList);
-
-
-
-        // list($firstChapterName, $firstChapterNavPoint) = each($this->ncx->chapterList);
-        foreach ($this->ncx->chapterList as $firstChapterName => $firstChapterNavPoint) {
-            break;
-        }
+        $firstChapterNavPoint = reset($this->ncx->chapterList);
+        $firstChapterName = key($this->ncx->chapterList);
 
         /** @var $firstChapterNavPoint NavPoint */
         $firstChapterFileName = $firstChapterNavPoint->getContentSrc();
@@ -2107,7 +2097,7 @@ class EPub {
 
         return true;
     }
-    
+
     /**
      * Finalize and build final ePub structures.
      *
@@ -2163,13 +2153,9 @@ class EPub {
         }
         $tocData .= ">\n";
 
-
-            
-        // while (list($item, $descriptive) = each($this->referencesOrder)) {
         foreach ($this->referencesOrder as $item => $descriptive) {
             if ($item === "text") {
                 foreach ($this->ncx->chapterList as $chapterName => $navPoint) {
-                // while (list($chapterName, $navPoint) = each($this->ncx->chapterList)) {
                     /** @var $navPoint NavPoint */
                     $fileName = $navPoint->getContentSrc();
                     $level = $navPoint->getLevel() - 2;
@@ -2237,7 +2223,7 @@ class EPub {
 
         return $this->ncx->finalizeEPub3($title, $cssFileName);
     }
-    
+
     /**
      * Return the finalized book.
      *
@@ -2290,7 +2276,7 @@ class EPub {
 
         return false;
     }
-    
+
     /**
      * Retrieve an array of file names currently added to the book.
      * $key is the filename used in the book
@@ -2325,7 +2311,7 @@ class EPub {
     function getSplitSize() {
         return $this->splitDefaultSize;
     }
-    
+
     /**
      * @return string
      */

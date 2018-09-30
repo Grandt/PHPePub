@@ -243,7 +243,7 @@ $html2 = $splitter->splitChapter($chapter5, true, $searchString);
 $log->logLine("Add Chapter 5");
 
 $idx = 0;
-while (list($k, $v) = each($html2)) {
+foreach ($html2 as $k => $v) {
     $idx++;
     // Because we used a string search in the splitter, the returned hits are put in the key part of the array.
     // The entire HTML tag of the line matching the chapter search.
