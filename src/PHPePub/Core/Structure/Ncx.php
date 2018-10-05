@@ -290,9 +290,10 @@ class Ncx {
             . "\t\t<meta name=\"dtb:totalPageCount\" content=\"0\" />\n"
             . "\t\t<meta name=\"dtb:maxPageNumber\" content=\"0\" />\n";
 
-        if (sizeof($this->meta)) {
+        if (count($this->meta)) {
             foreach ($this->meta as $metaEntry) {
-                list($name, $content) = each($metaEntry);
+                $content = reset($metaEntry);
+                $name = key($metaEntry);
                 $ncx .= "\t\t<meta name=\"" . $name . "\" content=\"" . $content . "\" />\n";
             }
         }
@@ -351,11 +352,11 @@ class Ncx {
      * @return string
      */
     function finalizeReferences() {
-        if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
+        if (isset($this->referencesList) && count($this->referencesList) > 0) {
             $this->rootLevel();
             $this->subLevel($this->referencesTitle, $this->referencesId, $this->referencesClass);
             $refId = 1;
-            while (list($item, $descriptive) = each($this->referencesOrder)) {
+            foreach ($this->referencesOrder as $item => $descriptive) {
                 if (array_key_exists($item, $this->referencesList)) {
                     $name = (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item]);
                     $navPoint = new NavPoint($name, $this->referencesList[$item], "ref-" . $refId++);
@@ -372,7 +373,7 @@ class Ncx {
      */
     function finalizeEPub3Landmarks() {
         $lm = "";
-        if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
+        if (isset($this->referencesList) && count($this->referencesList) > 0) {
             $lm = "\t\t\t<nav epub:type=\"landmarks\">\n"
                 . "\t\t\t\t<h2"
                 . ($this->writingDirection === EPub::DIRECTION_RIGHT_TO_LEFT ? " dir=\"rtl\"" : "") . ">"
@@ -380,7 +381,7 @@ class Ncx {
                 . "\t\t\t\t<ol>\n";
 
             $li = "";
-            while (list($item, $descriptive) = each($this->referencesOrder)) {
+            foreach ($this->referencesOrder as $item => $descriptive) {
                 if (array_key_exists($item, $this->referencesList)) {
                     $li .= "\t\t\t\t\t<li><a epub:type=\""
                         . $item

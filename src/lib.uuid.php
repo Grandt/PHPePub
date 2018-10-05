@@ -6,7 +6,7 @@
 
    See http://jkingweb.ca/code/php/lib.uuid/
     for documentation
-    
+
    Last revised 2014-09-06
 */
 
@@ -324,7 +324,7 @@ class UUID {
   switch(gettype($time)) {
    case "string":
     $time = explode(" ", $time);
-    if(sizeof($time) != 2) throw new UUIDException("Time input was of an unexpected format.",103);
+    if(count($time) != 2) throw new UUIDException("Time input was of an unexpected format.",103);
     return $time[1].substr(str_pad($time[0], 9, "0", STR_PAD_RIGHT),2,7);
    case "integer": // assume a second-precision timestamp
     return $time."0000000";
@@ -405,7 +405,7 @@ class UUID {
      $chunk = hexdec(array_pop($hex));
      $time = bcadd($time, bcmul($chunk, $mul));
      $mul = bcmul($max, $mul);
-    } while (sizeof($hex));
+    } while (count($hex));
     // And finally subtract the magic number to get the correct timestamp
     $time = bcsub($time, self::interval);
     break;
@@ -736,7 +736,7 @@ class UUIDStorageStable extends UUIDStorageVolatile {
   if (!$data) // an empty file is not an error
    return;
   $data = @unserialize($data);
-  if (!is_array($data) || sizeof($data) < 3)
+  if (!is_array($data) || count($data) < 3)
    throw new UUIDStorageException("Stable storage data is invalid or corrupted.", 1203);
   list($this->node, $this->sequence, $this->timestamp) = $data;
  }

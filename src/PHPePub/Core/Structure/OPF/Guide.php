@@ -33,7 +33,7 @@ class Guide {
      *
      */
     function length() {
-        return sizeof($this->references);
+        return count($this->references);
     }
 
     /**
@@ -56,7 +56,7 @@ class Guide {
      */
     function finalize() {
         $ref = "";
-        if (sizeof($this->references) > 0) {
+        if (count($this->references) > 0) {
             $ref = "\n\t<guide>\n";
             foreach ($this->references as $reference) {
                 /** @var $reference Reference */
