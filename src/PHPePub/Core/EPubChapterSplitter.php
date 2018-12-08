@@ -1,6 +1,7 @@
 <?php
 namespace PHPePub\Core;
 
+use Masterminds\HTML5;
 use DOMDocument;
 
 /**
@@ -77,8 +78,8 @@ class EPubChapterSplitter {
             );
         }
 
-        $xmlDoc = new DOMDocument();
-        @$xmlDoc->loadHTML($chapter);
+        $html5 = new HTML5();
+        $xmlDoc = $html5->loadHTML($chapter);
 
         $head = $xmlDoc->getElementsByTagName("head");
         $body = $xmlDoc->getElementsByTagName("body");

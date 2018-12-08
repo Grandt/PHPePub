@@ -18,7 +18,8 @@
         "php": ">=5.3.0",
         "phpzip/phpzip": "~2.0.7",
         "grandt/phpresizegif": "~1.0.3",
-        "grandt/relativepath": "~1.0.1"
+        "grandt/relativepath": "~1.0.1",
+        "masterminds/html5": "^2.1"
     },
     "autoload": {
         "psr-4": {
