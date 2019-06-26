@@ -284,10 +284,8 @@ class EPub {
             $partCount = 0;
             $this->chapterCount++;
 
-            $oneChapter = each($chapter);
-            while ($oneChapter) {
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                list($k, $v) = $oneChapter;
+            foreach ($chapter as $oneChapter) {
+                $v = reset($oneChapter);
                 if ($this->encodeHTML === true) {
                     $v = StringHelper::encodeHtml($v);
                 }
@@ -301,8 +299,6 @@ class EPub {
                 $this->extractIdAttributes($partName, $v);
 
                 $this->opf->addItemRef($partName);
-
-                $oneChapter = each($chapter);
             }
             $partName = $name . "_1." . $extension;
             $navPoint = new NavPoint(StringHelper::decodeHtmlEntities($chapterName), $partName, $partName);
@@ -315,10 +311,10 @@ class EPub {
             //$this->opf->addItemRef("chapter" . $this->chapterCount);
 
             $id = preg_split("/[#]/", $fileName);
-            if (sizeof($id) == 2 && $this->isLogging) {
+            if (count($id) == 2 && $this->isLogging) {
 
                 $name = preg_split('/[\.]/', $id[0]);
-                if (sizeof($name) > 1) {
+                if (count($name) > 1) {
                     $name = $name[0];
                 }
 
@@ -456,8 +452,8 @@ class EPub {
             $xml2Doc = new DOMDocument('1.0', "utf-8");
             $xml2Doc->lookupPrefix("http://www.w3.org/1999/xhtml");
             $xml2Doc->loadXML("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
-                . "   \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-                . "<html xmlns=\"http://www.w3.org/1999/xhtml\"" . $htmlNS . ">\n</html>\n");
+                              . "   \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+                              . "<html xmlns=\"http://www.w3.org/1999/xhtml\"" . $htmlNS . ">\n</html>\n");
             $html = $xml2Doc->getElementsByTagName("html")->item(0);
             $html->appendChild($xml2Doc->importNode($headNode->item(0), true));
             $html->appendChild($xml2Doc->importNode($bodyNode->item(0), true));
@@ -2057,8 +2053,9 @@ class EPub {
             $this->opf->addMeta("generator", "EPub (Version " . self::VERSION . ") by A. Grandt, http://www.phpclasses.org/package/6115 or https://github.com/Grandt/PHPePub/");
         }
 
-        reset($this->ncx->chapterList);
-        list($firstChapterName, $firstChapterNavPoint) = each($this->ncx->chapterList);
+        $firstChapterNavPoint = reset($this->ncx->chapterList);
+        $firstChapterName = key($this->ncx->chapterList);
+
         /** @var $firstChapterNavPoint NavPoint */
         $firstChapterFileName = $firstChapterNavPoint->getContentSrc();
         $this->opf->addReference(Reference::TEXT, StringHelper::decodeHtmlEntities($firstChapterName), $firstChapterFileName);
@@ -2100,7 +2097,7 @@ class EPub {
 
         return true;
     }
-    
+
     /**
      * Finalize and build final ePub structures.
      *
@@ -2156,9 +2153,9 @@ class EPub {
         }
         $tocData .= ">\n";
 
-        while (list($item, $descriptive) = each($this->referencesOrder)) {
+        foreach ($this->referencesOrder as $item => $descriptive) {
             if ($item === "text") {
-                while (list($chapterName, $navPoint) = each($this->ncx->chapterList)) {
+                foreach ($this->ncx->chapterList as $chapterName => $navPoint) {
                     /** @var $navPoint NavPoint */
                     $fileName = $navPoint->getContentSrc();
                     $level = $navPoint->getLevel() - 2;
@@ -2226,7 +2223,7 @@ class EPub {
 
         return $this->ncx->finalizeEPub3($title, $cssFileName);
     }
-    
+
     /**
      * Return the finalized book.
      *
@@ -2273,13 +2270,13 @@ class EPub {
             $fileName .= ".epub";
         }
 
-        if (true === $this->zip->sendZip($fileName, "application/epub+zip")) {
+        if (true === $this->zip->sendZip($fileName, "application/epub+zip", $fileName)) {
             return $fileName;
         }
 
         return false;
     }
-    
+
     /**
      * Retrieve an array of file names currently added to the book.
      * $key is the filename used in the book
@@ -2314,7 +2311,7 @@ class EPub {
     function getSplitSize() {
         return $this->splitDefaultSize;
     }
-    
+
     /**
      * @return string
      */

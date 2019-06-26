@@ -16,16 +16,16 @@ ini_set('display_errors', 1);
 // Create a test book for download.
 // ePub uses XHTML 1.1, preferably strict.
 $content_start =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
-. "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-. "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
-. "<head>"
-. "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
-. "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
-. "<title>Test Book</title>\n"
-. "</head>\n"
-. "<body>\n";
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    . "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+    . "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+    . "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+    . "<head>"
+    . "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
+    . "<link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\" />\n"
+    . "<title>Test Book</title>\n"
+    . "</head>\n"
+    . "<body>\n";
 
 $bookEnd = "</body>\n</html>\n";
 
@@ -101,7 +101,7 @@ $chapter1 = $content_start . "<h1>Chapter 1</h1>\n"
     . $bookEnd;
 
 $chapter2 =
-      "<h2>Vivamus bibendum massa</h2>\n"
+    "<h2>Vivamus bibendum massa</h2>\n"
     . "<p>Vivamus bibendum massa ac magna congue gravida. Curabitur nulla ante, accumsan sit amet luctus a, fermentum ut diam. Maecenas porttitor faucibus mattis. Ut auctor aliquet ligula nec posuere. Nullam arcu turpis, dapibus sit amet tempor nec, cursus at augue. Aliquam sed sem velit, id sagittis mauris. Donec sed ipsum nisi, id scelerisque felis. Cras lacus est, fermentum in ultricies eu, congue in elit. Nulla tincidunt posuere eros, eget suscipit tellus porta vel. Aliquam ut sollicitudin libero. Suspendisse potenti. Sed cursus dignissim nulla in elementum. Aliquam id quam justo, sit amet laoreet ligula. Etiam pellentesque tellus a nisi commodo eu sodales ante commodo. Vestibulum ultricies sapien arcu. Proin nunc mauris, ultrices id imperdiet ac, malesuada ac nunc. Nunc a mi quis nunc ultricies rhoncus. Mauris pellentesque eros eu augue congue ac tincidunt est gravida.</p>\n"
     . "<p>Integer lobortis facilisis magna, non tristique sem facilisis ut. Sed id nisi diam. Nulla viverra lectus ut purus tempus sagittis. Quisque dictum enim tempus ipsum mollis blandit. Cras in mi non nulla imperdiet fringilla at blandit urna. Donec vel dui quis sem congue ullamcorper nec a massa. Vivamus in dui nunc. Donec sit amet augue odio, at imperdiet lacus. Mauris sit amet magna justo. Maecenas ultrices orci ultrices sapien ornare eget consequat nisl tristique. Integer non mi ac eros vehicula pharetra. Curabitur risus augue, sollicitudin vitae pharetra interdum, sollicitudin sit amet magna. Nunc sit amet est lacus, vel sodales elit. Duis dolor lorem, convallis eu dignissim quis, vulputate at nibh.</p>\n"
     . "<p>Praesent gravida, sapien aliquet interdum elementum, magna mauris hendrerit eros, blandit posuere lectus neque sed massa. Cras ultricies rhoncus mi, vitae posuere ligula scelerisque sit amet. Cras porttitor congue odio, sit amet tristique magna euismod id. Cras enim dolor, scelerisque eget egestas vel, consectetur vel purus. Aenean et convallis felis. Mauris in arcu sollicitudin ipsum lobortis fringilla. Suspendisse felis mauris, convallis ac blandit interdum, imperdiet eget massa. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque velit quis augue commodo tristique. Maecenas dictum dui congue enim tristique vel mattis neque luctus. Fusce neque dui, laoreet suscipit varius sed, mattis sit amet diam. Nullam elementum, ante non cursus imperdiet, eros dui placerat elit, sit amet elementum erat risus eget nunc.</p>\n"
@@ -225,7 +225,7 @@ $html2 = $splitter->splitChapter($chapter5, true, $searchString);
 $log->logLine("Add Chapter 5");
 
 $idx = 0;
-while (list($k, $v) = each($html2)) {
+foreach ($html2 as $k => $v) {
     $idx++;
     // Because we used a string search in the splitter, the returned hits are put in the key part of the array.
     // The entire HTML tag of the line matching the chapter search.

@@ -98,7 +98,7 @@ class NavMap extends AbstractNavEntry {
         $this->navLevels = 0;
 
         $nav = "\t<navMap>\n";
-        if (sizeof($this->navPoints) > 0) {
+        if (count($this->navPoints) > 0) {
             $this->navLevels++;
             foreach ($this->navPoints as $navPoint) {
                 /** @var $navPoint NavPoint */
@@ -123,7 +123,7 @@ class NavMap extends AbstractNavEntry {
 
         $nav = "\t\t<nav epub:type=\"toc\" id=\"toc\">\n";
 
-        if (sizeof($this->navPoints) > 0) {
+        if (count($this->navPoints) > 0) {
             $this->navLevels++;
 
             $nav .= str_repeat("\t", $level) . "\t\t\t<ol epub:type=\"list\">\n";

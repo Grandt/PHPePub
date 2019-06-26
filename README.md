@@ -1,5 +1,14 @@
 # PHP ePub generator
 
+## What changes after fork
+
+1. Remove `each` function that deprecated in php 7.2.
+2. When download epub, let it use utf8filename.
+
+---
+
+## Below is original content
+
 PHPePub allows a php script to generate ePub Electronic books on the fly, and send them to the user as downloads.
 
 PHPePub support most of the ePub 2.01 specification, and enough of the new ePub3 specification to make valid ePub 3 books as well.

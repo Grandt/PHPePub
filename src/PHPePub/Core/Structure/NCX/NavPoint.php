@@ -221,7 +221,7 @@ class NavPoint extends AbstractNavEntry {
             $levelAdjust++;
         }
 
-        if (sizeof($this->navPoints) > 0) {
+        if (count($this->navPoints) > 0) {
             $maxLevel++;
             foreach ($this->navPoints as $navPoint) {
                 /** @var $navPoint NavPoint */
@@ -272,7 +272,7 @@ class NavPoint extends AbstractNavEntry {
             $nav .= $indent . "\t<span" . $dir . ">" . $this->label . "</span>\n";
         }
 
-        if (sizeof($this->navPoints) > 0) {
+        if (count($this->navPoints) > 0) {
             $maxLevel++;
 
             $nav .= $indent . "\t<ol epub:type=\"list\"" . $dir;
