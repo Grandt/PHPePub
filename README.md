@@ -53,6 +53,12 @@ Followed by telling Composer to install the dependencies.
 php composer.phar install
 ```
 
+If you have installed Composer on window, then simply change to the project directory and use the command
+```
+composer install
+```
+
+
 this will download and place all dependencies defined in your `composer.json` file in the `vendor` directory.
 
 Finally, you include the `autoload.php` file in the new `vendor` directory.
